@@ -3066,6 +3066,8 @@ extract(){
 					folder_name="${folder_name%.*}"
 					# Handles tar.xz
 					folder_name="${folder_name%.tar}"
+					# Handles img.xz
+					folder_name="${folder_name%.img}"
 					# Add random number if file exist with $folder_name
 					[[ -e $folder_name ]] && {
 						folder_name="${folder_name}_${RANDOM}"

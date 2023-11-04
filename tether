@@ -39,7 +39,7 @@ script_name=${0##*/}
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.03.1833"
+script_version="23.11.04.1120"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -2976,6 +2976,9 @@ dotfiles(){
 				;;
 				-v | --vim)
 					[[ $(type -p vim) ]] && {
+						# Run only root user on first run
+						chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /usr/share/vim/vim90/colors/tether.vim 2>/dev/null ||
+						print_not_root_user
 						# Update .vimrc
 						print_vimrc "$@" &&
 						print_success "Finished updating '~/.vimrc'" ||

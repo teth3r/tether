@@ -157,7 +157,7 @@ $ dotfiles --vim
 [+] Finished updating '/usr/share/vim/vim90/colors/tether.vim'
 ```
 
-# extract
+## extract
 
 This is a wrapper for 7z and bsdtar for extracting archive files.
 

@@ -12,15 +12,12 @@
 . [chroot-backup](#chroot-backup)
 . [dotfiles](#dotfiles)
 . [extract](#extract)
-. [install-module](#install-module)
 . [ll](#ll)
-. [misc](#misc)
 . [mkcp](#mkcp)
 . [mkmv](mkmv)
 . [mktouch](#mktouch)
 . [omaps-backup](omaps-backup)
 . [opencamera-backup](opencamera-backup)
-. [parity](parity)
 . [replace-su](replace-su)
 . [setup](#setup)
 . [tfetch](#tfetch)
@@ -33,12 +30,11 @@
 . [void-mount](void-mount)
 . [void-umount](void-umount)
 . [whatsapp-backup](whatsapp-backup)
-. [zip-module](zip-module)
 
 ## benchmark
 This is a simple single core performance benchmark tool, that uses the Mersenne primality test.
 
-Usage: benchmark \[OPTION] \[NUMBER]
+#### Usage: benchmark \[OPTION] \[NUMBER]
 ```
 $ benchmark --help
 
@@ -58,7 +54,7 @@ Options: -h,  --help       Print out this message
 Single core performance benchmark using Mersenne primality test
 ```
 
-Example:
+#### Example:
 ```
 $ benchmark --iteration 30
 
@@ -79,7 +75,7 @@ M(19) = 524287
 ## chroot-backup
 Creates an encrpyted/unencrypted backup of chroot container image (created with void-install) in user specified folder.
 
-Usage: chroot-backup \[OPTION] \[FOLDER]
+#### Usage: chroot-backup \[OPTION] \[FOLDER]
 ```
 $ chroot-backup --help
 
@@ -100,7 +96,7 @@ Options: -en, --encrypt    Create an encrypted backup
 Create chroot image backup in specifed folder
 ```
 
-Example:
+#### Example:
 ```
 $ chroot-backup --unencrypt /mnt/sdcard/newfolder
 
@@ -123,7 +119,7 @@ $ chroot-backup --unencrypt /mnt/sdcard/newfolder
 ## dotfiles
 Installs custom dotfiles for the specified program.
 
-Usage: dotfiles \[OPTION]
+#### Usage: dotfiles \[OPTION]
 ```
 $ dotfiles --help
 
@@ -149,7 +145,7 @@ Options: -ba, --bash-android  Update .bashrc for android
 Install/Update dotfiles
 ```
 
-Example:
+#### Example:
 ```
 $ dotfiles --vim
 
@@ -158,10 +154,9 @@ $ dotfiles --vim
 ```
 
 ## extract
-
 This is a wrapper for 7z and bsdtar for extracting archive files.
 
-Usage:
+#### Usage: extract \[FILE...]
 ```
 $ extract --help
 
@@ -181,7 +176,7 @@ Options: -h, --help     Print out this message
 Extract archive into archive-name folder
 ```
 
-Example:
+#### Example:
 ```
 $ extract android-14-system-td-arm64-ab-vndklite-vanilla.img.xz
 
@@ -209,16 +204,125 @@ Compressed: 735459536
 [+] Extracted 'android-14-system-td-arm64-ab-vndklite-vanilla.img.xz' to 'android-14-system-td-arm64-ab-vndklite-vanilla'
 ```
 
+## ll
+This is a wrapper for ls
+
+#### Usage: ll [OPTION] [NUMBER] [FOLDER/FILE...]
+```
+$ ll --help
+
+ll (C) 2023, Kolade Ayomide Olanrewaju (tether)
+ll is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    ll [OPTION] [NUMBER] [FOLDER/FILE...]
+
+Examples: ll /sdcard/folder
+          ll 1
+          ll 1 folder
+          ll -l folder
+          ll -l 1 folder
+          ll -l 1 folder folder2
+          ll -l 1 folder/folder
+
+Options: -h, --help     Print out this message
+         -V, --version  Show version information
+
+All 'ls' options are also available here
+
+Expand 'ls' functionality
+```
+
+#### Example:
+```
+$ ll 3 data/local
+
+../../../data/local:
+total 24k
+tests  tmp  traces
+```
+
+## mkcp
+Copies files/folders to the specified folder
+
+#### Usage: mkcp \[FOLDER] \[FILE...] 
+```
+$ mkcp --help
+
+mkcp (C) 2023, Kolade Ayomide Olanrewaju (tether)
+mkcp is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    mkcp [OPTION]
+          mkcp [FOLDER] [FILE...]
+
+Examples: mkcp --help
+          mkcp newfolder file1 file2
+          mkcp newfolder *
+
+Options: -h, --help     Print out this message
+         -V, --version  Show version information
+
+Copy file/folder to the specified folder
+```
+
+#### Example:
+```
+$ mkcp newfolder ~/.bash* ~/.vimrc
+
+[+] Copied '/home/user/.bash_history' to 'newfolder
+[+] Copied '/home/user/.bashrc' to 'newfolder'
+[+] Copied '/home/user/.vimrc' to 'newfolder'
+
+$ ll newfolder
+
+.bash_history .bashrc .vimrc
+```
+
+## mkmv
+Moves files/folders to the specified folder
+
+#### Usage: mkmv \[FOLDER] \[FILE...] 
+```
+$ mkmv --help
+
+mkmv (C) 2023, Kolade Ayomide Olanrewaju (tether)
+mkmv is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    mkmv [OPTION]
+          mkmv [FOLDER] [FILE...]
+
+Examples: mkmv --help
+          mkmv newfolder file1 file2
+          mkmv newfolder *
+
+Options: -h, --help     Print out this message
+         -V, --version  Show version information
+
+Move file/folder to the specified folder
+```
+
+#### Example:
+```
+$ mkmv newfolder ~/.bash* ~/.vimrc
+
+[+] Moved '/home/user/.bash_history' to 'newfolder
+[+] Moved '/home/user/.bashrc' to 'newfolder'
+[+] moved '/home/user/.vimrc' to 'newfolder'
+
+$ ll newfolder
+
+.bash_history .bashrc .vimrc
+```
+
 ## tether
 
 This is the main script.
 
-Usage: tether \[FUNCTION] \[ARGUMENTS...]
+#### Usage: tether \[FUNCTION] \[ARGUMENTS...]
 
 ```
 $ tether --help
 
-tether 23.11.03.1833-x86_64 (C) 2023, Kolade Ayomide Olanrewaju (tether)
+tether 23.11.05.1013-x86_64 (C) 2023, Kolade Ayomide Olanrewaju (tether)
 tether is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
 
 Usage:    tether [FUNCTION] [ARGUMENTS...]
@@ -237,6 +341,6 @@ Options: -h, --help     Print out this message
 tether is a multi-call shell script that combines many applets into a single executable.
 Create symbolic links to tether for each function and tether will act like whatever it was invoked as
 
-Currently defined functions (25)
-benchmark, chroot-backup, dotfiles, extract, install-module, ll, misc, mkcp, mkmv, mktouch, omaps-backup, opencamera-backup, parity, replace-su, setup, tfetch, touchzip, viw, void-backup, void-deploy, void-install, void-mount, void-umount, whatsapp-backup, zip-module
+Currently defined functions (21):
+benchmark, chroot-backup, dotfiles, extract, ll, mkcp, mkmv, mktouch, omaps-backup, opencamera-backup, replace-su, setup, tfetch, touchzip, viw, void-backup, void-deploy, void-install, void-mount, void-umount, whatsapp-backup
 ```

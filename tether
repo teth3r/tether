@@ -39,7 +39,7 @@ script_name=${0##*/}
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.05.1013"
+script_version="23.11.05.0826"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4671,7 +4671,7 @@ EOF
 		[[ $init_program != "runit" ]] && {
 			return 1
 		}
-		[[ ! -d /sys/class/power_supply/BAT0 ]] && {
+		[[ ! -f /sys/class/power_supply/BAT0/capacity ]] && {
 			error_check="no_battery"
 			return 1
 		}
@@ -4702,59 +4702,61 @@ unset system_set
 
 while :; do
 	for device_name in /sys/class/backlight/*; do
-		# Current brightness level
-		cur_value="$(< $device_name/brightness 2>/dev/null)"
-		# Battery percentage
-		bat_capacity="$(< /sys/class/power_supply/BAT0/capacity)"
-		# Battery status
-		bat_status="$(< /sys/class/power_supply/BAT0/status)"
-		# Handles battery when unplugged and <= 30%
-		[[ $bat_status == "Discharging" && $bat_capacity -le 30 ]] && {
-			# Prevent changing current brightness level, in case user increases it manually
-			[[ $cur_value -eq 75 || $system_set -eq 1 ]] && {
+		[[ -f $device_name/brightness ]] && {
+			# Current brightness level
+			cur_value="$(< $device_name/brightness)"
+			# Battery percentage
+			bat_capacity="$(< /sys/class/power_supply/BAT0/capacity)"
+			# Battery status
+			bat_status="$(< /sys/class/power_supply/BAT0/status)"
+			# Handles battery when unplugged and <= 30%
+			[[ $bat_status == "Discharging" && $bat_capacity -le 30 ]] && {
+				# Prevent changing current brightness level, in case user increases it manually
+				[[ $cur_value -eq 75 || $system_set -eq 1 ]] && {
+					system_set=1
+					break
+				}
+				# Set backlight to 30%
+				echo -e "75" > "$device_name/brightness"
 				system_set=1
-				break
 			}
-			# Set backlight to 30%
-			echo -e "75" > "$device_name/brightness"
-			system_set=1
-		}
-		# Handles battery when unplugged and <= 50% > 30%
-		[[ $bat_status == "Discharging" ]] && [[ $bat_capacity -le 50 && $bat_capacity -gt 30 ]] && {
-			# Prevent changing current brightness level, in case user increases it manually
-			[[ $cur_value -eq 125 || $system_set -eq 2 ]] && {
+			# Handles battery when unplugged and <= 50% > 30%
+			[[ $bat_status == "Discharging" ]] && [[ $bat_capacity -le 50 && $bat_capacity -gt 30 ]] && {
+				# Prevent changing current brightness level, in case user increases it manually
+				[[ $cur_value -eq 125 || $system_set -eq 2 ]] && {
+					system_set=2
+					break
+				}
+				# Set backlight to 50%
+				echo -e "125" > "$device_name/brightness"
 				system_set=2
-				break
 			}
-			# Set backlight to 50%
-			echo -e "125" > "$device_name/brightness"
-			system_set=2
-		}
-		# Handles battery when unplugged and < 100% > 50%
-		[[ $bat_status == "Discharging" && $bat_capacity -gt 50 ]] && {
-			# Prevent changing current brightness level, in case user increases it manually
-			[[ $cur_value -eq 180 || $system_set -eq 3 ]] && {
+			# Handles battery when unplugged and < 100% > 50%
+			[[ $bat_status == "Discharging" && $bat_capacity -gt 50 ]] && {
+				# Prevent changing current brightness level, in case user increases it manually
+				[[ $cur_value -eq 180 || $system_set -eq 3 ]] && {
+					system_set=3
+					break
+				}
+				# Set backlight to 70%
+				echo -e "180" > "$device_name/brightness"
 				system_set=3
-				break
 			}
-			# Set backlight to 70%
-			echo -e "180" > "$device_name/brightness"
-			system_set=3
-		}
-		# Handles battery when plugged in or battery is 100%
-		[[ $bat_status == "Full" || $bat_status == "Charging" ]] && {
-			# Prevent changing current brightness level, in case user increases it manually
-			[[ $cur_value -eq 205 || $system_set -eq 4 ]] && {
+			# Handles battery when plugged in or battery is 100%
+			[[ $bat_status == "Full" || $bat_status == "Charging" ]] && {
+				# Prevent changing current brightness level, in case user increases it manually
+				[[ $cur_value -eq 205 || $system_set -eq 4 ]] && {
+					system_set=4
+					break
+				}
+				# Set backlight to 80%
+				echo -e "205" > "$device_name/brightness"
 				system_set=4
-				break
 			}
-			# Set backlight to 80%
-			echo -e "205" > "$device_name/brightness"
-			system_set=4
 		}
 	done
-	# Poll for changes every second
-	read -rt "1" <> <(:) || :
+	# Poll for changes
+	read -rt "2" <> <(:) || :
 done
 EOF
 			chmod +x /var/service/backlight/run &&

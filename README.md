@@ -18,7 +18,6 @@
 . [mktouch](#mktouch)
 . [omaps-backup](omaps-backup)
 . [opencamera-backup](opencamera-backup)
-. [replace-su](replace-su)
 . [setup](#setup)
 . [tfetch](#tfetch)
 . [tether](#tether)
@@ -341,6 +340,6 @@ Options: -h, --help     Print out this message
 tether is a multi-call shell script that combines many applets into a single executable.
 Create symbolic links to tether for each function and tether will act like whatever it was invoked as
 
-Currently defined functions (21):
-benchmark, chroot-backup, dotfiles, extract, ll, mkcp, mkmv, mktouch, omaps-backup, opencamera-backup, replace-su, setup, tfetch, touchzip, viw, void-backup, void-deploy, void-install, void-mount, void-umount, whatsapp-backup
+Currently defined functions (20):
+benchmark, chroot-backup, dotfiles, extract, ll, mkcp, mkmv, mktouch, omaps-backup, opencamera-backup, setup, tfetch, touchzip, viw, void-backup, void-deploy, void-install, void-mount, void-umount, whatsapp-backup
 ```

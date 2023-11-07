@@ -39,7 +39,7 @@ script_name=${0##*/}
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.07.0835"
+script_version="23.11.07.1815"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3338,18 +3338,18 @@ mkcp(){
 								# file_name --> /home/username/folder -> folder
 								new_file_name=${file_name##*\/}
 								[[ -z $new_file_name ]] && {
-									# /home/username/file/*  -> home/username/file/
+									# /home/username/file/*  -> /home/username/file/
 									new_file_name=${file_name%\*}
-									# /home/username/file/  -> home/username/file
+									# /home/username/file/  -> /home/username/file
 									new_file_name=${file_name%\/}
 									# /home/username/file  -> file
 									new_file_name=${new_file_name##*\/}
 								}
 								# Creates folder in destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
-								mkdir -p "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0
+								mkdir -p "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
 								[[ -z $exit_status ]] && {
-									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}': Permission denied"
+									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
 								}
 								# Remove destination folder duplicate --- consequence of using find, first result is the input file path
 								dup_file_name="${file_name}"
@@ -3375,10 +3375,10 @@ mkcp(){
 								# Copies file into created destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
 								# Allow copying symbolic links as-is on filesystems that support it
-								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0 ||
-								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0
+								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0 ||
+								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
 								[[ -z $exit_status ]] && {
-									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}': Permission denied"
+									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
 								}
 							}
 						# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
@@ -3483,18 +3483,18 @@ mkmv(){
 								# file_name --> /home/username/folder -> folder
 								new_file_name=${file_name##*\/}
 								[[ -z $new_file_name ]] && {
-									# /home/username/file/*  -> home/username/file/
+									# /home/username/file/*  -> /home/username/file/
 									new_file_name=${file_name%\*}
-									# /home/username/file/  -> home/username/file
+									# /home/username/file/  -> /home/username/file
 									new_file_name=${file_name%\/}
 									# /home/username/file  -> file
 									new_file_name=${new_file_name##*\/}
 								}
 								# Creates folder in destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
-								mkdir -p "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0
+								mkdir -p "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
 								[[ -z $exit_status ]] && {
-									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}': Permission denied"
+									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
 								}
 								# Remove destination folder duplicate --- consequence of using find, first result is the input file path
 								dup_file_name="${file_name}"
@@ -3520,10 +3520,10 @@ mkmv(){
 								# Copies file into created destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
 								# Allow copying symbolic links as-is on filesystems that support it
-								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0 ||
-								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0
+								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0 ||
+								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
 								[[ -z $exit_status ]] && {
-									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}': Permission denied"
+									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
 								}
 							}
 						# Feed while loop data using here string ----> so exit_status is not empty on subshell exit

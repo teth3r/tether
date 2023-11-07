@@ -39,7 +39,7 @@ script_name=${0##*/}
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.07.1815"
+script_version="23.11.07.1857"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4167,77 +4167,6 @@ omaps-backup(){
 	trap 'remove_file_on_exit "${omaps_backup_dir}/current" "${omaps_backup_dir}/omaps-backup.${current_date}.7z"' 1 2 3 15
 	print_no_argument "$@"
 	check_input_option "$@"
-	exit
-}
-
-#--------------------------------------------------------------
-# Platform: Android
-# Dependencies: mount, umount
-#--------------------------------------------------------------
-replace-su(){
-	print_help(){
-		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $script_name [OPTION]\n"
-		echo -e "Examples: $script_name"
-		echo -e "          $script_name --help\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
-		echo -e "Replace phh-su with magisk in AOSP GSI"
-		exit 0
-	}
-	check_dependencies(){
-		# Only run on Android
-		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
-			print_os_error
-		}
-		# Only run on Android >= 12
-		[[ $android_version -le 11 ]] && {
-			print_os_error
-		}
-		# Only run on treble GSI ROM
-		[[ ! $(getprop init.svc.phh_on_boot) ]] && {
-			print_os_error
-		}
-		# Check if magisk is installed
-		[[ -f /system/bin/su && -f /system/bin/magisk ]] ||
-		[[ ! -d /system/xbin ]] && {
-			print_error "Magisk is already the default root solution"
-			exit 1
-		}
-		# Check for required dependencies
-		for mis_dep in mount umount; do
-			[[ ! $(type -p $mis_dep) ]] && {
-				print_missing_dependencies "$mis_dep"
-			}
-		done
-		# Show magisk warning
-		[[ $(magisk -V 2>/dev/null) -ge 26000 ]] && {
-			print_error "magisk has to be uninstalled first"
-			exit 1
-		}
-	}
-	replace_root(){
-		# mount /system as RW only work on vndk-lite variants
-		mount -o remount,rw / &>/dev/null
-		rm -r "/system/bin/phh-ota"
-		rm -r "/system/bin/phh-remotectl.sh"
-		rm -r "/system/bin/phh-securize.sh"
-		rm -r "/system/bin/phh-su"
-		rm -r "/system/etc/init/su.rc"
-		rm -r "/system/etc/init/phh-remotectl.rc"
-		rm -r "/system/etc/init/phh-ota.rc"
-		umount -lf /system/xbin &>/dev/null
-		rm -r "/system/xbin"
-		mount -o remount,ro / &>/dev/null
-		print_success "PHH-SU has been deleted successfully"
-		print_aligned "Reboot your device"
-		exit 0
-	}
-	trap 'run_on_exit' 1 2 3 15
-	input_option_type_two "$@"
-	check_dependencies "$@"
-	replace_root "$@"
 	exit
 }
 

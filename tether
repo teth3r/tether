@@ -39,7 +39,7 @@ script_name=${0##*/}
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.05.0826"
+script_version="23.11.07.0835"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3319,6 +3319,8 @@ mkcp(){
 					# Handles special files, stuff normally not caught by -f
 					[[ -e $file_name && ! -d $file_name ]] && {
 						unset exit_status
+						# Allow copying symbolic links as-is on filesystems that support it
+						cp -rf "$file_name" "$folder_name" 2>/dev/null && exit_status=0 ||
 						cp -f "$file_name" "$folder_name" 2>/dev/null && exit_status=0
 						[[ -z $exit_status ]] && {
 							print_error "Cannot create file '${folder_name}/${file_name##*\/}': Permission denied"
@@ -3372,6 +3374,8 @@ mkcp(){
 								}
 								# Copies file into created destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
+								# Allow copying symbolic links as-is on filesystems that support it
+								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0 ||
 								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0
 								[[ -z $exit_status ]] && {
 									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}': Permission denied"
@@ -3460,6 +3464,8 @@ mkmv(){
 					# Handles special files, stuff normally not caught by -f
 					[[ -e $file_name && ! -d $file_name ]] && {
 						unset exit_status
+						# Allow copying symbolic links as-is on filesystems that support it
+						cp -rf "$file_name" "$folder_name" 2>/dev/null && exit_status=0 ||
 						cp -f "$file_name" "$folder_name" 2>/dev/null && exit_status=0
 						[[ -z $exit_status ]] && {
 							print_error "Cannot create file '${folder_name}/${file_name##*\/}': Permission denied"
@@ -3513,6 +3519,8 @@ mkmv(){
 								}
 								# Copies file into created destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
+								# Allow copying symbolic links as-is on filesystems that support it
+								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0 ||
 								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}" 2>/dev/null && exit_status=0
 								[[ -z $exit_status ]] && {
 									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*$new_file_name\/}': Permission denied"

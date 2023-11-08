@@ -34,12 +34,12 @@
 #--------------------------------------------------------------
 # Set the name of this script
 #--------------------------------------------------------------
-script_name=${0##*/}
+script_name="${0##*/}"
 
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.07.1815"
+script_version="23.11.08.2104"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -7233,14 +7233,14 @@ tether(){
 						exit 0
 					}
 					# Handles renamed main program
-					[[ ! $(echo "$applet_name" | grep -x "$script_name") ]] && {
+					[[ ! $(echo "$applet_name" | grep -x "$script_name" 2>/dev/null) ]] && {
 						script_name="tether"
 						print_error "$script_name: '$0' applet not found"
 						exit 1
 					}
 					# Handles specified function not existing
 					# Makes $script_name the name of the main script
-					script_name=${0##*/}
+					script_name="${0##*/}"
 					print_error "$script_name: '$1' applet not found"
 					exit 1
 				;;
@@ -7249,14 +7249,14 @@ tether(){
 	}
 	trap 'run_on_exit' 1 2 3 15
 	# Set $applet_name to only desired functions i.e remove print_error...
-	applet_name="$(echo "$applet_name" | sed 's/.*_.*//')"
+	applet_name="$(echo "$applet_name" | sed 's/.*_.*//' 2>/dev/null)"
 	# Handles symlinked applets
 	# Example: mkcp newfolder file
-	[[ $(echo "$applet_name" | grep -x "$script_name") && $script_name != "tether" ]] && {
+	[[ $(echo "$applet_name" | grep -x "$script_name" 2>/dev/null) && $script_name != "tether" ]] && {
 		"$script_name" "${@:1}" && exit 0
 	}
 	# Handles symlinked applets that don't exist
-	[[ ! $(echo "$applet_name" | grep -x "$script_name") ]] && {
+	[[ ! $(echo "$applet_name" | grep -x "$script_name" 2>/dev/null) ]] && {
 		script_name="tether"
 		print_error "$script_name: '${0##*/}' applet not found"
 		exit 1

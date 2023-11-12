@@ -72,7 +72,7 @@ M(19) = 524287
 ```
 
 ## chroot-backup
-Creates an encrpyted/unencrypted backup of chroot container image (created with void-install) in user specified folder.
+Creates an encrypted/unencrypted backup of chroot container image (created with void-install) in user specified folder.
 
 #### Usage: chroot-backup \[OPTION] \[FOLDER]
 ```
@@ -92,7 +92,7 @@ Options: -en, --encrypt    Create an encrypted backup
          -un, --unencrypt  Create an unencrypted backup
          -V,  --version    Show version information
 
-Create chroot image backup in specifed folder
+Create chroot image backup in specified folder
 ```
 
 #### Example:
@@ -206,7 +206,7 @@ Compressed: 735459536
 ## ll
 This is a wrapper for ls
 
-#### Usage: ll [OPTION] [NUMBER] [FOLDER/FILE...]
+#### Usage: ll \[OPTION] \[NUMBER] [FOLDER/FILE...]
 ```
 $ ll --help
 
@@ -310,6 +310,504 @@ $ mkmv newfolder ~/.bash* ~/.vimrc
 $ ll newfolder
 
 .bash_history .bashrc .vimrc
+```
+
+## mktouch
+Creates specified empty file(s) in the specified folder
+
+#### Usage: mktouch \[FOLDER] \[FILE...] 
+```
+$ mktouch --help
+
+mktouch (C) 2023, Kolade Ayomide Olanrewaju (tether)
+mktouch is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    mktouch [OPTION]
+          mktouch [FOLDER] [FILE...]
+
+Examples: mktouch --help
+          mktouch newfolder file1 file2
+          mktouch newfolder *
+
+Options: -h, --help     Print out this message
+         -V, --version  Show version information
+
+Create empty file(s) in the specified folder
+```
+
+#### Example:
+```
+$ mktouch Aperture Aperture.apk oat
+
+[+] Created 'Aperture.apk' in 'Aperture'
+[+] Created 'oat' in 'Aperture'
+
+$ ll Aperture
+
+Aperture.apk oat
+```
+
+## omaps-backup
+Creates an encrypted/unencrypted backup of Organic Maps downloaded mapfiles in external storage
+
+#### Usage: omaps-backup \[OPTION]
+```
+$ omaps-backup --help
+
+omaps-backup (C) 2023, Kolade Ayomide Olanrewaju (tether)
+omaps-backup is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    omaps-backup [OPTION]
+
+Examples: omaps-backup --encrypt
+          omaps-backup --restore
+
+Options: -en, --encrypt    Create an encrypted backup
+         -h,  --help       Print out this message
+         -l,  --list       List all available backups
+         -un, --unencrypt  Create an unencrypted backup
+         -r,  --restore    Restore organic maps from available backups
+         -V,  --version    Show version information
+
+Create and restore organic maps backups
+```
+
+#### Example:
+```
+$ omaps-backup --encrypt
+
+[*] Creating encrypted backup 'omaps-backup.23.11.05.1013.7z'
+
+Input Password:
+Verify Password:
+
+[+] Finished encrypting 'omaps-backup.23.11.05.1013.7z'
+    Check '/storage/xxxx-xxxx/Misc/omaps-backup'
+
+$ omaps-backup --restore
+ 
+████████╗███████╗████████╗██╗   ██╗███████╗██████═╗ 
+╚══██╔══╝██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔═══██ 
+   ██║   ███████╗   ██║   ████████║███████╗███████═╗
+   ██║   ██╔════╝   ██║   ██╔═══██║██╔════╝██╔═══██║
+   ██║   ███████╗   ██║   ██║   ██║███████╗██║   ██║
+   ╚═╝   ╚══════╝   ╚═╝   ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝
+ 
+[*] Restoring organic maps
+
+1.omaps-backup.23.09.27.0340.7z
+2.omaps-backup.23.10.12.1918.7z
+3.omaps-backup.23.11.05.1013.7z
+
+Select preferred backup: 3
+
+[*]  Restoring organic maps using 'omaps-backup.23.11.05.1013.7z'
+
+7-Zip (z) 22.01 (arm64) : Copyright (c) 1999-2022 Igor Pavlov : 2022-07-15
+ 64-bit arm_v:8 locale=C UTF8=- Threads:8, ASM
+
+Scanning the drive for archives:
+1 file, 343119954 bytes (328 MiB)
+
+Extracting archive: omaps-backup.23.11.05.1013.7z
+
+Enter password:
+--
+Path = omaps-backup.23.11.05.1013.7z
+Type = 7z
+Physical Size = 343119954
+Headers Size = 322
+Method = LZMA2:18 7zAES
+Solid = -
+Blocks = 3
+
+Everything is Ok
+
+Files: 3
+Size:       343097989
+Compressed: 343119954
+
+7-Zip (z) 22.01 (arm64) : Copyright (c) 1999-2022 Igor Pavlov : 2022-07-15
+ 64-bit arm_v:8 locale=C UTF8=- Threads:8, ASM
+
+Scanning the drive for archives:
+1 file, 343096245 bytes (328 MiB)
+
+Extracting archive: omaps-sdcard.7z
+--
+Path = omaps-sdcard.7z
+Type = 7z
+Physical Size = 343096245
+Headers Size = 367
+Method = LZMA2:18
+Solid = +
+Blocks = 4
+
+Everything is Ok
+
+Folders: 2
+Files: 6
+Size:       518757870
+Compressed: 343096245
+
+7-Zip (z) 22.01 (arm64) : Copyright (c) 1999-2022 Igor Pavlov : 2022-07-15
+ 64-bit arm_v:8 locale=C UTF8=- Threads:8, ASM
+
+Scanning the drive for archives:
+1 file, 82 bytes (1 KiB)
+
+Extracting archive: omaps-storage.7z
+--
+Path = omaps-storage.7z
+Type = 7z
+Physical Size = 82
+Headers Size = 82
+Solid = -
+Blocks = 0
+
+Everything is Ok
+
+Folders: 1
+Files: 0
+Size:       0
+Compressed: 82
+
+7-Zip (z) 22.01 (arm64) : Copyright (c) 1999-2022 Igor Pavlov : 2022-07-15
+ 64-bit arm_v:8 locale=C UTF8=- Threads:8, ASM
+
+Scanning the drive for archives:
+1 file, 1662 bytes (2 KiB)
+
+Extracting archive: omaps-data.7z
+--
+Path = omaps-data.7z
+Type = 7z
+Physical Size = 1662
+Headers Size = 312
+Method = LZMA2:6k
+Solid = +
+Blocks = 1
+
+Everything is Ok
+
+Folders: 2
+Files: 4
+Size:       5756
+Compressed: 1662
+
+[+] Finished restoring 'omaps-backup.23.11.05.1013.7z'
+```
+
+## opencamera-backup
+Creates an encrypted/unencrypted backup of Open Camera config files in external storage
+
+#### Usage: opencamera-backup \[OPTION]
+```
+$ opencamera-backup --help
+
+opencamera-backup (C) 2023, Kolade Ayomide Olanrewaju (tether)
+opencamera-backup is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    opencamera-backup [OPTION]
+
+Examples: opencamera-backup --encrypt
+          opencamera-backup --restore
+
+Options: -en, --encrypt    Create an encrypted backup
+         -h,  --help       Print out this message
+         -l,  --list       List all available backups
+         -un, --unencrypt  Create an unencrypted backup
+         -r,  --restore    Restore organic maps from available backups
+         -V,  --version    Show version information
+
+Create and restore open camera backups
+```
+
+#### Example:
+```
+$ opencamera-backup --encrypt
+
+[*] Creating encrypted backup 'opencamera-backup.23.11.05.1013.7z'
+
+Input Password:
+Verify Password:
+
+[+] Finished encrypting 'opencamera-backup.23.11.05.1013.7z'
+    Check '/storage/xxxx-xxxx/Misc/opencamera-backup'
+
+$ opencamera-backup --restore
+ 
+████████╗███████╗████████╗██╗   ██╗███████╗██████═╗ 
+╚══██╔══╝██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔═══██ 
+   ██║   ███████╗   ██║   ████████║███████╗███████═╗
+   ██║   ██╔════╝   ██║   ██╔═══██║██╔════╝██╔═══██║
+   ██║   ███████╗   ██║   ██║   ██║███████╗██║   ██║
+   ╚═╝   ╚══════╝   ╚═╝   ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝
+ 
+[*] Restoring organic maps
+
+1.opencamera-backup.23.09.27.0340.7z
+2.opencamera-backup.23.11.05.1013.7z
+
+Select preferred backup: 2
+
+[*]  Restoring organic maps using 'opencamera-backup.23.11.05.1013.7z'
+
+7-Zip (z) 22.01 (arm64) : Copyright (c) 1999-2022 Igor Pavlov : 2022-07-15
+ 64-bit arm_v:8 locale=C UTF8=- Threads:8, ASM
+
+Scanning the drive for archives:
+1 file, 343119954 bytes (328 MiB)
+
+Extracting archive: opencamera-backup.23.11.05.1013.7z
+
+Enter password:
+--
+Path = opencamera-backup.23.11.05.1013.7z
+Type = 7z
+Physical Size = 343119954
+Headers Size = 322
+Method = LZMA2:18 7zAES
+Solid = -
+Blocks = 3
+
+Everything is Ok
+
+Files: 3
+Size:       343097989
+Compressed: 343119954
+
+7-Zip (z) 22.01 (arm64) : Copyright (c) 1999-2022 Igor Pavlov : 2022-07-15
+ 64-bit arm_v:8 locale=C UTF8=- Threads:8, ASM
+
+Scanning the drive for archives:
+1 file, 343096245 bytes (328 MiB)
+
+Extracting archive: opencamera-sdcard.7z
+--
+Path = opencamera-sdcard.7z
+Type = 7z
+Physical Size = 343096245
+Headers Size = 367
+Method = LZMA2:18
+Solid = +
+Blocks = 4
+
+Everything is Ok
+
+Folders: 2
+Files: 6
+Size:       518757870
+Compressed: 343096245
+
+[+] Finished restoring 'opencamera-backup.23.11.05.1013.7z'
+```
+
+## setup
+Post-installation setup script for Voidlinux
+
+#### Usage: setup \[OPTION]
+```
+$ setup --help
+
+setup (C) 2023, Kolade Ayomide Olanrewaju (tether)
+setup is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    setup [OPTION]
+
+Examples: setup
+          setup --help
+
+Options: -h, --help     Print out this message
+         -V, --version  Show version information
+
+Post-installation setup utility for voidlinux
+```
+
+#### Example:
+```
+$ setup
+
+████████╗███████╗████████╗██╗   ██╗███████╗██████═╗ 
+╚══██╔══╝██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔═══██ 
+   ██║   ███████╗   ██║   ████████║███████╗███████═╗
+   ██║   ██╔════╝   ██║   ██╔═══██║██╔════╝██╔═══██║
+   ██║   ███████╗   ██║   ██║   ██║███████╗██║   ██║
+   ╚═╝   ╚══════╝   ╚═╝   ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝
+ 
+[*] Setting up Voidlinux
+
+Install Desktop Environment: 
+1.KDE 
+2.Gnome 
+3.Xfce 
+4.Cinnamon 
+5.Skip 
+6.Exit
+
+Select Desktop: 5
+
+[*] Skipping Desktop Environment Installation
+
+Install GPU Drivers: 
+1.Intel 
+2.AMD/radeon 
+3.Skip 
+4.Exit
+
+Select GPU: 3
+
+[*] Skipping GPU Driver Installation
+
+Install VM Software (qemu, virt-manager): 
+1.Yes 
+2.Skip 
+3.Exit
+
+Select option: 2
+
+[*] Skipping VM Software Installation
+
+Install Printer Software: 
+1.HP 
+2.Epson 
+3.Brother 
+4.Skip 
+5.Exit
+
+Select Printer: 4
+
+[*] Skipping Printer Software Installation
+
+Install Audio Software: 
+1.Pulseaudio 
+2.ALSA 
+3.Pipewire 
+4.Skip 
+5.Exit
+
+Select Audio: 4
+
+[*] Skipping Audio Software Installation
+
+Install Extra/Misc Software (krita, libreoffice, wine): 
+1.Yes 
+2.Skip 
+3.Exit
+
+Select option: 2
+
+[*] Skipping Extra/Misc Software Installation
+
+Install Development Software (gcc, make tmux, vim, urxvt): 
+1.Yes 
+2.Skip 
+3.Exit
+
+Select option: 2
+
+[*] Skipping Development Software Installation
+
+Install Dotfiles (bash, tmux, vim, urxvt): 
+1.Yes 
+2.Skip 
+3.Exit
+
+Select option: 2
+
+[*] Skipping Dotfiles Installation
+
+Install Browser Software: 
+1.Chromium 
+2.Firefox 
+3.Skip 
+4.Exit
+
+Select Browser: 3
+
+[*] Skipping Browser Software Installation
+
+Install Media-Player Software: 
+1.VLC 
+2.MPV 
+3.Skip 
+4.Exit
+
+Select Media-Player: 3
+
+[*] Skipping Media-Player Software Installation
+
+Change Default Timezone: 
+1.Yes 
+2.Skip 
+3.Exit
+
+Select option: 2
+
+[*] Skipping Timezone Change
+
+Install Automatic Backlight Control: 
+1.Yes 
+2.Skip 
+3.Exit
+
+Select option: 2
+
+[*] Skipping Automatic Backlight Control
+
+Install Networking Software: 
+1.Yes 
+2.Skip 
+3.Exit
+
+Select option: 2
+
+[*] Skipping Networking Software Installation
+
+[-] Nothing left to do, exiting
+```
+
+## tfetch
+System resource information tool
+
+#### Usage: tfetch \[OPTION]
+```
+$ tfetch --help
+
+tfetch (C) 2023, Kolade Ayomide Olanrewaju (tether)
+tfetch is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.
+
+Usage:    tfetch [OPTION]
+
+Examples: tfetch
+          tfetch --help
+
+Options: -h, --help     Print out this message
+         -V, --version  Show version information
+
+System resource information tool
+```
+
+#### Example:
+```
+$ tfetch
+
+user@user
+ -----------------
+Device:   Dell Inc. Inspiron 7375
+OS:       Void Linux x86_64
+Kernel:   Linux 6.5.9_1 
+Init:     runit
+Packages: 1058 xbps
+Shell:    bash 5.2.15(1)
+Desktop:  GNOME (wayland)
+CPU:      AMD Ryzen 5 2500U with Radeon Vega Mobile Gfx (4) @ 1600Mhz
+CPU_CLK:  0 @ 1600Mhz, 1 @ 1600Mhz, 2 @ 1600Mhz, 3 @ 1380Mhz, 4 @ 1368Mhz, 5 @ 1600Mhz, 6 @ 3242Mhz, 7 @ 2000Mhz
+Battery:  Full, 100% - (96.14% Health)
+CPU Temp: [ ■■■■■■■■■■---------- ] 52.0°C
+RAM:      [ ■■■■■--------------- ] 3916 / 13874 MiB (28%)
+Swap:     [ -------------------- ] 0 / 0 MiB
+Uptime:   8 days 20 hours 26 minutes 44 seconds
 ```
 
 ## tether

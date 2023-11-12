@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.08.2104"
+script_version="23.11.12.2019"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3632,275 +3632,6 @@ mktouch(){
 # Platform: Android
 # Dependencies: 7zip, ls, pm, date, mkdir
 #--------------------------------------------------------------
-opencamera-backup(){
-	print_help(){
-		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $script_name [OPTION]\n"
-		echo -e "Examples: $script_name --encrypt"
-		echo -e "          $script_name --restore\n"
-		echo -e "Options: -en, --encrypt    Create an encrypted backup"
-		echo -e "         -h,  --help       Print out this message"
-		echo -e "         -l,  --list       List all available backups"
-		echo -e "         -un, --unencrypt  Create an unencrypted backup"
-		echo -e "         -r,  --restore    Restore open camera from available backups"
-		echo -e "         -V,  --version    Show version information\n"
-		echo -e "Create and restore open camera backups"
-		exit 0
-	}
-	check_dependencies(){
-		# Only run on Android
-		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
-			print_os_error
-		}
-		# Check for required dependencies
-		for mis_dep in ls 7z pm date; do
-			[[ ! $(type -p $mis_dep) ]] && {
-				print_missing_dependencies "$mis_dep"
-			}
-		done
-		# Only run as root user
-		print_not_root_user
-		# Handles no open camera install
-		[[ -z $(pm -l | grep "net.sourceforge.opencamera$" 2>/dev/null) ]] && {
-			print_error "Open Camera is not installed"
-			print_notification
-			exit 1
-		}
-		# Set open camera content directories
-		ocam_internal="/sdcard/Android/data/net.sourceforge.opencamera"
-		# Array of content directories
-		ocam_backup_candidates=(
-			"$ocam_internal"
-		)
-		# Handles missing open camera folders
-		unset backup_checker
-		backup_checker=0
-		for avail_dir in ${ocam_backup_candidates[@]}; do
-			[[ -d $avail_dir ]] && {
-				backup_checker=$((backup_checker + 1))
-			}
-		done
-		# Set open camera backup directory
-		ocam_backup_dir="$phone_storage/Misc/opencamera-backup"
-		# Use external storage if available
-		[[ -n $(ls -A "$external_storage" 2>/dev/null) ]] && {
-			ocam_backup_dir="$external_storage/Misc/opencamera-backup"
-		}
-		# Set current current directory
-		current_dir="$PWD"
-		# Get date and time in YY.MM.DD.HH.MM format
-		current_date="$(date +%y.%m.%d.%H%M)"
-	}
-	failed_to_create(){
-		print_error "Something went wrong"
-		print_aligned "Failed to create 'opencamera-backup.${current_date}.7z'"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-		rm -rf "${ocam_backup_dir}/opencamera-backup.${current_date}.7z" 2>/dev/null
-		# CD back to original directory
-		cd "$current_dir"
-		exit 1
-	}
-	failed_to_extract(){
-		echo ""
-		print_error "Failed to extract '${backup_list[$backup_option]}'"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-		# CD back to original directory
-		cd "$current_dir"
-		exit 1
-	}
-	encrypted_backup_ocam(){
-		print_warning "Creating encrypted backup 'opencamera-backup.${current_date}.7z'\n"
-		# Handles password creation
-		create_password "$@"
-		mkdir -p "${ocam_backup_dir}/current"
-		unset avail_dir
-		# Create archives of each open camera content folder
-		for avail_dir in ${ocam_backup_candidates[@]}; do
-			[[ -d $avail_dir ]] && {
-				file_name="${avail_dir#\/}"
-				file_name="${file_name%%\/*}"
-				cd "${avail_dir%files}"
-				# Compress $avail_dir contents
-				7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "opencamera-${file_name}.7z" "files/" &>/dev/null &&
-				mv "opencamera-${file_name}.7z" "${ocam_backup_dir}/current" 2>/dev/null
-			}
-		done
-		# Make main archive
-		cd "${ocam_backup_dir}/current"
-		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$cpu_core_count" -mhe=on "opencamera-backup.${current_date}.7z" "*" &>/dev/null &&
-		unset file_password file_password2 &&
-		mv "opencamera-backup.${current_date}.7z" .. 2>/dev/null ||
-		failed_to_create "$@"
-		print_success "Finished encrypting 'opencamera-backup.${current_date}.7z'"
-		# CD back to original directory
-		cd "$current_dir"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-		exit 0
-	}
-	unencrypted_backup_ocam(){
-		print_warning "Creating unencrypted backup 'opencamera-backup.${current_date}.7z'\n"
-		mkdir -p "${ocam_backup_dir}/current"
-		unset avail_dir
-		# Create archives of each open camera content folder
-		for avail_dir in ${ocam_backup_candidates[@]}; do
-			[[ -d $avail_dir ]] && {
-				file_name="${avail_dir#\/}"
-				file_name="${file_name%%\/*}"
-				cd "${avail_dir%files}"
-				# Compress $avail_dir contents
-				7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "opencamera-${file_name}.7z" "files/" &>/dev/null &&
-				mv "opencamera-${file_name}.7z" "${ocam_backup_dir}/current" 2>/dev/null
-			}
-		done
-		# Make main archive
-		cd "${ocam_backup_dir}/current"
-		7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "opencamera-backup.${current_date}.7z" "*" &>/dev/null &&
-		mv "opencamera-backup.${current_date}.7z" .. 2>/dev/null ||
-		failed_to_create "$@"
-		print_success "Finished creating 'opencamera-backup.${current_date}.7z'"
-		# CD back to original directory
-		cd "$current_dir"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-		exit 0
-	}
-	restore_ocam(){
-		# Set variables for available backups
-		array_counter=1
-		for avail_backup in $(ls -A "$ocam_backup_dir" 2>/dev/null); do
-			backup_list[$array_counter]="$avail_backup"
-			array_counter=$((array_counter + 1))
-		done
-		# Handles no available backups
-		[[ $array_counter -eq 1 ]] && {
-			print_error "No available backups to restore from"
-			exit 1
-		}
-		# List available backups
-		print_banner
-		print_warning "Restoring open camera\n"
-		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
-			echo -e "${array_checker}.${backup_list[$array_checker]}"
-		done
-		echo ""
-		read -rep "Select preferred backup: " backup_option
-		case "$backup_option" in
-			-*)
-				echo ""
-				[[ -z ${backup_option#*\-} ]] && {
-					print_error "Invalid option '${backup_option}'" &&
-					exit 1
-				}
-				print_error "Invalid option -- '${backup_option#*\-}'" &&
-				exit 1
-			;;
-			*)
-				echo ""
-				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
-					print_warning "Restoring open camera using '${backup_list[$backup_option]}'"
-					rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-					mkdir -p "${ocam_backup_dir}/current"
-					# Copy selected backup file to $ocam_backup_dir/current
-					cp -rf "$ocam_backup_dir"/${backup_list[$backup_option]} "${ocam_backup_dir}/current" 2>/dev/null &&
-					cd "${ocam_backup_dir}/current"
-					# Extract selected backup file
-					7z x "${backup_list[$backup_option]}" -mmt"$cpu_core_count" -y 2>/dev/null || failed_to_extract
-					# Get names of extracted files
-					for avail_dir in ${ocam_backup_candidates[@]}; do
-						file_name="${avail_dir#\/}"
-						file_name="${file_name%%\/*}"
-						[[ -f opencamera-${file_name}.7z ]] && {
-							# Extract compressed files in open camera content directories
-							7z x "opencamera-${file_name}.7z" -mmt"$cpu_core_count" -y -o${avail_dir} 2>/dev/null || failed_to_extract
-						}
-					done
-					echo "" &&
-					print_success "Finished restoring '${backup_list[$backup_option]}'"
-					# CD back to original directory
-					cd "$current_dir"
-					rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-					exit 0
-				}
-				print_error "Invalid option '${backup_option}'" &&
-				exit 1
-			;;
-		esac
-	}
-	check_input_option(){
-		for primary_options in "${@:1}"; do
-			case "$primary_options" in
-				-en | --encrypt)
-					check_dependencies "$@"
-					# Handles if $ocam_backup exists and is empty
-					[[ -z $(ls -A "$ocam_internal" 2>/dev/null) || ! -d $ocam_internal || $backup_checker -eq 0 ]] && {
-						print_error "There is nothing to backup"
-						print_aligned "Create a backup first using the Open Camera app"
-						exit 1
-					}
-					encrypted_backup_ocam "$@"
-				;;
-				-h | --help)
-					print_help
-				;;
-				-l | --list)
-					check_dependencies "$@"
-					# Handles no available ocam backup
-					[[ -z $(ls -A "$ocam_backup_dir" 2>/dev/null) ]] && {
-						print_error "No available backups"
-						exit 1
-					}
-					echo -e "\033[1;37mAvailable backups:\033[00m"
-					ls -A "$ocam_backup_dir"
-					exit 0
-				;;
-				-un | --unencrypt)
-					check_dependencies "$@"
-					# Handles if $ocam_backup exists and is empty
-					[[ -z $(ls -A "$ocam_internal" 2>/dev/null) || ! -d $ocam_internal || $backup_checker -eq 0 ]] && {
-						print_error "There is nothing to backup"
-						print_aligned "Create a backup first using the Open Camera app"
-						exit 1
-					}
-					unencrypted_backup_ocam "$@"
-				;;
-				-r | --restore)
-					check_dependencies "$@"
-					restore_ocam "$@"
-				;;
-				-V | --version)
-					print_version
-				;;
-				-*)
-					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
-						print_notification
-					}
-					print_error "Invalid option -- '${primary_options#*\-}'"
-					print_notification
-				;;
-				*)
-					for secondary_options in "${@:2}"; do
-						case "$secondary_options" in
-							-h | --help)
-								print_help
-							;;
-						esac
-					done
-					print_syntax_error
-				;;
-			esac
-		done
-	}
-	trap 'remove_file_on_exit "${ocam_backup_dir}/current" "${ocam_backup_dir}/opencamera-backup.${current_date}.7z"' 1 2 3 15
-	print_no_argument "$@"
-	check_input_option "$@"
-	exit
-}
-
-#--------------------------------------------------------------
-# Platform: Android
-# Dependencies: 7zip, ls, pm, date, mkdir
-#--------------------------------------------------------------
 omaps-backup(){
 	print_help(){
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
@@ -4006,6 +3737,7 @@ omaps-backup(){
 		mv "omaps-backup.${current_date}.7z" .. 2>/dev/null ||
 		failed_to_create "$@"
 		print_success "Finished encrypting 'omaps-backup.${current_date}.7z'"
+		print_aligned "Check '$omaps_backup_dir'"
 		# CD back to original directory
 		cd "$current_dir"
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
@@ -4032,6 +3764,7 @@ omaps-backup(){
 		mv "omaps-backup.${current_date}.7z" .. 2>/dev/null ||
 		failed_to_create "$@"
 		print_success "Finished creating 'omaps-backup.${current_date}.7z'"
+		print_aligned "Check '$omaps_backup_dir'"
 		# CD back to original directory
 		cd "$current_dir"
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
@@ -4171,6 +3904,277 @@ omaps-backup(){
 }
 
 #--------------------------------------------------------------
+# Platform: Android
+# Dependencies: 7zip, ls, pm, date, mkdir
+#--------------------------------------------------------------
+opencamera-backup(){
+	print_help(){
+		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
+		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
+		echo -e "Usage:    $script_name [OPTION]\n"
+		echo -e "Examples: $script_name --encrypt"
+		echo -e "          $script_name --restore\n"
+		echo -e "Options: -en, --encrypt    Create an encrypted backup"
+		echo -e "         -h,  --help       Print out this message"
+		echo -e "         -l,  --list       List all available backups"
+		echo -e "         -un, --unencrypt  Create an unencrypted backup"
+		echo -e "         -r,  --restore    Restore open camera from available backups"
+		echo -e "         -V,  --version    Show version information\n"
+		echo -e "Create and restore open camera backups"
+		exit 0
+	}
+	check_dependencies(){
+		# Only run on Android
+		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
+			print_os_error
+		}
+		# Check for required dependencies
+		for mis_dep in ls 7z pm date; do
+			[[ ! $(type -p $mis_dep) ]] && {
+				print_missing_dependencies "$mis_dep"
+			}
+		done
+		# Only run as root user
+		print_not_root_user
+		# Handles no open camera install
+		[[ -z $(pm -l | grep "net.sourceforge.opencamera$" 2>/dev/null) ]] && {
+			print_error "Open Camera is not installed"
+			print_notification
+			exit 1
+		}
+		# Set open camera content directories
+		ocam_internal="/sdcard/Android/data/net.sourceforge.opencamera"
+		# Array of content directories
+		ocam_backup_candidates=(
+			"$ocam_internal"
+		)
+		# Handles missing open camera folders
+		unset backup_checker
+		backup_checker=0
+		for avail_dir in ${ocam_backup_candidates[@]}; do
+			[[ -d $avail_dir ]] && {
+				backup_checker=$((backup_checker + 1))
+			}
+		done
+		# Set open camera backup directory
+		ocam_backup_dir="$phone_storage/Misc/opencamera-backup"
+		# Use external storage if available
+		[[ -n $(ls -A "$external_storage" 2>/dev/null) ]] && {
+			ocam_backup_dir="$external_storage/Misc/opencamera-backup"
+		}
+		# Set current current directory
+		current_dir="$PWD"
+		# Get date and time in YY.MM.DD.HH.MM format
+		current_date="$(date +%y.%m.%d.%H%M)"
+	}
+	failed_to_create(){
+		print_error "Something went wrong"
+		print_aligned "Failed to create 'opencamera-backup.${current_date}.7z'"
+		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
+		rm -rf "${ocam_backup_dir}/opencamera-backup.${current_date}.7z" 2>/dev/null
+		# CD back to original directory
+		cd "$current_dir"
+		exit 1
+	}
+	failed_to_extract(){
+		echo ""
+		print_error "Failed to extract '${backup_list[$backup_option]}'"
+		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
+		# CD back to original directory
+		cd "$current_dir"
+		exit 1
+	}
+	encrypted_backup_ocam(){
+		print_warning "Creating encrypted backup 'opencamera-backup.${current_date}.7z'\n"
+		# Handles password creation
+		create_password "$@"
+		mkdir -p "${ocam_backup_dir}/current"
+		unset avail_dir
+		# Create archives of each open camera content folder
+		for avail_dir in ${ocam_backup_candidates[@]}; do
+			[[ -d $avail_dir ]] && {
+				file_name="${avail_dir#\/}"
+				file_name="${file_name%%\/*}"
+				cd "${avail_dir%files}"
+				# Compress $avail_dir contents
+				7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "opencamera-${file_name}.7z" "files/" &>/dev/null &&
+				mv "opencamera-${file_name}.7z" "${ocam_backup_dir}/current" 2>/dev/null
+			}
+		done
+		# Make main archive
+		cd "${ocam_backup_dir}/current"
+		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$cpu_core_count" -mhe=on "opencamera-backup.${current_date}.7z" "*" &>/dev/null &&
+		unset file_password file_password2 &&
+		mv "opencamera-backup.${current_date}.7z" .. 2>/dev/null ||
+		failed_to_create "$@"
+		print_success "Finished encrypting 'opencamera-backup.${current_date}.7z'"
+		print_aligned "Check '$ocam_backup_dir'"
+		# CD back to original directory
+		cd "$current_dir"
+		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
+		exit 0
+	}
+	unencrypted_backup_ocam(){
+		print_warning "Creating unencrypted backup 'opencamera-backup.${current_date}.7z'\n"
+		mkdir -p "${ocam_backup_dir}/current"
+		unset avail_dir
+		# Create archives of each open camera content folder
+		for avail_dir in ${ocam_backup_candidates[@]}; do
+			[[ -d $avail_dir ]] && {
+				file_name="${avail_dir#\/}"
+				file_name="${file_name%%\/*}"
+				cd "${avail_dir%files}"
+				# Compress $avail_dir contents
+				7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "opencamera-${file_name}.7z" "files/" &>/dev/null &&
+				mv "opencamera-${file_name}.7z" "${ocam_backup_dir}/current" 2>/dev/null
+			}
+		done
+		# Make main archive
+		cd "${ocam_backup_dir}/current"
+		7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "opencamera-backup.${current_date}.7z" "*" &>/dev/null &&
+		mv "opencamera-backup.${current_date}.7z" .. 2>/dev/null ||
+		failed_to_create "$@"
+		print_success "Finished creating 'opencamera-backup.${current_date}.7z'"
+		print_aligned "Check '$ocam_backup_dir'"
+		# CD back to original directory
+		cd "$current_dir"
+		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
+		exit 0
+	}
+	restore_ocam(){
+		# Set variables for available backups
+		array_counter=1
+		for avail_backup in $(ls -A "$ocam_backup_dir" 2>/dev/null); do
+			backup_list[$array_counter]="$avail_backup"
+			array_counter=$((array_counter + 1))
+		done
+		# Handles no available backups
+		[[ $array_counter -eq 1 ]] && {
+			print_error "No available backups to restore from"
+			exit 1
+		}
+		# List available backups
+		print_banner
+		print_warning "Restoring open camera\n"
+		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
+			echo -e "${array_checker}.${backup_list[$array_checker]}"
+		done
+		echo ""
+		read -rep "Select preferred backup: " backup_option
+		case "$backup_option" in
+			-*)
+				echo ""
+				[[ -z ${backup_option#*\-} ]] && {
+					print_error "Invalid option '${backup_option}'" &&
+					exit 1
+				}
+				print_error "Invalid option -- '${backup_option#*\-}'" &&
+				exit 1
+			;;
+			*)
+				echo ""
+				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
+					print_warning "Restoring open camera using '${backup_list[$backup_option]}'"
+					rm -rf "${ocam_backup_dir}/current" 2>/dev/null
+					mkdir -p "${ocam_backup_dir}/current"
+					# Copy selected backup file to $ocam_backup_dir/current
+					cp -rf "$ocam_backup_dir"/${backup_list[$backup_option]} "${ocam_backup_dir}/current" 2>/dev/null &&
+					cd "${ocam_backup_dir}/current"
+					# Extract selected backup file
+					7z x "${backup_list[$backup_option]}" -mmt"$cpu_core_count" -y 2>/dev/null || failed_to_extract
+					# Get names of extracted files
+					for avail_dir in ${ocam_backup_candidates[@]}; do
+						file_name="${avail_dir#\/}"
+						file_name="${file_name%%\/*}"
+						[[ -f opencamera-${file_name}.7z ]] && {
+							# Extract compressed files in open camera content directories
+							7z x "opencamera-${file_name}.7z" -mmt"$cpu_core_count" -y -o${avail_dir} 2>/dev/null || failed_to_extract
+						}
+					done
+					echo "" &&
+					print_success "Finished restoring '${backup_list[$backup_option]}'"
+					# CD back to original directory
+					cd "$current_dir"
+					rm -rf "${ocam_backup_dir}/current" 2>/dev/null
+					exit 0
+				}
+				print_error "Invalid option '${backup_option}'" &&
+				exit 1
+			;;
+		esac
+	}
+	check_input_option(){
+		for primary_options in "${@:1}"; do
+			case "$primary_options" in
+				-en | --encrypt)
+					check_dependencies "$@"
+					# Handles if $ocam_backup exists and is empty
+					[[ -z $(ls -A "$ocam_internal" 2>/dev/null) || ! -d $ocam_internal || $backup_checker -eq 0 ]] && {
+						print_error "There is nothing to backup"
+						print_aligned "Create a backup first using the Open Camera app"
+						exit 1
+					}
+					encrypted_backup_ocam "$@"
+				;;
+				-h | --help)
+					print_help
+				;;
+				-l | --list)
+					check_dependencies "$@"
+					# Handles no available ocam backup
+					[[ -z $(ls -A "$ocam_backup_dir" 2>/dev/null) ]] && {
+						print_error "No available backups"
+						exit 1
+					}
+					echo -e "\033[1;37mAvailable backups:\033[00m"
+					ls -A "$ocam_backup_dir"
+					exit 0
+				;;
+				-un | --unencrypt)
+					check_dependencies "$@"
+					# Handles if $ocam_backup exists and is empty
+					[[ -z $(ls -A "$ocam_internal" 2>/dev/null) || ! -d $ocam_internal || $backup_checker -eq 0 ]] && {
+						print_error "There is nothing to backup"
+						print_aligned "Create a backup first using the Open Camera app"
+						exit 1
+					}
+					unencrypted_backup_ocam "$@"
+				;;
+				-r | --restore)
+					check_dependencies "$@"
+					restore_ocam "$@"
+				;;
+				-V | --version)
+					print_version
+				;;
+				-*)
+					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
+						print_error "Invalid option '${primary_options}'"
+						print_notification
+					}
+					print_error "Invalid option -- '${primary_options#*\-}'"
+					print_notification
+				;;
+				*)
+					for secondary_options in "${@:2}"; do
+						case "$secondary_options" in
+							-h | --help)
+								print_help
+							;;
+						esac
+					done
+					print_syntax_error
+				;;
+			esac
+		done
+	}
+	trap 'remove_file_on_exit "${ocam_backup_dir}/current" "${ocam_backup_dir}/opencamera-backup.${current_date}.7z"' 1 2 3 15
+	print_no_argument "$@"
+	check_input_option "$@"
+	exit
+}
+
+#--------------------------------------------------------------
 # Platform: voidlinux
 # Dependencies: xbps, ping, ls, sed, grep, ln
 #--------------------------------------------------------------
@@ -4183,7 +4187,7 @@ setup(){
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "         -V, --version  Show version information\n"
-		echo -e "Post-install setup utility for voidlinux"
+		echo -e "Post-installation setup utility for voidlinux"
 		exit 0
 	}
 	check_dependencies(){
@@ -4396,7 +4400,7 @@ setup(){
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		# Install useful GUI software
-		xbps-install -Syu tageditor libreoffice krita &&
+		xbps-install -Syu nicotine+ tageditor libreoffice krita &&
 		# Install gaming software
 		xbps-install -Syu wine wine-32bit libwine libwine-32bit wine-mono winetricks
 	}
@@ -6963,6 +6967,7 @@ whatsapp-backup(){
 		failed_to_create "$@"
 		unset file_password file_password2
 		print_success "Finished encrypting 'whatsapp-backup.${current_date}.7z'"
+		print_aligned "Check '$whatsapp_backup_dir'"
 		# CD back to original directory
 		cd "$current_dir"
 		exit 0
@@ -6975,6 +6980,7 @@ whatsapp-backup(){
 		7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "$whatsapp_backup_dir/whatsapp-backup.${current_date}.7z" "*" &>/dev/null ||
 		failed_to_create "$@"
 		print_success "Finished creating 'whatsapp-backup.${current_date}.7z'"
+		print_aligned "Check '$whatsapp_backup_dir'"
 		# CD back to original directory
 		cd "$current_dir"
 		exit 0

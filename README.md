@@ -56,7 +56,7 @@ Think busybox or toybox, except as a shell script, you can create symbolic links
 ## Installation:
 
 ```
-$ wget https://codeberg.org/tether/tether/raw/branch/master/tether
+$ wget https://raw.githubusercontent.com/teth3r/tether/master/tether
 $ chmod +x tether
 $ tether --install <desired-folder>
 ```

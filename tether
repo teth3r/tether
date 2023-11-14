@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.12.2133"
+script_version="23.11.14.1352"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3409,7 +3409,7 @@ mkcp(){
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: mkdir, cp, ls, find
+# Dependencies: mkdir, cp, ls, find, rm
 #--------------------------------------------------------------
 mkmv(){
 	print_help(){
@@ -3427,7 +3427,7 @@ mkmv(){
 	}
 	check_dependencies(){
 		# Check for required dependencies
-		for mis_dep in mkdir cp ls find; do
+		for mis_dep in mkdir cp ls find, rm; do
 			[[ ! $(type -p $mis_dep) ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -3654,7 +3654,7 @@ omaps-backup(){
 			print_os_error
 		}
 		# Check for required dependencies
-		for mis_dep in ls 7z pm date; do
+		for mis_dep in ls 7z pm date mkdir; do
 			[[ ! $(type -p $mis_dep) ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -3669,7 +3669,9 @@ omaps-backup(){
 		}
 		# Set organic maps content directories
 		omaps_internal="/sdcard/Android/data/app.organicmaps"
-		omaps_external="$external_storage/Android/data/app.organicmaps"
+		[[ -n $external_storage ]] && {
+			omaps_external="$external_storage/Android/data/app.organicmaps"
+		}
 		omaps_private_internal="/data/data/app.organicmaps"
 		# Array of content directories
 		omaps_backup_candidates=(
@@ -3929,7 +3931,7 @@ opencamera-backup(){
 			print_os_error
 		}
 		# Check for required dependencies
-		for mis_dep in ls 7z pm date; do
+		for mis_dep in ls 7z pm date mkdir; do
 			[[ ! $(type -p $mis_dep) ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -5802,14 +5804,18 @@ touchzip(){
 		archive_name="$2"
 		archive_name="${archive_name%.*}"
 		# Check for required dependencies
-		[[ ! $(type -p 7z) ]] && print_missing_dependencies "7zip"
+		for mis_dep in touch rm 7z; do
+			[[ ! $(type -p $mis_dep) ]] && {
+				print_missing_dependencies "$mis_dep"
+			}
+		done
 		[[ $# -lt 3 ]] && {
 			print_syntax_error
 		}
 		# Check destination directory for write permissions
 		touch "${archive_name}_${script_name}" 2>/dev/null || print_file_write_error "${archive_name}.7z"
 		rm "${archive_name}_${script_name}"
-		# Check if files exist
+		# Check if specified files exist
 		for check_existing in "${@:3}"; do
 			[[ ! -e $check_existing ]] && {
 				print_error "Cannot stat '$check_existing': No such file or directory"
@@ -5993,6 +5999,7 @@ void-backup(){
 					print_help
 				;;
 				-c | --cache)
+					check_dependencies "$@"
 					backup_cache
 				;;
 				-V | --version)
@@ -6015,7 +6022,6 @@ void-backup(){
 	}
 	trap 'run_on_exit' 1 2 3 15
 	print_no_argument "$@"
-	check_dependencies "$@"
 	check_input_option "$@"
 	exit
 }
@@ -6033,9 +6039,9 @@ void-deploy(){
 		echo -e "          $script_name --install\n"
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "         -i, --install  Setup chroot after installation"
-		echo -e "         -s, --setup    Setup chroot after boot"
+		echo -e "         -s, --setup    Setup chroot after mounting"
 		echo -e "         -V, --version  Show version information\n"
-		echo -e "Chroot post-install and post-boot setup tool"
+		echo -e "Chroot post-install and post-mount setup tool"
 		exit 0
 	}
 	check_dependencies(){
@@ -6331,7 +6337,7 @@ void-deploy(){
 
 #--------------------------------------------------------------
 # Platform: Android
-# Dependencies: mount, losetup, busybox, lsof, fallocate, dd, mke2fs
+# Dependencies: mount, losetup, busybox, lsof, fallocate, mke2fs
 #--------------------------------------------------------------
 void-install(){
 	print_help(){
@@ -6342,7 +6348,7 @@ void-install(){
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "         -V, --version  Show version information\n"
-		echo -e "Chroot installation utility"
+		echo -e "Chroot installation tool"
 		exit 0
 	}
 	check_dependencies(){
@@ -6353,7 +6359,7 @@ void-install(){
 			print_os_error
 		}
 		# Check for required dependencies
-		for mis_dep in mount losetup busybox lsof fallocate; do
+		for mis_dep in mount losetup busybox lsof fallocate, mke2fs; do
 			[[ ! $(type -p $mis_dep) ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -6594,7 +6600,7 @@ void-mount(){
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "         -V, --version  Show version information\n"
-		echo -e "Chroot initialization utility"
+		echo -e "Chroot initialization tool"
 		exit 0
 	}
 	check_dependencies(){
@@ -6685,7 +6691,7 @@ void-mount(){
 
 #--------------------------------------------------------------
 # Platform: Android
-# Dependencies: losetup, umount, lsof, wc
+# Dependencies: losetup, umount, lsof, wc, rm
 #--------------------------------------------------------------
 void-umount(){
 	print_help(){
@@ -6697,7 +6703,7 @@ void-umount(){
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "         -r, --remove   Unmount and delete chroot"
 		echo -e "         -V, --version  Show version information\n"
-		echo -e "Chroot uninitialization utility"
+		echo -e "Chroot unmount tool"
 		exit 0
 	}
 	check_dependencies(){
@@ -6706,7 +6712,7 @@ void-umount(){
 			print_os_error
 		}
 		# Check for required dependencies
-		for mis_dep in losetup umount lsof wc; do
+		for mis_dep in losetup umount lsof wc mkdir rm; do
 			[[ ! $(type -p $mis_dep) ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -6894,7 +6900,7 @@ whatsapp-backup(){
 			print_os_error
 		}
 		# Check for required dependencies
-		for mis_dep in ls 7z pm date; do
+		for mis_dep in ls 7z pm date mkdir; do
 			[[ ! $(type -p $mis_dep) ]] && {
 				print_missing_dependencies "$mis_dep"
 			}

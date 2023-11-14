@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.12.2019"
+script_version="23.11.12.2133"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -307,14 +307,14 @@ input_option_type_two(){
 # Print program banner
 #--------------------------------------------------------------
 print_banner(){
-	echo " "
-	echo "████████╗███████╗████████╗██╗   ██╗███████╗██████═╗ "
-	echo "╚══██╔══╝██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔═══██ "
-	echo "   ██║   ███████╗   ██║   ████████║███████╗███████═╗"
-	echo "   ██║   ██╔════╝   ██║   ██╔═══██║██╔════╝██╔═══██║"
-	echo "   ██║   ███████╗   ██║   ██║   ██║███████╗██║   ██║"
-	echo "   ╚═╝   ╚══════╝   ╚═╝   ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝"
-	echo " "
+	echo " 
+████████╗███████╗████████╗██╗   ██╗███████╗██████═╗
+╚══██╔══╝██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔═══██ 
+   ██║   ███████╗   ██║   ████████║███████╗███████═╗
+   ██║   ██╔════╝   ██║   ██╔═══██║██╔════╝██╔═══██║
+   ██║   ███████╗   ██║   ██║   ██║███████╗██║   ██║
+   ╚═╝   ╚══════╝   ╚═╝   ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝
+"
 }
 
 #--------------------------------------------------------------
@@ -329,20 +329,20 @@ print_usage_bar(){
 	usage_counter="$(( usage_visualizer / 5 ))"
 	# Handles all $usage_visualizer values > 0
 	out_block="${color_green}"
-	for ((b_counter=0; b_counter < $usage_counter; b_counter++)); do
+	for ((blk_counter=0; blk_counter < $usage_counter; blk_counter++)); do
 		out_block+="■"
 		# Show ${color_yellow} blocks after 7 ${color_green} blocks
-		[[ $b_counter -eq 6 ]] && {
+		[[ $blk_counter -eq 6 ]] && {
 			out_block+="${color_yellow}"
 		}
 		# Show ${color_red} blocks after 7 ${color_yellow} blocks
-		[[ $b_counter -eq 13 ]] && {
+		[[ $blk_counter -eq 13 ]] && {
 			out_block+="${color_red}"
 		}
 	done
 	# Handles $usage_visualizer values <= 0 || $usage_visualizer values < 100
 	out_empty="${color_white}"
-	for ((; b_counter < 20; b_counter++)); do
+	for ((; blk_counter < 20; blk_counter++)); do
 		out_empty+="-"
 	done
 	# Output colored progress bar

@@ -4,7 +4,7 @@ tether is a multi-call shell script that combines many applets/functions into a 
 
 Think busybox or toybox, except as a shell script, you can create symbolic links to tether for each defined function and it will behave/act like whatever it was invoked as.
 
-## Currently defined functions:
+## Currently defined functions
 
 . benchmark
 . chroot-backup
@@ -53,7 +53,7 @@ Think busybox or toybox, except as a shell script, you can create symbolic links
 **void-umount** | losetup, lsof, mkdir, rm, umount, wc | Android (root) | Usage: ` void-umount [OPTION] ` <p> Unmount tool for Voidlinux chroot on Android. It was created for, and will only work for chroot images created using `void-install`. Run `void-umount --help` for more details.
 **whatsapp-backup** | 7z, date, ls, mkdir, pm | Android (root) | Usage: ` whatsapp-backup [OPTION] ` <p> This tool creates and restores encrypted/unencrypted backups of `Whatsapp` (media, chats, etc) in external storage (SD card, USB OTG, etc), It will fallback to using internal storage if no external storage device is available. Run `whatsapp-backup --help` for more details.
 
-## Installation:
+## Installation
 
 ```
 $ wget https://raw.githubusercontent.com/teth3r/tether/master/tether
@@ -62,7 +62,7 @@ $ tether --install <desired-folder>
 ```
 Ensure that `<desired-folder>` is included in PATH
 
-## LICENSE:
+## LICENSE
 
 Copyrights (c) 2023, Kolade Ayomide Olanrewaju <<koladeolanrewaju@tutanota.com>>
 

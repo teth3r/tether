@@ -62,7 +62,7 @@ $ tether --install <desired-folder>
 ```
 Ensure that `<desired-folder>` is included in PATH
 
-## LICENSE
+## LICENSE:
 
 Copyrights (c) 2023, Kolade Ayomide Olanrewaju <<koladeolanrewaju@tutanota.com>>
 

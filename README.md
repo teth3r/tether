@@ -66,4 +66,4 @@ Ensure that `<desired-folder>` is included in PATH
 
 Copyrights (c) 2023, Kolade Ayomide Olanrewaju <<koladeolanrewaju@tutanota.com>>
 
-Distributed under the [GPL-3.0-or-later](/LICENSE).
+Distributed under the [GPL-3.0-or-later](../LICENSE).

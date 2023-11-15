@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.15.2024"
+script_version="23.11.15.2115"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -654,11 +654,12 @@ none="\[\e[00m\]"
 	}
 }
 EOF
+	# Add exist status for Android
+	[[ -d /system/app/ && -f /system/build.prop ]] && return 0
+	# Change file ownership
 	[[ -f /home/"${SUDO_USER:=$USER}"/.bashrc ]] && {
 		chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.bashrc 2>/dev/null
 	}
-	# Add exist status for Android
-	[[ -d /system/app/ && -f /system/build.prop ]] && return 0
 }
 
 #--------------------------------------------------------------
@@ -2449,24 +2450,22 @@ dotfiles(){
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
 		echo -e "Examples: $script_name --vim"
-		echo -e "          $script_name --bash-desktop\n"
-		echo -e "Options: -ba, --bash-android  Update .bashrc for android"
-		echo -e "         -bc, --bash-chroot   Update .bashrc for android chroot"
-		echo -e "         -bd, --bash-desktop  Update .bashrc for linux"
-		echo -e "         -h,  --help          Print out this message"
-		echo -e "         -ma, --mksh-android  Update mkshrc for android"
-		echo -e "         -te, --termux        Update *.properties and profile"
-		echo -e "         -tm, --tmux          Update .tmux.conf"
-		echo -e "         -u,  --urxvt         Update .Xresources"
-		echo -e "         -v,  --vim           Update .vimrc and tether.vim"
-		echo -e "         -V,  --version       Show version information\n"
+		echo -e "          $script_name --bash\n"
+		echo -e "Options: -b,  --bashrc   Add custom .bashrc"
+		echo -e "         -h,  --help     Print out this message"
+		echo -e "         -m,  --mkshrc   Add custom mkshrc for android"
+		echo -e "         -te, --termux   Add custom colorscheme and prop files"
+		echo -e "         -tm, --tmux     Add custom .tmux.conf"
+		echo -e "         -u,  --urxvt    Add custom .Xresources"
+		echo -e "         -v,  --vim      Add custom .vimrc and vim colorscheme"
+		echo -e "         -V,  --version  Show version information\n"
 		echo -e "Install/Update dotfiles"
 		exit 0
 	}
 	check_input_option(){
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
-				-ba | --bash-android)
+				-b | --bashrc)
 					[[ -d /system/app/ && -f /system/build.prop ]] && {
 						print_not_root_user "$@"
 						print_bashrc "$@" &&
@@ -2474,36 +2473,16 @@ dotfiles(){
 						print_error "Failed to update '$module_directory/system/etc/bash/.bashrc'"
 						exit 0
 					}
-					print_os_error
-					exit 1
-				;;
-				-bc | --bash-chroot)
-					[[ ! -d /system/app && -d /sys/class/power_supply/battery ]] && {
-						print_bashrc "$@" &&
-						print_success "Finished updating '~/.bashrc'" ||
-						print_error "Failed to update '~/.bashrc'"
-						exit 0
-					}
-					print_os_error
-					exit 1
-				;;
-				-bd | --bash-desktop)
-					# Handles Linux desktop including Virtual Machines
-					[[ -d /sys/class/power_supply/BAT0 ]] ||
-					[[ ! -d /sys/class/kgsl && ! -d /sys/class/power_supply/battery ]] ||
-					[[ ! -d /proc/gpufreq && ! -d /sys/class/power_supply/battery ]] && {
-						print_bashrc "$@" &&
-						print_success "Finished updating '~/.bashrc'" ||
-						print_error "Failed to update '~/.bashrc'"
-						exit 0
-					}
-					print_os_error
-					exit 1
+					print_bashrc "$@" &&
+					print_success "Finished updating '/home/"${SUDO_USER:=$USER}"/.bashrc'" ||
+					print_error "Failed to update '/home/"${SUDO_USER:=$USER}"/.bashrc'"
+					# Exit status is gotten from 'print_bashrc'
+					exit
 				;;
 				-h | --help)
 					print_help
 				;;
-				-ma | --mksh-android)
+				-m | --mkshrc)
 					[[ -d /system/app/ && -f /system/build.prop ]] && {
 						print_not_root_user "$@"
 						print_mkshrc_android "$@" &&

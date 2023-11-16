@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.16.1739"
+script_version="23.11.16.1810"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4082,7 +4082,7 @@ done
 #--------------------------------------------------------------
 # Change default cpusets to all available CPUs
 #--------------------------------------------------------------
-cpu_core_count="$(< /sys/devices/system/cpu/online)"
+cpu_core_count="$(cat /sys/devices/system/cpu/online)"
 for dev_cpuset in /dev/cpuset/*/cpus; do
 	echo "$cpu_core_count" > "$dev_cpuset"
 done
@@ -4094,51 +4094,15 @@ done
 	echo "1" > /sys/class/power_supply/usb/otg_switch
 }
 
-#--------------------------------------------------------------
-# Apply Memory tweaks
-#--------------------------------------------------------------
-mem_file="$(< /proc/meminfo)"
-total_mem="${mem_file#*MemTotal: }"
-total_mem="${total_mem%% kB*}"
-# Only run if total installed memory >= 4096 MB
-[[ $total_mem -ge 4194304 ]] && {
-	swap_file="$(< /proc/swaps)"
-	# Disable ZRAM if it exists
-	[[ $swap_file == *zram0* ]] && {
-		swapoff /dev/block/zram0 &&
-		echo "1" > /sys/block/zram0/reset
-	}
-	# Create swapfile
-	[[ $(type -p fallocate) && $swap_file != *swapfile0* ]] && {
-		# Create empty file
-		fallocate -l 2560M "$MODDIR/swapfile0" &>/dev/null &&
-		chown root:root "$MODDIR/swapfile0" &&
-		chmod 0600 "$MODDIR/swapfile0" &&
-		mkswap "$MODDIR/swapfile0" &>/dev/null &&
-		swapon -p 32760 "$MODDIR/swapfile0" &>/dev/null
-	}
-	# Adjust swappiness
-	echo "100" > /proc/sys/vm/swappiness
-	# Reduce oom_score_adj for all running processes
-	lmk_control_loader(){
-		while :; do
-			for adj_file in /proc/*/oom_score_adj; do
-				echo 2>/dev/null "-1000" > "$adj_file"
-			done
-			# Add delay between each run
-			read -rt "2" <> <(:) || :
-		done
-	}
-	lmk_control_loader &
-}
-
 # Show clock seconds in status bar
 settings put secure clock_seconds 1
+
 # Disable private DNS
 settings put global private_dns_mode off
 # Disable captive portal detection
 settings put global captive_portal_detection_enabled 0
 settings put global captive_portal_mode 0
+
 # Disable monitoring and killing of phantom app processes
 settings put global settings_enable_monitor_phantom_procs false
 # Increase max phantom process limit
@@ -4149,16 +4113,14 @@ device_config put activity_manager max_cached_processes 65536
 device_config put activity_manager max_empty_time_millis 360000000
 
 # Reduce size of UI
-[[ $(type -p wm) ]] && {
-	display_density="$(wm density 2>/dev/null)"
-	[[ $display_density != *Override* ]] && {
-		display_density="${display_density/*:\ }"
-		display_density="${display_density//[[:space:]]}"
-		display_density="$(( display_density - 30 ))"
-		wm density $display_density &>/dev/null
-		# Reduce size of display font
-		settings put system font_scale 0.96
-	}
+display_density="$(wm density 2>/dev/null)"
+[[ $display_density != *Override* && $display_density == *Physical* ]] && {
+	display_density="${display_density/*:\ }"
+	display_density="${display_density//[[:space:]]}"
+	display_density="$(( display_density - 30 ))"
+	wm density $display_density &>/dev/null
+	# Reduce size of display font
+	settings put system font_scale 0.96
 }
 
 current_date="$(date +%y.%m.%d.%H%M)"

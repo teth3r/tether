@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.16.1832"
+script_version="23.11.16.1905"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4029,7 +4029,7 @@ hostname "$device_user"
 	dnscrypt_loader(){
 		# Only run if dnscrypt-proxy is not running
 		while [[ ! $(pgrep -x dnscrypt-proxy) ]]; do
-			/system/bin/dnscrypt-proxy -config "/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml"
+			/system/bin/dnscrypt-proxy -config "$MODDIR/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml"
 			# Add delay so multiple instances are not created
 			read -rt "5" <> <(:) || :
 		done

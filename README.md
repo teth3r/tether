@@ -16,6 +16,9 @@ Think busybox or toybox, except as a shell script, you can create symbolic links
 . mktouch
 . omaps-backup
 . opencamera-backup
+. package
+. parity
+. replace-su
 . setup
 . tfetch
 . tether

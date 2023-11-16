@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.16.1655"
+script_version="23.11.16.1739"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3854,7 +3854,7 @@ package(){
 	download_bash(){
 		print_warning "Downloading 'bash' static binary (ccbins)\n"
 		# Download bash static binary from ccbins magisk module repo
-		busybox wget https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/bash/bash-arm64 -O "$package_tmp_dir/bash-arm64" &>/dev/null ||
+		busybox wget https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/raw/master/bash/bash-arm64 -O "$package_tmp_dir/bash-arm64" &>/dev/null ||
 		download_fail "bash-arm64"
 		cp -rf "$package_tmp_dir/bash-arm64" "$package_tmp_dir/system/bin/bash" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/bash"
 		rm -rf "$package_tmp_dir/bash-arm64" 2>/dev/null
@@ -3862,12 +3862,12 @@ package(){
 	download_adb(){
 		print_warning "Downloading 'adb' static binary (adb-ndk)\n"
 		# Download adb static binary from adb-ndk magisk module repo
-		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/blob/master/bin/adb.bin-arm64 -O "$package_tmp_dir/adb.bin-arm64" &>/dev/null ||
+		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/raw/master/bin/adb.bin-arm64 -O "$package_tmp_dir/adb.bin-arm64" &>/dev/null ||
 		download_fail "adb.bin-arm64"
 		cp -rf "$package_tmp_dir/adb.bin-arm64" "$package_tmp_dir/system/bin/adb" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/adb"
 		# Download fastboot static binary from adb-ndk magisk module repo
 		print_warning "Downloading 'fastboot' static binary (adb-ndk)\n"
-		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/blob/master/bin/fastboot.bin-arm64 -O "$package_tmp_dir/fastboot.bin-arm64" &>/dev/null ||
+		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/raw/master/bin/fastboot.bin-arm64 -O "$package_tmp_dir/fastboot.bin-arm64" &>/dev/null ||
 		download_fail "fastboot.bin-arm64"
 		cp -rf "$package_tmp_dir/fastboot.bin-arm64" "$package_tmp_dir/system/bin/fastboot" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/fastboot"
 		rm -r "$package_tmp_dir/adb.bin-arm64" "$package_tmp_dir/fastboot.bin-arm64" 2>/dev/null

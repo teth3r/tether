@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.16.1905"
+script_version="23.11.16.1940"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -587,7 +587,6 @@ none="\[\e[00m\]"
 	alias external='cd $external_storage'
 	alias sdcard='cd $phone_storage'
 
-	tether_dns="/home/${SUDO_USER:=$USER}/tether/system/etc/dnscrypt-proxy"
 	module_dns="/mnt/module-dnscrypt"
 
 	alias querylogs='vi $module_dns/query-logs.log'
@@ -596,10 +595,10 @@ none="\[\e[00m\]"
 	alias blockedips='vi $module_dns/blocked-ips.log'
 	alias allowedlogs='vi $module_dns/allowed-names.log'
 
-	alias editallowed='vi $tether_dns/allowed-names.txt'
-	alias editblocked='vi $tether_dns/blocked-names.txt'
-	alias editcloaked='vi $tether_dns/cloaking-rules.txt'
-	alias editblockedips='vi $tether_dns/blocked-ips.txt'
+	alias editallowed='vi $module_dns/allowed-names.txt'
+	alias editblocked='vi $module_dns/blocked-names.txt'
+	alias editcloaked='vi $module_dns/cloaking-rules.txt'
+	alias editblockedips='vi $module_dns/blocked-ips.txt'
 
 	alias edittether="vi /home/${SUDO_USER:=$USER}/.local/bin/tether"
 
@@ -4029,7 +4028,7 @@ hostname "$device_user"
 	dnscrypt_loader(){
 		# Only run if dnscrypt-proxy is not running
 		while [[ ! $(pgrep -x dnscrypt-proxy) ]]; do
-			/system/bin/dnscrypt-proxy -config "$MODDIR/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml"
+			dnscrypt-proxy -config "$MODDIR/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml"
 			# Add delay so multiple instances are not created
 			read -rt "5" <> <(:) || :
 		done

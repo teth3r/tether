@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.16.1940"
+script_version="23.11.16.2027"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4883,7 +4883,7 @@ EOF
 	install_networking(){
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
-		xbps-install -Syu dnscrypt-proxy NetworkManager bluez &&
+		xbps-install -Syu git dnscrypt-proxy NetworkManager bluez
 		[[ -d /var/service/dhcpcd ]] && {
 			sv down dhcpcd
 			rm -r /var/service/dhcpcd
@@ -4902,12 +4902,19 @@ EOF
 		}
 		usermod -aG bluetooth "$SUDO_USER"
 		# Dnscrypt-proxy
+		chattr -i /etc/resolv.conf
 		echo "nameserver 127.0.0.1" > /etc/resolv.conf
 		chattr +i /etc/resolv.conf
 		[[ ! -d /var/service/dnscrypt-proxy ]] && {
 			ln -sf /etc/sv/dnscrypt-proxy /var/service/
 		}
 		mkdir -p /etc/dnscrypt-proxy
+		git clone "https://github.com/teth3r/blocklist" &&
+		cp -rf blocklist/*.txt /etc/dnscrypt-proxy &&
+		cp -rf blocklist/*.toml /etc/dnscrypt-proxy &&
+		sed -i 's|127.0.0.1:5354|127.0.0.1:53|g' /etc/dnscrypt-proxy/dnscrypt-proxy.toml &&
+		sed -i 's|\[::1\]:5354|\[::1\]:53|g' /etc/dnscrypt-proxy/dnscrypt-proxy.toml &&
+		rm -r blocklist &&
 		chown -R "$SUDO_USER":"$SUDO_USER" /etc/dnscrypt-proxy 2>/dev/null
 	}
 	get_user_options(){

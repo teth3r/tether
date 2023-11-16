@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.16.1810"
+script_version="23.11.16.1832"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4111,17 +4111,6 @@ device_config put activity_manager max_phantom_processes 65536
 device_config put activity_manager max_cached_processes 65536
 # Increase max cached process timeout
 device_config put activity_manager max_empty_time_millis 360000000
-
-# Reduce size of UI
-display_density="$(wm density 2>/dev/null)"
-[[ $display_density != *Override* && $display_density == *Physical* ]] && {
-	display_density="${display_density/*:\ }"
-	display_density="${display_density//[[:space:]]}"
-	display_density="$(( display_density - 30 ))"
-	wm density $display_density &>/dev/null
-	# Reduce size of display font
-	settings put system font_scale 0.96
-}
 
 current_date="$(date +%y.%m.%d.%H%M)"
 setprop tether_performance_runtime "$current_date"

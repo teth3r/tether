@@ -3749,7 +3749,7 @@ opencamera-backup(){
 
 #--------------------------------------------------------------
 # Platform: Android
-# Dependencies: ping, magisk
+# Dependencies: ping, magisk, sed
 #--------------------------------------------------------------
 package(){
 	print_help(){
@@ -3794,6 +3794,8 @@ package(){
 			print_error "Magisk is not installed"
 			exit 1
 		}
+		# Check if sed is installed
+		[[ ! $(type -p sed) ]] && print_missing_dependencies "sed"
 		# Create module package directories
 		mkdir -p "$package_tmp_dir/system/app" 2>/dev/null || print_write_error "$package_tmp_dir/system/app"
 		mkdir -p "$package_tmp_dir/system/bin" 2>/dev/null || print_write_error "$package_tmp_dir/system/bin"
@@ -3847,6 +3849,7 @@ package(){
 		busybox unzip "main.zip" &>/dev/null
 		cp -rf "$package_tmp_dir/blocklist-main"/*.txt "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
 		cp -rf "$package_tmp_dir/blocklist-main"/*.toml "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
+		sed -i 's|127.0.0.1:53|127.0.0.1:5354|g' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
 		rm -r "$package_tmp_dir/main.zip" "$package_tmp_dir/blocklist-main" 2>/dev/null
 	}
 	download_bash(){
@@ -4908,8 +4911,6 @@ EOF
 		git clone "https://github.com/teth3r/blocklist" &&
 		cp -rf blocklist/*.txt /etc/dnscrypt-proxy &&
 		cp -rf blocklist/*.toml /etc/dnscrypt-proxy &&
-		sed -i 's|127.0.0.1:5354|127.0.0.1:53|g' /etc/dnscrypt-proxy/dnscrypt-proxy.toml &&
-		sed -i 's|\[::1\]:5354|\[::1\]:53|g' /etc/dnscrypt-proxy/dnscrypt-proxy.toml &&
 		rm -r blocklist &&
 		chown -R "$SUDO_USER":"$SUDO_USER" /etc/dnscrypt-proxy 2>/dev/null
 	}

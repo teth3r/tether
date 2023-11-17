@@ -17,7 +17,6 @@ benchmark
 . omaps-backup
 . opencamera-backup
 . package
-. parity
 . replace-su
 . setup
 . tfetch
@@ -46,7 +45,6 @@ benchmark
 **omaps-backup** | 7z, date, ls, mkdir, pm | Android (root) | Usage: ` omaps-backup [OPTION] ` <p> This tool creates and restores encrypted/unencrypted backups of `Organic Maps` downloaded mapfiles in external storage (SD card, USB OTG, etc), It will fallback to using internal storage if no external storage device is available. Run `omaps-backup --help` for more details. |
 **opencamera-backup** | 7z, date, ls, mkdir, pm | Android (root) | Usage: ` opencamera-backup [OPTION] ` <p> This tool creates and restores encrypted/unencrypted backups of `Open Camera` config files in external storage (SD card, USB OTG, etc), It will fallback to using internal storage if no external storage device is available. Run `opencamera-backup --help` for more details. |
 **package** | ping, magisk, sed | Android (root) | Usage: ` package [OPTION] ` <p> Magisk module packaging tool. Run `package --help` for more details. |
-**parity** | cp, mkdir | Android (root) | Usage: ` parity [OPTION] ` <p> Updates `/system/bin/tether` with the version in `/data/voidlinux/home/<user>/.local/bin`. Run `parity --help` for more details. |
 **replace-su** | mount, unmount | Android (root) | Usage: ` replace-su [OPTION] ` <p> Removes phh-su from AOSP GSI releases >= 12, allowing the use of custom root solutions like `magisk`. Run `replace-su --help` for more details. |
 **setup** | ping, xbps | Voidlinux | Usage: ` setup [OPTION] ` <p> Post-installation setup tool for Voidlinux. Run `setup --help` for more details. |
 **tfetch** |  | Device Agnostic | Usage: ` tfetch [OPTION] ` <p> System resource information tool, has no external dependencies. Run `tfetch --help` for more details. |

@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.17.0324"
+script_version="23.11.17.1140"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3800,7 +3800,6 @@ package(){
 		mkdir -p "$package_tmp_dir/system/app" 2>/dev/null || print_write_error "$package_tmp_dir/system/app"
 		mkdir -p "$package_tmp_dir/system/bin" 2>/dev/null || print_write_error "$package_tmp_dir/system/bin"
 		mkdir -p "$package_tmp_dir/system/etc" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc"
-		mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 		mkdir -p "$package_tmp_dir/system/product" 2>/dev/null || print_write_error "$package_tmp_dir/system/product"
 		# Check for required dependencies
 		for mis_dep in busybox; do
@@ -3918,10 +3917,6 @@ package(){
 		# AOSP launcher search bar
 		mkdir -p "$package_tmp_dir/system/product/app/QuickSearchBox" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/QuickSearchBox"
 		$(touch "$package_tmp_dir/system/product/app/QuickSearchBox/QuickSearchBox.apk" 2>/dev/null)
-		# Populate font/ if custom font files exist
-		[[ -f $tmp_dir/fonts/RobotoStatic-Regular.ttf ]] && {
-			cp -r $tmp_dir/fonts/*.ttf "$package_tmp_dir/system/fonts" 2>/dev/null
-		}
 		# Create empty mkshrc file to populate with 'dotfiles --mkshrc'
 		$(touch "$package_tmp_dir/system/etc/mkshrc" 2>/dev/null)
 	}
@@ -4142,7 +4137,12 @@ EOF
 		populate_dir "$@"
 		create_module_prop "$@"
 		create_customize "$@"
-		create_post_fs "$@"
+		# Populate font/ if custom font files exist
+		[[ -f $tmp_dir/fonts/RobotoStatic-Regular.ttf ]] && {
+			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
+			cp -r $tmp_dir/fonts/*.ttf "$package_tmp_dir/system/fonts" 2>/dev/null
+			create_post_fs "$@"
+		}
 		create_service "$@"
 		# Add execute permissions
 		chmod +x $package_tmp_dir/system/bin/*

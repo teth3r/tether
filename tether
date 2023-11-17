@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.16.2027"
+script_version="23.11.17.0153"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3799,7 +3799,6 @@ package(){
 		mkdir -p "$package_tmp_dir/system/bin" 2>/dev/null || print_write_error "$package_tmp_dir/system/bin"
 		mkdir -p "$package_tmp_dir/system/etc" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc"
 		mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-		mkdir -p "$package_tmp_dir/system/priv-app" 2>/dev/null || print_write_error "$package_tmp_dir/system/priv-app"
 		mkdir -p "$package_tmp_dir/system/product" 2>/dev/null || print_write_error "$package_tmp_dir/system/product"
 		# Check for required dependencies
 		for mis_dep in busybox; do
@@ -3903,9 +3902,6 @@ package(){
 		# Populate app/
 		mkdir -p "$package_tmp_dir/system/app/Stk" 2>/dev/null || print_write_error "$package_tmp_dir/system/app/Stk"
 		$(touch "$package_tmp_dir/system/app/Stk/Stk.apk" 2>/dev/null)
-		# Populate priv-app/
-		mkdir -p "$package_tmp_dir/system/priv-app/MusicFX" 2>/dev/null || print_write_error "$package_tmp_dir/system/priv-app/MusicFX"
-		$(touch "$package_tmp_dir/system/priv-app/MusicFX/MusicFX.apk" 2>/dev/null)
 		# Populate product/app/
 		# AOSP webview shell
 		mkdir -p "$package_tmp_dir/system/product/app/Browser2" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Browser2"

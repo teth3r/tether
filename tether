@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.17.1140"
+script_version="23.11.18.0929"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4127,7 +4127,7 @@ exit 0
 EOF
 	}
 	package_main(){
-		print_warning "Creating 'tether.$current_date.zip'"
+		print_warning "Creating 'tether.$current_date' Magisk module"
 		print_aligned "This may take a while\n"
 		download_dnscrypt "$@"
 		download_bash "$@"
@@ -4193,21 +4193,21 @@ exit 0
 EOF
 		cd "$tmp_dir/tether"
 		print_warning "Almost done"
-		print_aligned "Zipping 'tether.$current_date.zip'\n"
+		print_aligned "Creating archive file 'tether.$current_date.zip'\n"
 		# Zip tether/ contents
 		7z a -snl -snh -tzip -mx1 -mmt"$cpu_core_count" "tether.$current_date.zip" "*" &>/dev/null ||
 		failed_to_create "$@"
-		cp -rf "$tmp_dir/tether/tether.$current_date.zip" /sdcard 2>/dev/null
-		# Backup module in external storage if available
+		# Move module archive to external storage if available
 		[[ -n $(ls -A "$external_storage" 2>/dev/null) ]] && {
 			mkdir -p "$backup_dir" 2>/dev/null || print_write_error "$backup_dir"
-			cp -f "$phone_storage/tether.$current_date.zip" "$backup_dir"
+			cp -rf "$tmp_dir/tether/tether.$current_date.zip" "$backup_dir" 2>/dev/null || print_file_write_error "$backup_dir/tether.$current_date.zip"
 			print_success "Finished creating 'tether.$current_date.zip'"
-			print_aligned "Check '/sdcard' and '$backup_dir'"
+			print_aligned "Check '$backup_dir'"
 			rm -r "$package_tmp_dir" "$tmp_dir/tether" 2>/dev/null
 			cd "$current_dir"
 			exit 0
 		}
+		cp -rf "$tmp_dir/tether/tether.$current_date.zip" /sdcard 2>/dev/null || print_file_write_error "/sdcard/tether.$current_date.zip"
 		print_success "Finished creating 'tether.$current_date.zip'"
 		print_aligned "Check '/sdcard'"
 		rm -r "$package_tmp_dir" "$tmp_dir/tether" 2>/dev/null

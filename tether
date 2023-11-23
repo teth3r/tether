@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.18.0929"
+script_version="23.11.23.0430"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4516,7 +4516,7 @@ setup(){
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		# Install useful GUI software
-		xbps-install -Syu nicotine+ tageditor libreoffice krita &&
+		xbps-install -Syu nicotine+ qbittorrent tageditor libreoffice krita &&
 		# Install gaming software
 		xbps-install -Syu wine wine-32bit libwine libwine-32bit wine-mono winetricks
 	}

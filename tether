@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.23.0430"
+script_version="23.11.25.0004"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -832,6 +832,177 @@ pp(){
 	PS2+=$'\e[1;37m]\n\e[1;37m╰──\e[0m \e[1;33m$\e[0m '
 }
 EOF
+}
+
+#--------------------------------------------------------------
+# Create custom konsolerc for Konsole
+#--------------------------------------------------------------
+print_konsole_config(){
+	mkdir -p "/home/"${SUDO_USER:=$USER}"/.config/" 2>/dev/null
+	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.config/konsolerc
+[Desktop Entry]
+DefaultProfile=tether.profile
+
+[General]
+ConfigVersion=1
+
+[KonsoleWindow]
+RememberWindowSize=false
+ShowWindowTitleOnTitleBar=true
+UseSingleInstance=true
+
+[MainWindow]
+MenuBar=Disabled
+State=AAAA/wAAAAD9AAAAAQAAAAAAAAAAAAAAAPwCAAAAAvsAAAAcAFMAUwBIAE0AYQBuAGEAZwBlAHIARABvAGMAawAAAAAA/////wAAAPkA////+wAAACIAUQB1AGkAYwBrAEMAbwBtAG0AYQBuAGQAcwBEAG8AYwBrAAAAAAD/////AAABSQD///8AAAeAAAAD8wAAAAQAAAAEAAAACAAAAAj8AAAAAQAAAAIAAAACAAAAFgBtAGEAaQBuAFQAbwBvAGwAQgBhAHIAAAAAAP////8AAAAAAAAAAAAAABwAcwBlAHMAcwBpAG8AbgBUAG8AbwBsAGIAYQByAAAAAPX/////AAAAAAAAAAA=
+ToolBarsMovable=Disabled
+
+[UiSettings]
+ColorScheme=Krita darker
+EOF
+	chown -R "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.config 2>/dev/null
+}
+
+#--------------------------------------------------------------
+# Create custom .colorscheme for Konsole
+#--------------------------------------------------------------
+print_konsole_color(){
+	mkdir -p "/home/"${SUDO_USER:=$USER}"/.local/share/konsole/" 2>/dev/null
+	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.local/share/konsole/tether.colorscheme
+[Background]
+Color=6,10,12
+
+[BackgroundFaint]
+Color=6,10,12
+
+[BackgroundIntense]
+Color=6,10,12
+
+[Color0]
+Color=6,10,12
+
+[Color0Faint]
+Color=6,10,12
+
+[Color0Intense]
+Color=6,10,12
+
+[Color1]
+Color=254,94,65
+
+[Color1Faint]
+Color=254,94,65
+
+[Color1Intense]
+Color=254,94,65
+
+[Color2]
+Color=177,204,114
+
+[Color2Faint]
+Color=177,204,114
+
+[Color2Intense]
+Color=177,204,114
+
+[Color3]
+Color=255,172,84
+
+[Color3Faint]
+Color=255,172,84
+
+[Color3Intense]
+Color=255,172,84
+
+[Color4]
+Color=114,194,214
+
+[Color4Faint]
+Color=114,194,214
+
+[Color4Intense]
+Color=114,194,214
+
+[Color5]
+Color=237,119,130
+
+[Color5Faint]
+Color=237,119,130
+
+[Color5Intense]
+Color=237,119,130
+
+[Color6]
+Color=162,218,198
+
+[Color6Faint]
+Color=162,218,198
+
+[Color6Intense]
+Color=162,218,198
+
+[Color7]
+Color=18,29,35
+
+[Color7Faint]
+Color=217,187,150
+
+[Color7Intense]
+Color=217,187,150
+
+[Foreground]
+Color=209,179,143
+
+[ForegroundFaint]
+Color=217,187,150
+
+[ForegroundIntense]
+Color=217,187,150
+
+[General]
+Anchor=0.5,0.5
+Blur=false
+ColorRandomization=false
+Description=tether
+FillStyle=Tile
+Opacity=1
+Wallpaper=
+WallpaperFlipType=NoFlip
+WallpaperOpacity=1
+EOF
+	chown -R "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/konsole 2>/dev/null
+}
+
+#--------------------------------------------------------------
+# Create custom .profile for Konsole
+#--------------------------------------------------------------
+print_konsole_profile(){
+	mkdir -p "/home/"${SUDO_USER:=$USER}"/.local/share/konsole/" 2>/dev/null
+	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.local/share/konsole/tether.profile
+[Appearance]
+ColorScheme=tether
+Font=Sarasa Mono CL Nerd Font,12.0
+EmojiFont=Noto Color Emoji,5.8,-1,5,50,0,0,0,0,0
+UseFontLineChararacters=true
+
+[Cursor Options]
+CustomCursorColor=217,187,150
+UseCustomCursorColor=true
+
+[General]
+Name=tether
+Parent=FALLBACK/
+TerminalColumns=132
+TerminalRows=44
+
+[Scrolling]
+HistorySize=20000
+ScrollBarPosition=2
+
+[Terminal Features]
+BellMode=3
+BlinkingCursorEnabled=true
+EOF
+	chown -R "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/konsole 2>/dev/null
 }
 
 #--------------------------------------------------------------
@@ -4507,6 +4678,60 @@ setup(){
 			xbps-install -Syu pipewire wireplumber libspa-bluetooth
 		}
 	}
+	install_terminal(){
+		install_urxvt(){
+			# Update xbps and enable multi-lib repo
+			xbps-install -Syu xbps void-repo-multilib &&
+			xbps-install -Syu rxvt-unicode
+			# Create vim file association
+			[[ ! -f /home/"$SUDO_USER"/.local/share/applications/vim.desktop ]] && {
+				mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
+				chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
+				cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
+[Desktop Entry]
+Version=1.0
+Name=vim
+Exec=urxvt -e vim %f
+Icon=konsole
+Type=Application
+MimeType=text/plain;
+EOF
+				chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
+			}
+			# Change uxrvt app/file icon
+			[[ $(< /usr/share/applications/rxvt-unicode.desktop) != *konsole* ]] && {
+				sed -i 's|Icon=rxvt-unicode|Icon=konsole|g' /usr/share/applications/rxvt-unicode.desktop
+			}
+			# Create custom Xresources
+			print_xresources "$@"
+		}
+		install_konsole(){
+			# Update xbps and enable multi-lib repo
+			xbps-install -Syu xbps void-repo-multilib &&
+			xbps-install -Syu konsole
+			# Create vim file association
+			[[ ! -f /home/"$SUDO_USER"/.local/share/applications/vim.desktop ]] && {
+				mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
+				chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
+				cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
+[Desktop Entry]
+Version=1.0
+Name=vim
+Exec=konsole -e vim %f
+Icon=konsole
+Type=Application
+MimeType=text/plain;
+EOF
+				chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
+			}
+			# Create Konsole profile
+			print_konsole_profile "$@"
+			# Create Konsole colorscheme
+			print_konsole_color "$@"
+			# Create konsole config file
+			print_konsole_config "$@"
+		}
+	}
 	install_extras(){
 		# Disble ssh server
 		[[ -d /var/service/sshd ]] && {
@@ -4524,32 +4749,13 @@ setup(){
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		# Install development software
-		xbps-install -Syu rxvt-unicode vim tmux bash-completion gcc make cmake git &&
+		xbps-install -Syu vim tmux bash-completion gcc make cmake git &&
 		# Install Android specific tools
 		xbps-install -Syu android-tools android-udev-rules gvfs gvfs-mtp &&
 		# Install useful CLI software
 		xbps-install -Syu smartmontools unzip bsdtar wget bc ldns ntfs-3g udftools man 7zip libhwloc &&
 		# Required for ADB and fastboot
 		usermod -aG plugdev "$SUDO_USER"
-		# Create vim file association
-		[[ ! -f /home/"$SUDO_USER"/.local/share/applications/vim.desktop ]] && {
-			mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
-			chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
-			cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
-[Desktop Entry]
-Version=1.0
-Name=vim
-Exec=urxvt -e vim %f
-Icon=konsole
-Type=Application
-MimeType=text/plain;
-EOF
-			chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
-		}
-		# Change uxrvt app/file icon
-		[[ $(< /usr/share/applications/rxvt-unicode.desktop) != *konsole* ]] && {
-			sed -i 's|Icon=rxvt-unicode|Icon=konsole|g' /usr/share/applications/rxvt-unicode.desktop
-		}
 		# Update man pages
 		makewhatis /usr/share/man
 	}
@@ -4562,8 +4768,6 @@ EOF
 		print_vim_color "$@"
 		# Create custom tmux.conf
 		print_tmux_conf "$@"
-		# Create custom Xresources
-		print_xresources "$@"
 		# Make symbolic links to dotfiles
 		[[ -f /home/"$SUDO_USER"/.bashrc ]] && {
 			ln -sf /home/"$SUDO_USER"/.bashrc /root
@@ -5099,6 +5303,53 @@ EOF
 			print_aligned "Couldn't install audio software"
 			exit 1
 		}
+		# Handles Terminal Software Installation
+		echo -e "\nInstall Terminal: \n1.Konsole \n2.Urxvt \n3.Skip \n4.Exit\n"
+		read -rep "Select Terminal: " term_option
+		case "$term_option" in
+			1)
+				echo ""
+				print_warning "Installing Konsole\n"
+				install_terminal && install_konsole && error_check="terminal" &&
+				echo "" &&
+				print_success "Finished installing Konsole"
+			;;
+			2)
+				echo ""
+				print_warning "Installing Urxvt\n"
+				install_terminal && install_urxvt && error_check="terminal" &&
+				echo "" &&
+				print_success "Finished installing Urxvt"
+			;;
+			3)
+				echo ""
+				print_warning "Skipping Terminal Installation"
+				error_check="terminal"
+			;;
+			4)
+				run_on_exit
+			;;
+			-*)
+				echo ""
+				[[ -z ${term_option#*\-} || -z ${term_option/\-\-*} ]] && {
+					print_error "Invalid option '${term_option}'" &&
+					exit 1
+				}
+				print_error "Invalid option -- '${term_option#*\-}'" &&
+				exit 1
+			;;
+			*)
+				echo ""
+				print_error "Invalid option '${term_option}'" &&
+				exit 1
+			;;
+		esac
+		[[ $error_check != "terminal" ]] && {
+			echo ""
+			print_error "Something went wrong"
+			print_aligned "Couldn't install terminal"
+			exit 1
+		}
 		# Handles Extra Software Installation
 		echo -e "\nInstall Extra/Misc Software (krita, libreoffice, wine): \n1.Yes \n2.Skip \n3.Exit\n"
 		read -rep "Select option: " extras_option
@@ -5140,7 +5391,7 @@ EOF
 			exit 1
 		}
 		# Handles Development Software Installation
-		echo -e "\nInstall Development Software (gcc, make tmux, vim, urxvt): \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall Development Software (gcc, make tmux, vim): \n1.Yes \n2.Skip \n3.Exit\n"
 		read -rep "Select option: " dev_option
 		case "$dev_option" in
 			1)

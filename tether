@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.25.1125"
+script_version="23.11.25.1153"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4854,18 +4854,19 @@ EOF
 		}
 		usermod -aG bluetooth "$SUDO_USER"
 		# Dnscrypt-proxy
-		chattr -i /etc/resolv.conf
-		echo "nameserver 127.0.0.1" > /etc/resolv.conf
-		chattr +i /etc/resolv.conf
-		[[ ! -d /var/service/dnscrypt-proxy ]] && {
-			ln -sf /etc/sv/dnscrypt-proxy /var/service/
-		}
 		mkdir -p /etc/dnscrypt-proxy
 		git clone "https://github.com/teth3r/blocklist" &&
 		cp -rf blocklist/*.txt /etc/dnscrypt-proxy &&
 		cp -rf blocklist/*.toml /etc/dnscrypt-proxy &&
 		rm -r blocklist &&
 		chown -R "$SUDO_USER":"$SUDO_USER" /etc/dnscrypt-proxy 2>/dev/null
+		# Make resolv.conf immutable
+		chattr -i /etc/resolv.conf
+		echo "nameserver 127.0.0.1" > /etc/resolv.conf
+		chattr +i /etc/resolv.conf
+		[[ ! -d /var/service/dnscrypt-proxy ]] && {
+			ln -sf /etc/sv/dnscrypt-proxy /var/service/
+		} || sv up dnscrypt-proxy
 	}
 	get_user_options(){
 		print_banner

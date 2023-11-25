@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.25.0004"
+script_version="23.11.25.1100"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3938,9 +3938,7 @@ package(){
 		# Only run on Android
 		[[ ! -d /system/app ]] && print_os_error
 		# Run only on arm64 Android
-		[[ $HOSTTYPE != aarch64 ]] && {
-			print_os_error
-		}
+		[[ $HOSTTYPE != aarch64 ]] && print_os_error
 		# Check for internet connectivity
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
 			print_error "Network isn't ready yet"
@@ -4139,7 +4137,7 @@ MODDIR=${0%/*}
 cp /system/etc/fonts.xml "$MODDIR/system/etc/"
 
 #--------------------------------------------------------------
-# Edit file to include custom ttf files
+# Edit font.xml file to include custom ttf files
 #--------------------------------------------------------------
 [[ -f "$MODDIR/system/fonts/RobotoStatic-Regular.ttf" ]] && {
 	sed -i 's/<font weight="100" style="normal">Roboto-Regular.ttf/<font weight="100" style="normal">RobotoStatic-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
@@ -4189,7 +4187,8 @@ hostname "$device_user"
 	# Change IPv4 DNS settings to prevent leakage
 	iptables -t nat -A OUTPUT -p tcp ! -d 45.11.45.11 --dport 53 -j DNAT --to-destination 127.0.0.1:5354
 	iptables -t nat -A OUTPUT -p udp ! -d 45.11.45.11 --dport 53 -j DNAT --to-destination 127.0.0.1:5354
-	# DNSCrypt-proxy service manager
+
+	# DNScrypt-proxy service manager
 	dnscrypt_loader(){
 		# Only run if dnscrypt-proxy is not running
 		while [[ ! $(pgrep -x dnscrypt-proxy) ]]; do
@@ -4199,6 +4198,8 @@ hostname "$device_user"
 		done
 	}
 	dnscrypt_loader &
+
+	# Log service runtime
 	current_date="$(date +%y.%m.%d.%H%M)"
 	setprop tether_dnscrypt_runtime "$current_date"
 }
@@ -4258,24 +4259,45 @@ done
 	echo "1" > /sys/class/power_supply/usb/otg_switch
 }
 
+#--------------------------------------------------------------
 # Show clock seconds in status bar
+#--------------------------------------------------------------
 settings put secure clock_seconds 1
 
+#--------------------------------------------------------------
 # Disable private DNS
+#--------------------------------------------------------------
 settings put global private_dns_mode off
+
+#--------------------------------------------------------------
 # Disable captive portal detection
+#--------------------------------------------------------------
 settings put global captive_portal_detection_enabled 0
 settings put global captive_portal_mode 0
 
+#--------------------------------------------------------------
 # Disable monitoring and killing of phantom app processes
+#--------------------------------------------------------------
 settings put global settings_enable_monitor_phantom_procs false
+
+#--------------------------------------------------------------
 # Increase max phantom process limit
+#--------------------------------------------------------------
 device_config put activity_manager max_phantom_processes 65536
+
+#--------------------------------------------------------------
 # Increase max cached process limit
+#--------------------------------------------------------------
 device_config put activity_manager max_cached_processes 65536
+
+#--------------------------------------------------------------
 # Increase max cached process timeout
+#--------------------------------------------------------------
 device_config put activity_manager max_empty_time_millis 360000000
 
+#--------------------------------------------------------------
+# Log script runtime
+#--------------------------------------------------------------
 current_date="$(date +%y.%m.%d.%H%M)"
 setprop tether_performance_runtime "$current_date"
 
@@ -4684,10 +4706,9 @@ setup(){
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu rxvt-unicode
 			# Create vim file association
-			[[ ! -f /home/"$SUDO_USER"/.local/share/applications/vim.desktop ]] && {
-				mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
-				chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
-				cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
+			mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
+			chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
+			cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
 [Desktop Entry]
 Version=1.0
 Name=vim
@@ -4696,8 +4717,7 @@ Icon=konsole
 Type=Application
 MimeType=text/plain;
 EOF
-				chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
-			}
+			chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
 			# Change uxrvt app/file icon
 			[[ $(< /usr/share/applications/rxvt-unicode.desktop) != *konsole* ]] && {
 				sed -i 's|Icon=rxvt-unicode|Icon=konsole|g' /usr/share/applications/rxvt-unicode.desktop
@@ -4710,10 +4730,9 @@ EOF
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu konsole
 			# Create vim file association
-			[[ ! -f /home/"$SUDO_USER"/.local/share/applications/vim.desktop ]] && {
-				mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
-				chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
-				cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
+			mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
+			chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
+			cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
 [Desktop Entry]
 Version=1.0
 Name=vim
@@ -4722,8 +4741,7 @@ Icon=konsole
 Type=Application
 MimeType=text/plain;
 EOF
-				chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
-			}
+			chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
 			# Create Konsole profile
 			print_konsole_profile "$@"
 			# Create Konsole colorscheme

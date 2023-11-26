@@ -4023,7 +4023,7 @@ hostname "$device_user"
 		while [[ ! $(pgrep -x dnscrypt-proxy) ]]; do
 			dnscrypt-proxy -config "$MODDIR/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml"
 			# Add delay so multiple instances are not created
-			read -rt "5" <> <(:) || :
+			read -rt "2" <> <(:) || :
 		done
 	}
 	dnscrypt_loader &
@@ -7108,7 +7108,7 @@ whatsapp-backup(){
 		}
 		# Handles missing $whatsapp_dir
 		[[ -n $(pm -l 2>/dev/null | grep -i whatsapp) && ! -d $whatsapp_dir ]] && {
-			print_error "Cannot stat '$whatsapp_dir': No such file or directory"
+			print_error "Cannot stat '${whatsapp_dir:=com.whatsapp': No such file or directory"
 			print_aligned "Try running 'Whatsapp' at least once"
 			exit 1
 		}

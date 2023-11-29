@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.27.0224"
+script_version="23.11.29.1454"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3968,26 +3968,30 @@ cp /system/etc/fonts.xml "$MODDIR/system/etc/"
 #--------------------------------------------------------------
 # Edit font.xml file to include custom ttf files
 #--------------------------------------------------------------
-[[ -f "$MODDIR/system/fonts/RobotoStatic-Regular.ttf" ]] && {
-	sed -i 's/<font weight="100" style="normal">Roboto-Regular.ttf/<font weight="100" style="normal">RobotoStatic-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="200" style="normal">Roboto-Regular.ttf/<font weight="200" style="normal">RobotoStatic-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="300" style="normal">Roboto-Regular.ttf/<font weight="300" style="normal">RobotoStatic-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="400" style="normal">Roboto-Regular.ttf/<font weight="400" style="normal">RobotoStatic-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
+[[ -f "$MODDIR/system/fonts/NotoSerif-Regular.ttf" ]] && {
+	sed -i 's/<font weight="100" style="normal">Roboto-Regular.ttf/<font weight="100" style="normal">NotoSerif-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="200" style="normal">Roboto-Regular.ttf/<font weight="200" style="normal">NotoSerif-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="300" style="normal">Roboto-Regular.ttf/<font weight="300" style="normal">NotoSerif-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="400" style="normal">Roboto-Regular.ttf/<font weight="400" style="normal">NotoSerif-Regular.ttf/g' "$MODDIR/system/etc/fonts.xml"
 }
 
-[[ -f "$MODDIR/system/fonts/Roboto-Italic.ttf" ]] && {
-	sed -i 's/<font weight="100" style="italic">Roboto-Regular.ttf/<font weight="100" style="italic">Roboto-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="200" style="italic">Roboto-Regular.ttf/<font weight="200" style="italic">Roboto-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="300" style="italic">Roboto-Regular.ttf/<font weight="300" style="italic">Roboto-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="400" style="italic">Roboto-Regular.ttf/<font weight="400" style="italic">Roboto-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+[[ -f "$MODDIR/system/fonts/NotoSerif-Italic.ttf" ]] && {
+	sed -i 's/<font weight="100" style="italic">Roboto-Regular.ttf/<font weight="100" style="italic">NotoSerif-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="200" style="italic">Roboto-Regular.ttf/<font weight="200" style="italic">NotoSerif-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="300" style="italic">Roboto-Regular.ttf/<font weight="300" style="italic">NotoSerif-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="400" style="italic">Roboto-Regular.ttf/<font weight="400" style="italic">NotoSerif-Italic.ttf/g' "$MODDIR/system/etc/fonts.xml"
 }
 
-[[ -f "$MODDIR/system/fonts/Roboto-BoldItalic.ttf" ]] && {
-	sed -i 's/<font weight="500" style="italic">Roboto-Regular.ttf/<font weight="500" style="italic">Roboto-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="600" style="italic">Roboto-Regular.ttf/<font weight="600" style="italic">Roboto-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="700" style="italic">Roboto-Regular.ttf/<font weight="700" style="italic">Roboto-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="800" style="italic">Roboto-Regular.ttf/<font weight="800" style="italic">Roboto-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
-	sed -i 's/<font weight="900" style="italic">Roboto-Regular.ttf/<font weight="900" style="italic">Roboto-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+[[ -f "$MODDIR/system/fonts/NotoSerif-BoldItalic.ttf" ]] && {
+	sed -i 's/<font weight="500" style="italic">Roboto-Regular.ttf/<font weight="500" style="italic">NotoSerif-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="600" style="italic">Roboto-Regular.ttf/<font weight="600" style="italic">NotoSerif-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="700" style="italic">Roboto-Regular.ttf/<font weight="700" style="italic">NotoSerif-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="800" style="italic">Roboto-Regular.ttf/<font weight="800" style="italic">NotoSerif-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+	sed -i 's/<font weight="900" style="italic">Roboto-Regular.ttf/<font weight="900" style="italic">NotoSerif-BoldItalic.ttf/g' "$MODDIR/system/etc/fonts.xml"
+}
+
+[[ -f "$MODDIR/system/fonts/NotoSerif-Bold.ttf" ]] && {
+	sed -i 's/Roboto-Regular.ttf/NotoSerif-Bold.ttf/g' "$MODDIR/system/etc/fonts.xml"
 }
 
 exit 0
@@ -4160,7 +4164,7 @@ EOF
 		create_module_prop "$@"
 		create_customize "$@"
 		# Populate font/ if custom font files exist
-		[[ -f $tmp_dir/fonts/RobotoStatic-Regular.ttf ]] && {
+		[[ -f $tmp_dir/fonts/NotoSerif-Regular.ttf ]] && {
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cp -r $tmp_dir/fonts/*.ttf "$package_tmp_dir/system/fonts" 2>/dev/null
 			create_post_fs "$@"

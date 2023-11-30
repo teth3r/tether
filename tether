@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.29.1454"
+script_version="23.11.30.0917"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4545,6 +4545,7 @@ setup(){
 [Desktop Entry]
 Version=1.0
 Name=vim
+Comment=Screen-based text editor program
 Exec=urxvt -e vim %f
 Icon=konsole
 Type=Application

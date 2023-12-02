@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.11.30.0917"
+script_version="23.12.02.0102"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4577,7 +4577,7 @@ EOF
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		# Install development software
-		xbps-install -Syu vim tmux bash-completion gcc make cmake git rust cargo &&
+		xbps-install -Syu vim tmux bash-completion gcc git rust cargo &&
 		# Install Android specific tools
 		xbps-install -Syu android-tools android-udev-rules gvfs gvfs-mtp &&
 		# Install useful CLI software
@@ -5213,7 +5213,7 @@ EOF
 			exit 1
 		}
 		# Handles Development Software Installation
-		echo -e "\nInstall Development Software (gcc, make, cargo, vim): \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall Development Software (gcc, rust, cargo, vim): \n1.Yes \n2.Skip \n3.Exit\n"
 		read -rep "Select option: " dev_option
 		case "$dev_option" in
 			1)
@@ -6263,7 +6263,7 @@ void-deploy(){
 		}
 		[[ $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
 			print_warning "Setting up voidlinux chroot\n"
-			sudo xbps-install -Syu xbps git openjdk make cmake bc ldns man 7zip wget gcc bash-completion unzip bsdtar --cachedir "$cache_directory" || exit 1
+			sudo xbps-install -Syu xbps git rust cargo bc ldns man 7zip wget gcc bash-completion unzip bsdtar --cachedir "$cache_directory" || exit 1
 			sudo xbps-install -Syu --cachedir "$cache_directory" || exit 1
 			sudo xbps-reconfigure -f glibc-locales || exit 1
 			sudo makewhatis /usr/share/man || exit 1

@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.02.0102"
+script_version="23.12.03.1016"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3846,7 +3846,10 @@ package(){
 		busybox unzip "main.zip" &>/dev/null
 		cp -rf "$package_tmp_dir/blocklist-main"/*.txt "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
 		cp -rf "$package_tmp_dir/blocklist-main"/*.toml "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
+		# Change default DNS port
 		sed -i 's|127.0.0.1:53|127.0.0.1:5354|g' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
+		# Force TCP usage for connecting to upstream resolvers (Fixes startup issues with anonymized DNS on Android)
+		sed -i 's/force_tcp\ =\ false/force_tcp\ =\ true/' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
 		rm -r "$package_tmp_dir/main.zip" "$package_tmp_dir/blocklist-main" 2>/dev/null
 	}
 	download_bash(){

@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.05.1025"
+script_version="23.12.05.1118"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3848,7 +3848,7 @@ package(){
 		cp -rf "$package_tmp_dir/blocklist-main"/*.toml "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
 		# Change default DNS port
 		sed -i 's|127.0.0.1:53|127.0.0.1:5354|g' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
-		# Force TCP usage for connecting to upstream resolvers (Fixes startup issues with anonymized DNS on Android)
+		# Force TCP usage for connecting to upstream resolvers 
 		sed -i 's/force_tcp\ =\ false/force_tcp\ =\ true/' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
 		rm -r "$package_tmp_dir/main.zip" "$package_tmp_dir/blocklist-main" 2>/dev/null
 	}
@@ -4796,7 +4796,7 @@ while :; do
 				# Set backlight to 30%
 				echo "77" > "$device_name/brightness"
 				# Turn off keyboard backlight to save power
-				for kbd in /sys/class/leds/*kbd_backlight
+				for kbd in /sys/class/leds/*kbd_backlight; do
 					[[ -f $kbd ]] && {
 						echo "0" > "$kbd/brightness"
 					}
@@ -4862,6 +4862,8 @@ EOF
 		cp -rf blocklist/*.txt /etc/dnscrypt-proxy &&
 		cp -rf blocklist/*.toml /etc/dnscrypt-proxy &&
 		rm -r blocklist &&
+		# Force TCP usage for connecting to upstream resolvers 
+		sed -i 's/force_tcp\ =\ false/force_tcp\ =\ true/' /etc/dnscrypt-proxy/dnscrypt-proxy.toml
 		chown -R "$SUDO_USER":"$SUDO_USER" /etc/dnscrypt-proxy 2>/dev/null
 		# Make resolv.conf immutable
 		chattr -i /etc/resolv.conf

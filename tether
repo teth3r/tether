@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.05.1118"
+script_version="23.12.05.1351"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -1081,6 +1081,11 @@ let $VIMRC="~/.vimrc"
 " Enables unicode support
 "--------------------------------------------------------------
 set encoding=utf-8
+
+"--------------------------------------------------------------
+" Enables clipboard support
+"--------------------------------------------------------------
+set clipboard=unnamedplus
 
 "--------------------------------------------------------------
 " Enables mouse, useful for touch screens
@@ -4580,7 +4585,9 @@ EOF
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		# Install development software
-		xbps-install -Syu vim tmux bash-completion gcc git rust cargo &&
+		xbps-install -Syu tmux bash-completion gcc git rust cargo
+		# Incase no vim-huge exists i.e on ARM systems
+		xbps-install -Syu vim-huge
 		# Install Android specific tools
 		xbps-install -Syu android-tools android-udev-rules gvfs gvfs-mtp &&
 		# Install useful CLI software

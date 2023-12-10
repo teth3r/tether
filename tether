@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.10.0219"
+script_version="23.12.10.0335"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4105,7 +4105,7 @@ done
 #--------------------------------------------------------------
 mem_total="$(cat /proc/meminfo)"
 mem_total="${mem_total//kB*}"
-mem_total="${mem_total//*MemTotal}"
+mem_total="${mem_total//*MemTotal:}"
 mem_total="${mem_total//[[:space:]]}"
 
 [[ $mem_total -gt 4194304 ]] && {

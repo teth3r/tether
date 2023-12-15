@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.15.0118"
+script_version="23.12.15.1400"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -99,35 +99,35 @@ cpu_core_count="$((cpu_core_count + 1))"
 #--------------------------------------------------------------
 # Print out error message
 #--------------------------------------------------------------
-print_error(){
+print_error() {
 	echo -e "\033[1;97m[\033[1;31m-\033[1;97m] $@ \033[00m"
 }
 
 #--------------------------------------------------------------
 # Print out success message
 #--------------------------------------------------------------
-print_success(){
+print_success() {
 	echo -e "\033[1;97m[\033[1;32m+\033[1;97m] $@ \033[00m"
 }
 
 #--------------------------------------------------------------
 # Print out warning/notice
 #--------------------------------------------------------------
-print_warning(){
+print_warning() {
 	echo -e "\033[1;97m[\033[1;35m*\033[1;97m] $@ \033[00m"
 }
 
 #--------------------------------------------------------------
 # Print out non bold text aligned with print_error
 #--------------------------------------------------------------
-print_aligned(){
+print_aligned() {
 	echo -e "    $@"
 }
 
 #--------------------------------------------------------------
 # Print out status message on exit
 #--------------------------------------------------------------
-run_on_exit(){
+run_on_exit() {
 	echo -e "\n" && print_error "Aborted" &&
 	exit 1
 }
@@ -135,7 +135,7 @@ run_on_exit(){
 #--------------------------------------------------------------
 # Remove files and print out status message on exit
 #--------------------------------------------------------------
-remove_file_on_exit(){
+remove_file_on_exit() {
 	echo -e "\n" && print_error "Aborted" &&
 	rm -r "$@" 2>/dev/null
 	exit 1
@@ -144,7 +144,7 @@ remove_file_on_exit(){
 #--------------------------------------------------------------
 # Print out notice/guide after error
 #--------------------------------------------------------------
-print_notification(){
+print_notification() {
 	print_aligned "Try '$script_name --help' for more information." &&
 	exit 1
 }
@@ -152,7 +152,7 @@ print_notification(){
 #--------------------------------------------------------------
 # Print out help message if there no input argument
 #--------------------------------------------------------------
-print_no_argument(){
+print_no_argument() {
 	[[ $# -eq 0 ]] && {
 		print_help "$@"
 	}
@@ -161,7 +161,7 @@ print_no_argument(){
 #--------------------------------------------------------------
 # Print unsupported OS error
 #--------------------------------------------------------------
-print_os_error(){
+print_os_error() {
 	print_error "Unsupported OS detected" &&
 	exit 1
 }
@@ -169,7 +169,7 @@ print_os_error(){
 #--------------------------------------------------------------
 # Print missing dependencies error
 #--------------------------------------------------------------
-print_missing_dependencies(){
+print_missing_dependencies() {
 	print_error "'$@' is not installed" &&
 	exit 1
 }
@@ -177,17 +177,17 @@ print_missing_dependencies(){
 #--------------------------------------------------------------
 # Print insufficient write/read permissions error
 #--------------------------------------------------------------
-print_write_error(){
+print_write_error() {
 	print_error "Cannot create directory '$1': Permission denied" &&
 	exit 1
 }
 
-print_file_write_error(){
+print_file_write_error() {
 	print_error "Cannot create file '$1': Permission denied" &&
 	exit 1
 }
 
-print_file_read_error(){
+print_file_read_error() {
 	print_error "Cannot read '$1' file: Permission denied" &&
 	exit 1
 }
@@ -195,7 +195,7 @@ print_file_read_error(){
 #--------------------------------------------------------------
 # Print syntax error
 #--------------------------------------------------------------
-print_syntax_error(){
+print_syntax_error() {
 	print_error "Syntax error"
 	print_notification
 }
@@ -203,14 +203,14 @@ print_syntax_error(){
 #--------------------------------------------------------------
 # Print user permissions error
 #--------------------------------------------------------------
-print_not_root_user(){
+print_not_root_user() {
 	[[ $EUID -gt 0 ]] && {
 		print_error "Running as non-root user is not supported" &&
 		exit 1
 	}
 }
 
-print_not_normal_user(){
+print_not_normal_user() {
 	[[ $EUID -eq 0 ]] && {
 		print_error "Running as root user is not supported" &&
 		exit 1
@@ -220,7 +220,7 @@ print_not_normal_user(){
 #--------------------------------------------------------------
 # Print version info
 #--------------------------------------------------------------
-print_version(){
+print_version() {
 	echo -e "${script_name} ${script_version}-${HOSTTYPE}"
 	exit 0
 }
@@ -228,7 +228,7 @@ print_version(){
 #--------------------------------------------------------------
 # Handle password creation
 #--------------------------------------------------------------
-create_password(){
+create_password() {
 	read -rsp "Input Password: " file_password
 	echo ""
 	read -rsp "Verify Password: " file_password2
@@ -250,7 +250,7 @@ create_password(){
 #--------------------------------------------------------------
 # Handle input options/arguments
 #--------------------------------------------------------------
-input_option_type_one(){
+input_option_type_one() {
 	for primary_options in "${@:1}"; do
 		case "$primary_options" in
 			-h | --help)
@@ -278,7 +278,7 @@ input_option_type_one(){
 	done
 }
 
-input_option_type_two(){
+input_option_type_two() {
 	for primary_options in "${@:1}"; do
 		case "$primary_options" in
 			-h | --help)
@@ -306,7 +306,7 @@ input_option_type_two(){
 #--------------------------------------------------------------
 # Print program banner
 #--------------------------------------------------------------
-print_banner(){
+print_banner() {
 	echo " 
 ████████╗███████╗████████╗██╗   ██╗███████╗██████═╗
 ╚══██╔══╝██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔═══██ 
@@ -320,7 +320,7 @@ print_banner(){
 #--------------------------------------------------------------
 # Print colored usage/progress bar
 #--------------------------------------------------------------
-print_usage_bar(){
+print_usage_bar() {
 	color_red="\033[1;31m"
 	color_green="\033[1;32m"
 	color_yellow="\033[1;33m"
@@ -352,7 +352,7 @@ print_usage_bar(){
 #--------------------------------------------------------------
 # Create custom .bash.rc
 #--------------------------------------------------------------
-print_bashrc(){
+print_bashrc() {
 	bash_file="/home/"${SUDO_USER:=$USER}"/.bashrc"
 	[[ -d /system/app/ && -f /system/build.prop ]] && {
 		mkdir -p "$module_directory/system/etc/bash" 2>/dev/null
@@ -406,9 +406,9 @@ complete -o nospace -F _cd pp
 # Platform: Device Agnostic
 # Dependencies: cd
 #--------------------------------------------------------------
-pp(){
+pp() {
 	script_name="${FUNCNAME[0]}"
-	print_help(){
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION] [NUMBER] [FOLDER/FILE...]\n"
@@ -423,7 +423,7 @@ pp(){
 		echo -e "Expand 'cd' functionality"
 		return 0
 	}
-	check_input_argument(){
+	check_input_argument() {
 		# Handles cd
 		# Handles cd 0
 		[[ $# -eq 0 || $1 == "0" ]] && {
@@ -668,7 +668,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom mkshrc for Android
 #--------------------------------------------------------------
-print_mkshrc_android(){
+print_mkshrc_android() {
 	mkdir -p "$module_directory/system/etc" 2>/dev/null
 	cat 2>/dev/null << "EOF" > $module_directory/system/etc/mkshrc
 #--------------------------------------------------------------
@@ -715,9 +715,9 @@ alias bash='bash --rcfile $module_directory/system/etc/bash/.bashrc'
 # Platform: Device Agnostic
 # Dependencies: cd
 #--------------------------------------------------------------
-pp(){
+pp() {
 	script_name="pp"
-	print_help(){
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION] [NUMBER] [FOLDER/FILE...]\n"
@@ -732,7 +732,7 @@ pp(){
 		echo -e "Expand 'cd' functionality"
 		return 0
 	}
-	check_input_argument(){
+	check_input_argument() {
 		# Handles cd
 		# Handles cd 0
 		[[ $# -eq 0 || $1 == "0" ]] && {
@@ -835,9 +835,488 @@ EOF
 }
 
 #--------------------------------------------------------------
+# Create custom user.js
+#--------------------------------------------------------------
+print_firefox() {
+	unset user_js
+	# Handles Android
+	[[ -d /system/app/ && -f /system/build.prop ]] && {
+		for firefox_dir in /data/data/org.mozilla.fennec_fdroid/files/mozilla/*default*; do
+			[[ -f $firefox_dir/prefs.js || -f $firefox_dir/storage.sqlite || -f $firefox_dir/pkcs11.txt ]] && {
+				user_js="$firefox_dir/user.js"
+				break
+			}
+		done
+	}
+
+	# Handles Linux desktop
+	[[ ! -d /system/app/ ]] && {
+		for firefox_dir in /home/"${SUDO_USER:=$USER}"/.mozilla/firefox/*default*; do
+			[[ -f $firefox_dir/prefs.js || -f $firefox_dir/storage.sqlite || -f $firefox_dir/pkcs11.txt ]] && {
+				user_js="$firefox_dir/user.js"
+				break
+			}
+		done
+	}
+
+	# Return an error if Firefox is installed but $firefox_dir doesn't exist
+	[[ -z $user_js ]] && {
+		user_js="user.js"
+		return 1
+	}
+
+	cat 2>/dev/null << "EOF" > "$user_js"
+//--------------------------------------------------------------
+// Set browser startup page
+// 0=blank, 1=home, 2=last visited page, 3=resume previous session
+//--------------------------------------------------------------
+user_pref("browser.startup.page", 3);
+
+//--------------------------------------------------------------
+// Set HOME+NEWWINDOW
+// about:home, custom URL, about:blank
+//--------------------------------------------------------------
+user_pref("browser.startup.homepage", "about:blank");
+
+//--------------------------------------------------------------
+// Set NEWTAB page
+// true=Firefox Home, false=blank page
+//--------------------------------------------------------------
+user_pref("browser.newtabpage.enabled", false);
+
+//--------------------------------------------------------------
+// Disable sponsored content on Firefox Home
+//--------------------------------------------------------------
+user_pref("browser.newtabpage.activity-stream.showSponsored", false);
+user_pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false);
+
+//--------------------------------------------------------------
+// Clear default topsites
+//--------------------------------------------------------------
+user_pref("browser.newtabpage.activity-stream.default.sites", "");
+
+//--------------------------------------------------------------
+// Disable geolocation service
+//--------------------------------------------------------------
+user_pref("geo.provider.network.url", "");
+
+//--------------------------------------------------------------
+// Disable using the OS' geolocation service
+//--------------------------------------------------------------
+user_pref("geo.provider.ms-windows-location", false);
+user_pref("geo.provider.use_corelocation", false);
+user_pref("geo.provider.use_gpsd", false);
+user_pref("geo.provider.use_geoclue", false);
+
+//--------------------------------------------------------------
+// Disable recommendation pane in about:addons
+//--------------------------------------------------------------
+user_pref("extensions.getAddons.showPane", false);
+user_pref("extensions.htmlaboutaddons.recommendations.enabled", false);
+
+//--------------------------------------------------------------
+// Disable personalized Extension Recommendations in about:addons
+//--------------------------------------------------------------
+user_pref("browser.discovery.enabled", false);
+
+//--------------------------------------------------------------
+// Disable shopping experience
+//--------------------------------------------------------------
+user_pref("browser.shopping.experience2023.enabled", false);
+
+//--------------------------------------------------------------
+// Disable new data submission
+//--------------------------------------------------------------
+user_pref("datareporting.policy.dataSubmissionEnabled", false);
+
+//--------------------------------------------------------------
+// Disable Health Reports
+//--------------------------------------------------------------
+user_pref("datareporting.healthreport.uploadEnabled", false);
+
+//--------------------------------------------------------------
+// Disable telemetry
+//--------------------------------------------------------------
+user_pref("toolkit.telemetry.unified", false);
+user_pref("toolkit.telemetry.enabled", false);
+user_pref("toolkit.telemetry.server", "data:,");
+user_pref("toolkit.telemetry.archive.enabled", false);
+user_pref("toolkit.telemetry.newProfilePing.enabled", false);
+user_pref("toolkit.telemetry.shutdownPingSender.enabled", false);
+user_pref("toolkit.telemetry.updatePing.enabled", false);
+user_pref("toolkit.telemetry.bhrPing.enabled", false);
+user_pref("toolkit.telemetry.firstShutdownPing.enabled", false);
+
+//--------------------------------------------------------------
+// Disable Telemetry Coverage
+//--------------------------------------------------------------
+user_pref("toolkit.telemetry.coverage.opt-out", true);
+user_pref("toolkit.coverage.opt-out", true);
+user_pref("toolkit.coverage.endpoint.base", "");
+
+//--------------------------------------------------------------
+// Disable PingCentre telemetry
+//--------------------------------------------------------------
+user_pref("browser.ping-centre.telemetry", false);
+
+//--------------------------------------------------------------
+// Disable Firefox Home telemetry
+//--------------------------------------------------------------
+user_pref("browser.newtabpage.activity-stream.feeds.telemetry", false);
+user_pref("browser.newtabpage.activity-stream.telemetry", false);
+
+//--------------------------------------------------------------
+// Disable Studies
+//--------------------------------------------------------------
+user_pref("app.shield.optoutstudies.enabled", false);
+
+//--------------------------------------------------------------
+// Disable Normandy/Shield
+//--------------------------------------------------------------
+user_pref("app.normandy.enabled", false);
+user_pref("app.normandy.api_url", "");
+
+//--------------------------------------------------------------
+// Disable Crash Reports
+//--------------------------------------------------------------
+user_pref("breakpad.reportURL", "");
+user_pref("browser.tabs.crashReporting.sendReport", false);
+
+//--------------------------------------------------------------
+// Enforce no submission of backlogged Crash Reports
+//--------------------------------------------------------------
+user_pref("browser.crashReports.unsubmittedCheck.autoSubmit2", false);
+
+//--------------------------------------------------------------
+// Disable Captive Portal detection
+//--------------------------------------------------------------
+user_pref("captivedetect.canonicalURL", "");
+user_pref("network.captive-portal-service.enabled", false);
+
+//--------------------------------------------------------------
+// Disable Network Connectivity checks
+//--------------------------------------------------------------
+user_pref("network.connectivity-service.enabled", false);
+
+//--------------------------------------------------------------
+// Disable SB (Safe Browsing)
+//--------------------------------------------------------------
+user_pref("browser.safebrowsing.malware.enabled", false);
+user_pref("browser.safebrowsing.phishing.enabled", false);
+
+//--------------------------------------------------------------
+// Disable SB checks for downloads
+//--------------------------------------------------------------
+user_pref("browser.safebrowsing.downloads.enabled", false);
+
+//--------------------------------------------------------------
+// Disable SB checks for downloads (remote)
+//--------------------------------------------------------------
+user_pref("browser.safebrowsing.downloads.remote.enabled", false);
+user_pref("browser.safebrowsing.downloads.remote.url", "");
+
+//--------------------------------------------------------------
+// Disable SB checks for unwanted software
+//--------------------------------------------------------------
+user_pref("browser.safebrowsing.downloads.remote.block_potentially_unwanted", false);
+user_pref("browser.safebrowsing.downloads.remote.block_uncommon", false);
+
+//--------------------------------------------------------------
+// Disable "ignore this warning" on SB warnings
+//--------------------------------------------------------------
+user_pref("browser.safebrowsing.allowOverride", false);
+
+//--------------------------------------------------------------
+// Disable link prefetching
+//--------------------------------------------------------------
+user_pref("network.prefetch-next", false);
+
+//--------------------------------------------------------------
+// Disable DNS prefetching
+//--------------------------------------------------------------
+user_pref("network.dns.disablePrefetch", true);
+user_pref("network.dns.disablePrefetchFromHTTPS", true);
+
+//--------------------------------------------------------------
+// Disable predictor / prefetching
+//--------------------------------------------------------------
+user_pref("network.predictor.enabled", false);
+user_pref("network.predictor.enable-prefetch", false);
+
+//--------------------------------------------------------------
+// Disable link-mouseover opening connection to linked server
+//--------------------------------------------------------------
+user_pref("network.http.speculative-parallel-limit", 0);
+
+//--------------------------------------------------------------
+// Disable mousedown speculative connections on bookmarks and history
+//--------------------------------------------------------------
+user_pref("browser.places.speculativeConnect.enabled", false);
+
+//--------------------------------------------------------------
+// Enforce no "Hyperlink Auditing" (click tracking)
+//--------------------------------------------------------------
+user_pref("browser.send_pings", false);
+
+//--------------------------------------------------------------
+// Enable DNS-over-HTTPS (DoH)
+// 0=default, 2=increased (TRR (Trusted Recursive Resolver) first), 3=max (TRR only), 5=off (no rollout)
+//--------------------------------------------------------------
+user_pref("network.trr.mode", 5);
+
+//--------------------------------------------------------------
+// Disable location bar making speculative connections
+//--------------------------------------------------------------
+user_pref("browser.urlbar.speculativeConnect.enabled", false);
+
+//--------------------------------------------------------------
+// Disable location bar contextual suggestions
+//--------------------------------------------------------------
+user_pref("browser.urlbar.suggest.quicksuggest.nonsponsored", false);
+user_pref("browser.urlbar.suggest.quicksuggest.sponsored", false);
+
+//--------------------------------------------------------------
+// Disable live search suggestions
+//--------------------------------------------------------------
+user_pref("browser.search.suggest.enabled", false);
+user_pref("browser.urlbar.suggest.searches", false);
+
+//--------------------------------------------------------------
+// Disable urlbar trending search suggestions
+//--------------------------------------------------------------
+user_pref("browser.urlbar.trending.featureGate", false);
+
+//--------------------------------------------------------------
+// Disable urlbar suggestions
+//--------------------------------------------------------------
+user_pref("browser.urlbar.addons.featureGate", false);
+user_pref("browser.urlbar.mdn.featureGate", false);
+user_pref("browser.urlbar.pocket.featureGate", false);
+user_pref("browser.urlbar.weather.featureGate", false);
+
+//--------------------------------------------------------------
+// Disable urlbar clipboard suggestions
+//--------------------------------------------------------------
+user_pref("browser.urlbar.clipboard.featureGate", false);
+
+//--------------------------------------------------------------
+// Disable search and form history
+//--------------------------------------------------------------
+user_pref("browser.formfill.enable", false);
+
+//--------------------------------------------------------------
+// Disable coloring of visited links
+//--------------------------------------------------------------
+user_pref("layout.css.visited_links_enabled", false);
+
+//--------------------------------------------------------------
+// Disable auto-filling username & password form fields
+//--------------------------------------------------------------
+user_pref("signon.autofillForms", false);
+
+//--------------------------------------------------------------
+// Disable formless login capture for Password Manager
+//--------------------------------------------------------------
+user_pref("signon.formlessCapture.enabled", false);
+
+//--------------------------------------------------------------
+// Limit (or disable) HTTP authentication credentials dialogs triggered by sub-resources
+// 0 = don't allow sub-resources to open HTTP authentication credentials dialogs
+// 1 = don't allow cross-origin sub-resources to open HTTP authentication credentials dialogs
+// 2 = allow sub-resources to open HTTP authentication credentials dialogs
+//--------------------------------------------------------------
+user_pref("network.auth.subresource-http-auth-allow", 1);
+
+//--------------------------------------------------------------
+// Enforce no automatic authentication on Microsoft sites
+//--------------------------------------------------------------
+user_pref("network.http.windows-sso.enabled", false);
+
+//--------------------------------------------------------------
+// 1602: control the amount of cross-origin information to send
+// 0=send full URI, 1=scheme+host+port+path, 2=scheme+host+port
+//--------------------------------------------------------------
+user_pref("network.http.referer.XOriginTrimmingPolicy", 2);
+
+//--------------------------------------------------------------
+// Prevent scripts from moving and resizing open windows
+//--------------------------------------------------------------
+user_pref("dom.disable_window_move_resize", true);
+
+//--------------------------------------------------------------
+// Enforce PDFJS, disable PDFJS scripting
+//--------------------------------------------------------------
+user_pref("pdfjs.disabled", false);
+user_pref("pdfjs.enableScripting", false);
+
+//--------------------------------------------------------------
+// Disable middle click on new tab button opening URLs or searches using clipboard
+//--------------------------------------------------------------
+user_pref("browser.tabs.searchclipboardfor.middleclick", false);
+
+//--------------------------------------------------------------
+// Enable user interaction always asking where to download
+//--------------------------------------------------------------
+user_pref("browser.download.useDownloadDir", false);
+
+//--------------------------------------------------------------
+// Disable downloads panel opening on every download
+//--------------------------------------------------------------
+user_pref("browser.download.alwaysOpenPanel", false);
+
+//--------------------------------------------------------------
+// Disable adding downloads to the system's "recent documents" list
+//--------------------------------------------------------------
+user_pref("browser.download.manager.addToRecentDocs", false);
+
+//--------------------------------------------------------------
+// Enable user interaction always asking how to handle new mimetypes
+//--------------------------------------------------------------
+user_pref("browser.download.always_ask_before_handling_new_types", true);
+
+//--------------------------------------------------------------
+// Enable ETP Strict Mode
+// ETP Strict Mode enables Total Cookie Protection (TCP)
+//--------------------------------------------------------------
+user_pref("browser.contentblocking.category", "strict");
+
+//--------------------------------------------------------------
+// Disable ETP web compat features
+//--------------------------------------------------------------
+user_pref("privacy.antitracking.enableWebcompat", false);
+
+//--------------------------------------------------------------
+// Enable Firefox clearing items on shutdown
+//--------------------------------------------------------------
+user_pref("privacy.sanitize.sanitizeOnShutdown", true);
+
+//--------------------------------------------------------------
+// Set/enforce what items to clear on shutdown
+//--------------------------------------------------------------
+user_pref("privacy.clearOnShutdown.cache", true);
+user_pref("privacy.clearOnShutdown.formdata", true);
+user_pref("privacy.clearOnShutdown.siteSettings", true);
+user_pref("privacy.clearOnShutdown.cookies", true);
+user_pref("privacy.clearOnShutdown.offlineApps", true);
+user_pref("privacy.clearOnShutdown.history", false);
+user_pref("privacy.clearOnShutdown.downloads", false);
+user_pref("privacy.clearOnShutdown.sessions", false);
+user_pref("privacy.clearOnShutdown.openWindows", false);
+
+//--------------------------------------------------------------
+// Enable RFP
+//--------------------------------------------------------------
+user_pref("privacy.resistFingerprinting", true);
+
+//--------------------------------------------------------------
+// Enforce links targeting new windows to open in a new tab instead
+// 1=most recent window or tab, 2=new window, 3=new tab
+//--------------------------------------------------------------
+user_pref("browser.link.open_newwindow", 3);
+
+//--------------------------------------------------------------
+// Set all open window methods to abide by "browser.link.open_newwindow"
+//--------------------------------------------------------------
+user_pref("browser.link.open_newwindow.restriction", 0);
+
+//--------------------------------------------------------------
+// Disable WebGL (Web Graphics Library)
+//--------------------------------------------------------------
+user_pref("webgl.disabled", true);
+
+//--------------------------------------------------------------
+// Disable Form Autofill
+//--------------------------------------------------------------
+user_pref("extensions.formautofill.addresses.enabled", false);
+user_pref("extensions.formautofill.creditCards.enabled", false);
+
+//--------------------------------------------------------------
+// Enable the DNT (Do Not Track) HTTP header
+//--------------------------------------------------------------
+user_pref("privacy.donottrackheader.enabled", true);
+
+//--------------------------------------------------------------
+// Disable WebRTC (Web Real-Time Communication)
+//--------------------------------------------------------------
+user_pref("media.peerconnection.enabled", false);
+
+//--------------------------------------------------------------
+// Disable welcome notices
+//--------------------------------------------------------------
+user_pref("browser.startup.homepage_override.mstone", "ignore");
+
+//--------------------------------------------------------------
+// Disable recommending extensions/features as you browse
+//--------------------------------------------------------------
+user_pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons", false);
+user_pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features", false);
+
+//--------------------------------------------------------------
+// Disable What's New toolbar icon
+//--------------------------------------------------------------
+user_pref("browser.messaging-system.whatsNewPanel.enabled", false);
+
+//--------------------------------------------------------------
+// Force use of custom font
+//--------------------------------------------------------------
+user_pref("browser.display.use_document_fonts", 0);
+user_pref("browser.display.use_document_fonts.icon_font_allowlist", "");
+
+//--------------------------------------------------------------
+// Disable rendering of web fonts
+//--------------------------------------------------------------
+user_pref("gfx.downloadable_fonts.disable_cache", true);
+user_pref("gfx.downloadable_fonts.enabled", false);
+
+//--------------------------------------------------------------
+// Set custom cursive font
+//--------------------------------------------------------------
+user_pref("font.name.cursive.x-math", "Iosevka");
+user_pref("font.name.cursive.x-unicode", "Iosevka");
+user_pref("font.name.cursive.x-western", "Iosevka");
+
+//--------------------------------------------------------------
+// Set custom monospace font
+//--------------------------------------------------------------
+user_pref("font.name.monospace.x-math", "Iosevka");
+user_pref("font.name.monospace.x-unicode", "Iosevka");
+user_pref("font.name.monospace.x-western", "Iosevka");
+user_pref("font.name-list.monospace.x-math", "Iosevka");
+user_pref("font.name-list.monospace.x-unicode", "Iosevka");
+user_pref("font.name-list.monospace.x-western", "Iosevka");
+
+//--------------------------------------------------------------
+// Set custom sans-serif font
+//--------------------------------------------------------------
+user_pref("font.name.sans-serif.x-math", "Iosevka");
+user_pref("font.name.sans-serif.x-unicode", "Iosevka");
+user_pref("font.name.sans-serif.x-western", "Iosevka");
+user_pref("font.name-list.sans-serif.x-math", "Iosevka");
+user_pref("font.name-list.sans-serif.x-unicode", "Iosevka");
+user_pref("font.name-list.sans-serif.x-western", "Iosevka");
+
+//--------------------------------------------------------------
+// Set custom serif font
+//--------------------------------------------------------------
+user_pref("font.name.serif.x-math", "Iosevka");
+user_pref("font.name.serif.x-unicode", "Iosevka");
+user_pref("font.name.serif.x-western", "Iosevka");
+user_pref("font.name-list.serif.x-math", "Iosevka");
+user_pref("font.name-list.serif.x-unicode", "Iosevka");
+user_pref("font.name-list.serif.x-western", "Iosevka");
+EOF
+	# Add exist status for Android
+	[[ -d /system/app/ && -f /system/build.prop ]] && {
+		chmod 644 "$user_js" 2>/dev/null
+		return 0
+	}
+	chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" "$user_js" 2>/dev/null
+}
+
+#--------------------------------------------------------------
 # Create custom kitty.conf file
 #--------------------------------------------------------------
-print_kitty(){
+print_kitty() {
 	mkdir -p "/home/"${SUDO_USER:=$USER}"/.config/kitty" 2>/dev/null
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.config/kitty/kitty.conf
 #--------------------------------------------------------------
@@ -981,7 +1460,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom .Xresources file
 #--------------------------------------------------------------
-print_xresources(){
+print_xresources() {
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.Xresources
 !--------------------------------------------------------------
 ! tether Urxvt color scheme
@@ -1049,7 +1528,7 @@ URxvt.cursorBlink: true
 URxvt.geometry: 132x44
 URxvt.scrollBar: false
 URxvt.scrollBar_right: false
-URxvt.font: xft:Iosevka:size=12, xft:Sarasa\ Mono\ CL\ Nerd\ Font:size=12, xft:Sarasa\ Mono\ CL:size=12
+URxvt.font: xft:Iosevka:size=12, xft:Sarasa\ Mono\ CL:size=12
 EOF
 	chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.Xresources 2>/dev/null
 }
@@ -1057,7 +1536,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom .vimrc file
 #--------------------------------------------------------------
-print_vimrc(){
+print_vimrc() {
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.vimrc
 "--------------------------------------------------------------
 " Disables compatibility with vi
@@ -1558,7 +2037,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom .tmux.conf file
 #--------------------------------------------------------------
-print_tmux_conf(){
+print_tmux_conf() {
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.tmux.conf
 #--------------------------------------------------------------
 # General settings
@@ -1772,7 +2251,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom vim colorscheme
 #--------------------------------------------------------------
-print_vim_color(){
+print_vim_color() {
 	mkdir -p /usr/share/vim/vim90/colors 2>/dev/null
 	cat 2>/dev/null << "EOF" > /usr/share/vim/vim90/colors/tether.vim
 "--------------------------------------------------------------
@@ -1928,7 +2407,7 @@ hi ErrorMsg ctermfg=1 ctermbg=0 cterm=bold,inverse
 "--------------------------------------------------------------
 " Colors of the buffer number in tabline
 "--------------------------------------------------------------
-hi Title ctermfg=15 ctermbg=0 cterm=bold,inverse
+hi Title ctermfg=15 ctermbg=NONE cterm=bold
 
 "--------------------------------------------------------------
 " Colors of the added lines in diffmode
@@ -2096,7 +2575,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom /etc/profile for termux
 #--------------------------------------------------------------
-print_termux_profile(){
+print_termux_profile() {
 	mkdir -p "$termux_directory/usr/etc" 2>/dev/null
 	cat 2>/dev/null << "EOF" > $termux_directory/usr/etc/profile
 #--------------------------------------------------------------
@@ -2112,7 +2591,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom Termux colorscheme
 #--------------------------------------------------------------
-print_termux_color(){
+print_termux_color() {
 	mkdir -p "$termux_directory/home/.termux" 2>/dev/null
 	cat 2>/dev/null << "EOF" > $termux_directory/home/.termux/colors.properties
 #--------------------------------------------------------------
@@ -2180,7 +2659,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom termux.properties for termux
 #--------------------------------------------------------------
-print_termux_config(){
+print_termux_config() {
 	mkdir -p "$termux_directory/home/.termux" 2>/dev/null
 	cat 2>/dev/null << "EOF" > $termux_directory/home/.termux/termux.properties
 ### After making changes and saving you need to run `termux-reload-settings`
@@ -2340,8 +2819,8 @@ EOF
 # Platform: Device Agnostic
 # Dependencies: bc, bash
 #--------------------------------------------------------------
-benchmark(){
-	print_help(){
+benchmark() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]"
@@ -2354,7 +2833,7 @@ benchmark(){
 		echo -e "Single core performance benchmark using Mersenne primality test"
 		exit 0
 	}
-	prime_test_benchmark(){
+	prime_test_benchmark() {
 		found_mersenne_primes=0
 		for ((prime_numbers=2; prime_numbers < user_iteration; prime_numbers++)); do
 			# Use bash to find mersenne numbers
@@ -2397,14 +2876,14 @@ benchmark(){
 		print_success "Total time taken = ${SECONDS} ${time_suffix}"
 	}
 	# Show total time taken on program cancellation
-	show_on_exit(){
+	show_on_exit() {
 		time_suffix="seconds"
 		[[ $SECONDS -eq 1 ]] && time_suffix="${time_suffix%s}"
 		echo -e "\n" && print_error "Aborted\n"
 		print_success "Total Time taken = ${SECONDS} ${time_suffix}"
 		exit 1
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-h | --help)
@@ -2460,8 +2939,8 @@ benchmark(){
 # Platform: Android
 # Dependencies: cp, mkdir, losetup, 7zip
 #--------------------------------------------------------------
-chroot-backup(){
-	print_help(){
+chroot-backup() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]"
@@ -2475,7 +2954,7 @@ chroot-backup(){
 		echo -e "Create chroot image backup in specifed folder"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			print_os_error
@@ -2521,14 +3000,14 @@ chroot-backup(){
 		# Create destination directory
 		mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 	}
-	failed_to_create(){
+	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create '${chroot_image##*\/}' backup in '$folder_name'"
 		rm -r "$folder_name/void.7z" 2>/dev/null
 		rm -r "$folder_name/void.img" 2>/dev/null
 		exit 1
 	}
-	encrypted_backup(){
+	encrypted_backup() {
 		print_warning "Creating encrypted chroot image backup\n"
 		# Handles password creation
 		input_password "$@"
@@ -2539,7 +3018,7 @@ chroot-backup(){
 		print_success "Created encrypted '${chroot_image##*\/}' backup in '$folder_name'"
 		exit 0
 	}
-	unencrypted_backup(){
+	unencrypted_backup() {
 		print_warning "Creating chroot image backup\n"
 		print_warning "This may take a while\n"
 		cp -f "$chroot_image" "$folder_name" 2>/dev/null ||
@@ -2547,7 +3026,7 @@ chroot-backup(){
 		print_success "Created '${chroot_image##*/}' backup in '$folder_name'"
 		exit 0
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-h | --help)
@@ -2589,14 +3068,15 @@ chroot-backup(){
 # Platform: Device Agnostic
 # Dependencies: bash
 #--------------------------------------------------------------
-dotfiles(){
-	print_help(){
+dotfiles() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
 		echo -e "Examples: $script_name --vim"
 		echo -e "          $script_name --bash\n"
 		echo -e "Options: -b,  --bashrc   Add custom .bashrc"
+		echo -e "         -fi, --firefox  Add custom user.js"
 		echo -e "         -h,  --help     Print out this message"
 		echo -e "         -k,  --kitty    Add custom kitty.conf"
 		echo -e "         -m,  --mkshrc   Add custom mkshrc for android"
@@ -2608,7 +3088,7 @@ dotfiles(){
 		echo -e "Install/Update dotfiles"
 		exit 0
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-b | --bashrc)
@@ -2625,6 +3105,16 @@ dotfiles(){
 					# Exit status is gotten from 'print_bashrc'
 					exit
 				;;
+				-fi | --firefox)
+					[[ $(type -p firefox) || $(pm -l 2>/dev/null | grep "org.mozilla.fennec_fdroid") ]] && {
+						print_firefox "$@" &&
+						print_success "Finished updating '$user_js'" ||
+						print_error "Failed to update '$user_js'"
+						exit 0
+					}
+					print_missing_dependencies "Firefox"
+					exit 1
+				;;
 				-h | --help)
 					print_help
 				;;
@@ -2635,7 +3125,7 @@ dotfiles(){
 						print_error "Failed to update '~/.config/kitty/kitty.conf'"
 						exit 0
 					}
-					print_missing_dependencies "kitty"
+					print_missing_dependencies "Kitty"
 					exit 1
 				;;
 				-m | --mkshrc)
@@ -2758,8 +3248,8 @@ dotfiles(){
 # Platform: Device Agnostic
 # Dependencies: mkdir, ls, 7zip, bsdtar
 #--------------------------------------------------------------
-extract(){
-	print_help(){
+extract() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]"
@@ -2772,7 +3262,7 @@ extract(){
 		echo -e "Extract archive into archive-name folder"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Prevent bad system call error as non-root user
 		[[ -d "/system/app/" && $EUID -gt 0 ]] && print_not_root_user
 		# Check for required dependencies
@@ -2782,12 +3272,12 @@ extract(){
 			}
 		done
 	}
-	failed_to_extract(){
+	failed_to_extract() {
 		print_error "Failed to extract '$archive_file'"
 		rm -rf "$folder_name" 2>/dev/null
 		exit_status=1
 	}
-	check_input_argument(){
+	check_input_argument() {
 		for archive_file in "${@:1}"; do
 			unset exit_status
 			case "$archive_file" in
@@ -2858,8 +3348,8 @@ extract(){
 # Platform: Device Agnostic
 # Dependencies: ls
 #--------------------------------------------------------------
-ll(){
-	print_help(){
+ll() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION] [NUMBER] [FOLDER/FILE...]\n"
@@ -2876,7 +3366,7 @@ ll(){
 		echo -e "Expand 'ls' functionality"
 		exit 0
 	}
-	check_input_argument(){
+	check_input_argument() {
 		# Handles ll
 		# Handles ll 0
 		[[ $# -eq 0 || $1 == "0" ]] && {
@@ -2997,8 +3487,8 @@ ll(){
 # Platform: Device Agnostic
 # Dependencies: mkdir, cp, ls, find
 #--------------------------------------------------------------
-mkcp(){
-	print_help(){
+mkcp() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]"
@@ -3011,7 +3501,7 @@ mkcp(){
 		echo -e "Copy file/folder to the specified folder"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Check for required dependencies
 		for mis_dep in mkdir cp ls find; do
 			[[ ! $(type -p $mis_dep) ]] && {
@@ -3031,7 +3521,7 @@ mkcp(){
 			print_notification
 		}
 	}
-	check_input_argument(){
+	check_input_argument() {
 		for file_name in "${@:2}"; do
 			case "$file_name" in
 				*)
@@ -3142,8 +3632,8 @@ mkcp(){
 # Platform: Device Agnostic
 # Dependencies: mkdir, cp, ls, find, rm
 #--------------------------------------------------------------
-mkmv(){
-	print_help(){
+mkmv() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]"
@@ -3156,7 +3646,7 @@ mkmv(){
 		echo -e "Move file/folder to the specified folder"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Check for required dependencies
 		for mis_dep in mkdir cp ls find rm; do
 			[[ ! $(type -p $mis_dep) ]] && {
@@ -3176,7 +3666,7 @@ mkmv(){
 			print_notification
 		}
 	}
-	check_input_argument(){
+	check_input_argument() {
 		for file_name in "${@:2}"; do
 			case "$file_name" in
 				*)
@@ -3289,8 +3779,8 @@ mkmv(){
 # Platform: Device Agnostic
 # Dependencies: mkdir, touch, ls
 #--------------------------------------------------------------
-mktouch(){
-	print_help(){
+mktouch() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]"
@@ -3303,7 +3793,7 @@ mktouch(){
 		echo -e "Create empty file(s) in the specified folder"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Check for required dependencies
 		for mis_dep in mkdir touch ls; do
 			[[ ! $(type -p $mis_dep) ]] && {
@@ -3323,7 +3813,7 @@ mktouch(){
 			print_notification
 		}
 	}
-	check_input_argument(){
+	check_input_argument() {
 		folder_name="$1"
 		for file_name in "${@:2}"; do
 			unset exit_status
@@ -3363,8 +3853,8 @@ mktouch(){
 # Platform: Android
 # Dependencies: 7zip, ls, pm, date, mkdir
 #--------------------------------------------------------------
-omaps-backup(){
-	print_help(){
+omaps-backup() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -3379,7 +3869,7 @@ omaps-backup(){
 		echo -e "Create and restore organic maps backups"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			print_os_error
@@ -3429,7 +3919,7 @@ omaps-backup(){
 		# Get date and time in YY.MM.DD.HH.MM format
 		current_date="$(date +%y.%m.%d.%H%M)"
 	}
-	failed_to_create(){
+	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'omaps-backup.${current_date}.7z'"
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
@@ -3438,7 +3928,7 @@ omaps-backup(){
 		cd "$current_dir"
 		exit 1
 	}
-	failed_to_extract(){
+	failed_to_extract() {
 		echo ""
 		print_error "Failed to extract '${backup_list[$backup_option]}'"
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
@@ -3446,7 +3936,7 @@ omaps-backup(){
 		cd "$current_dir"
 		exit 1
 	}
-	encrypted_backup_omaps(){
+	encrypted_backup_omaps() {
 		print_warning "Creating encrypted backup 'omaps-backup.${current_date}.7z'\n"
 		# Handles password creation
 		create_password "$@"
@@ -3476,7 +3966,7 @@ omaps-backup(){
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 		exit 0
 	}
-	unencrypted_backup_omaps(){
+	unencrypted_backup_omaps() {
 		print_warning "Creating unencrypted backup 'omaps-backup.${current_date}.7z'\n"
 		mkdir -p "${omaps_backup_dir}/current"
 		unset avail_dir
@@ -3503,7 +3993,7 @@ omaps-backup(){
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 		exit 0
 	}
-	restore_omaps(){
+	restore_omaps() {
 		# Set variables for available backups
 		array_counter=1
 		for avail_backup in $(ls -A "$omaps_backup_dir" 2>/dev/null); do
@@ -3565,7 +4055,7 @@ omaps-backup(){
 			;;
 		esac
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-en | --encrypt)
@@ -3640,8 +4130,8 @@ omaps-backup(){
 # Platform: Android
 # Dependencies: 7zip, ls, pm, date, mkdir
 #--------------------------------------------------------------
-opencamera-backup(){
-	print_help(){
+opencamera-backup() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -3656,7 +4146,7 @@ opencamera-backup(){
 		echo -e "Create and restore open camera backups"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			print_os_error
@@ -3700,7 +4190,7 @@ opencamera-backup(){
 		# Get date and time in YY.MM.DD.HH.MM format
 		current_date="$(date +%y.%m.%d.%H%M)"
 	}
-	failed_to_create(){
+	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'opencamera-backup.${current_date}.7z'"
 		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
@@ -3709,7 +4199,7 @@ opencamera-backup(){
 		cd "$current_dir"
 		exit 1
 	}
-	failed_to_extract(){
+	failed_to_extract() {
 		echo ""
 		print_error "Failed to extract '${backup_list[$backup_option]}'"
 		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
@@ -3717,7 +4207,7 @@ opencamera-backup(){
 		cd "$current_dir"
 		exit 1
 	}
-	encrypted_backup_ocam(){
+	encrypted_backup_ocam() {
 		print_warning "Creating encrypted backup 'opencamera-backup.${current_date}.7z'\n"
 		# Handles password creation
 		create_password "$@"
@@ -3747,7 +4237,7 @@ opencamera-backup(){
 		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
 		exit 0
 	}
-	unencrypted_backup_ocam(){
+	unencrypted_backup_ocam() {
 		print_warning "Creating unencrypted backup 'opencamera-backup.${current_date}.7z'\n"
 		mkdir -p "${ocam_backup_dir}/current"
 		unset avail_dir
@@ -3774,7 +4264,7 @@ opencamera-backup(){
 		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
 		exit 0
 	}
-	restore_ocam(){
+	restore_ocam() {
 		# Set variables for available backups
 		array_counter=1
 		for avail_backup in $(ls -A "$ocam_backup_dir" 2>/dev/null); do
@@ -3836,7 +4326,7 @@ opencamera-backup(){
 			;;
 		esac
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-en | --encrypt)
@@ -3911,8 +4401,8 @@ opencamera-backup(){
 # Platform: Android
 # Dependencies: ping, magisk, sed
 #--------------------------------------------------------------
-package(){
-	print_help(){
+package() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -3923,7 +4413,7 @@ package(){
 		echo -e "Magisk module packaging tool"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app ]] && print_os_error
 		# Run only on arm64 Android
@@ -3973,21 +4463,21 @@ package(){
 			cp -f /bin/busybox "$package_tmp_dir/system/bin" || print_file_write_error "$package_tmp_dir/system/bin/busybox"
 		}
 	}
-	download_fail(){
+	download_fail() {
 		print_error "Something went wrong"
 		print_aligned "Failed to download '$@'"
 		rm -r "${package_tmp_dir}" 2>/dev/null
 		cd "$current_dir"
 		exit 1
 	}
-	failed_to_create(){
+	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'tether.$current_date.zip'"
 		rm -r "${package_tmp_dir} $tmp_dir/tether" 2>/dev/null
 		cd "$current_dir"
 		exit 1
 	}
-	download_dnscrypt(){
+	download_dnscrypt() {
 		mkdir -p "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/dnscrypt-proxy"
 		cd "$package_tmp_dir"
 		print_warning "Downloading 'dnscrypt-proxy version $dnscrypt_version'\n"
@@ -4012,7 +4502,7 @@ package(){
 		sed -i 's/force_tcp\ =\ false/force_tcp\ =\ true/' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
 		rm -r "$package_tmp_dir/main.zip" "$package_tmp_dir/blocklist-main" 2>/dev/null
 	}
-	download_bash(){
+	download_bash() {
 		print_warning "Downloading 'bash' static binary (ccbins)\n"
 		# Download bash static binary from ccbins magisk module repo
 		busybox wget https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/raw/master/bash/bash-arm64 -O "$package_tmp_dir/bash-arm64" &>/dev/null ||
@@ -4020,7 +4510,7 @@ package(){
 		cp -rf "$package_tmp_dir/bash-arm64" "$package_tmp_dir/system/bin/bash" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/bash"
 		rm -rf "$package_tmp_dir/bash-arm64" 2>/dev/null
 	}
-	download_adb(){
+	download_adb() {
 		print_warning "Downloading 'adb' static binary (adb-ndk)\n"
 		# Download adb static binary from adb-ndk magisk module repo
 		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/raw/master/bin/adb.bin-arm64 -O "$package_tmp_dir/adb.bin-arm64" &>/dev/null ||
@@ -4033,7 +4523,7 @@ package(){
 		cp -rf "$package_tmp_dir/fastboot.bin-arm64" "$package_tmp_dir/system/bin/fastboot" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/fastboot"
 		rm -r "$package_tmp_dir/adb.bin-arm64" "$package_tmp_dir/fastboot.bin-arm64" 2>/dev/null
 	}
-	download_zip(){
+	download_zip() {
 		print_warning "Downloading '7zip' static binary\n"
 		mkdir -p "$package_tmp_dir/new" 2>/dev/null
 		# Download 7zip for arm64 Android
@@ -4049,7 +4539,7 @@ package(){
 		cd "$package_tmp_dir"
 		rm -r "$package_tmp_dir/new" 2>/dev/null
 	}
-	download_tether(){
+	download_tether() {
 		print_warning "Downloading 'tether'\n"
 		# Download latest version of tether
 		busybox wget https://raw.githubusercontent.com/teth3r/tether/master/tether -O "$package_tmp_dir/tether" &>/dev/null ||
@@ -4060,7 +4550,7 @@ package(){
 		rm tether 2>/dev/null
 		
 	}
-	populate_dir(){
+	populate_dir() {
 		print_warning "Populating module directories\n"
 		# Populate app/
 		mkdir -p "$package_tmp_dir/system/app/Stk" 2>/dev/null || print_write_error "$package_tmp_dir/system/app/Stk"
@@ -4081,7 +4571,7 @@ package(){
 		# Create empty mkshrc file to populate with 'dotfiles --mkshrc'
 		$(touch "$package_tmp_dir/system/etc/mkshrc" 2>/dev/null)
 	}
-	create_module_prop(){
+	create_module_prop() {
 		print_warning "Creating 'module.prop'\n"
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/module.prop"
 id=tether
@@ -4092,7 +4582,7 @@ author=tether
 description=
 EOF
 	}
-	create_customize(){
+	create_customize() {
 		print_warning "Creating 'customize.sh'\n"
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/customize.sh"
 #!/bin/env sh
@@ -4113,7 +4603,7 @@ ui_print "GPL-3.0-or-later"
 ui_print " "
 EOF
 	}
-	create_post_fs(){
+	create_post_fs() {
 		print_warning "Creating 'post-fs-data.sh'\n"
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/post-fs-data.sh"
 #!/bin/env sh
@@ -4160,7 +4650,7 @@ cp /system/etc/fonts.xml "$MODDIR/system/etc/"
 exit 0
 EOF
 	}
-	create_service(){
+	create_service() {
 		print_warning "Creating 'service.sh'\n"
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/service.sh"
 #!/bin/env bash
@@ -4185,7 +4675,7 @@ hostname "$device_user"
 	iptables -t nat -A OUTPUT -p udp ! -d 45.11.45.11 --dport 53 -j DNAT --to-destination 127.0.0.1:5354
 
 	# DNScrypt-proxy service manager
-	dnscrypt_loader(){
+	dnscrypt_loader() {
 		# Only run if dnscrypt-proxy is not running
 		while [[ ! $(pgrep -x dnscrypt-proxy) ]]; do
 			dnscrypt-proxy -config "$MODDIR/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml"
@@ -4331,7 +4821,7 @@ dotfiles --bashrc
 exit 0
 EOF
 	}
-	package_main(){
+	package_main() {
 		print_warning "Creating 'tether.$current_date' Magisk module"
 		print_aligned "This may take a while\n"
 		download_dnscrypt "$@"
@@ -4430,8 +4920,8 @@ EOF
 # Platform: Android
 # Dependencies: mount, umount
 #--------------------------------------------------------------
-replace-su(){
-	print_help(){
+replace-su() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -4442,7 +4932,7 @@ replace-su(){
 		echo -e "Replace phh-su with magisk in AOSP GSI"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			print_os_error
@@ -4473,7 +4963,7 @@ replace-su(){
 			exit 1
 		}
 	}
-	replace_root(){
+	replace_root() {
 		# mount /system as RW only work on vndk-lite variants
 		mount -o remount,rw / &>/dev/null
 		rm -r "/system/bin/phh-remotectl.sh" 2>/dev/null
@@ -4499,8 +4989,8 @@ replace-su(){
 # Platform: voidlinux
 # Dependencies: xbps, ping, ls, sed, grep, ln
 #--------------------------------------------------------------
-setup(){
-	print_help(){
+setup() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -4511,7 +5001,7 @@ setup(){
 		echo -e "Post-installation setup utility for voidlinux"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		[[ -d /system/app || ! -d /proc/1 ]] && print_os_error
 		# Handles Linux desktop including Virtual Machines
 		[[ -d /sys/class/kgsl || -d /sys/class/power_supply/battery || -d /proc/gpufreq ]] && print_os_error
@@ -4526,8 +5016,8 @@ setup(){
 			exit 1
 		}
 	}
-	install_desktop(){
-		desktop_kde(){
+	install_desktop() {
+		desktop_kde() {
 			xbps-install -Syu xbps void-repo-multilib kde5 dolphin kdegraphics-thumbnailers spectacle okular gwenview xorg sddm elisa papirus-icon-theme ffmpegthumbnailer &&
 			sudo xbps-install -Syu &&
 			# Add Dbus service
@@ -4565,7 +5055,7 @@ setup(){
 			}
 			ln -sf /etc/sv/sddm /var/service/
 		}
-		desktop_gnome(){
+		desktop_gnome() {
 			xbps-install -Syu xbps void-repo-multilib gnome-core gdm dbus xorg gnome-tweaks eog qt5ct rhythmbox fontmanager totem papirus-icon-theme ffmpegthumbnailer &&
 			sudo xbps-install -Syu &&
 			# Add Dbus service
@@ -4606,7 +5096,7 @@ setup(){
 			# Start gdm
 			ln -sf /etc/sv/gdm /var/service/
 		}
-		desktop_xfce(){
+		desktop_xfce() {
 			xbps-install -Syu xbps void-repo-multilib pavucontrol dbus xorg xfce4 xfwm4 lightdm lightdm-gtk-greeter lightdm-gtk3-greeter lightdm-gtk-greeter-settings papirus-icon-theme ffmpegthumbnailer &&
 			sudo xbps-install -Syu &&
 			# Remove bloat
@@ -4640,7 +5130,7 @@ setup(){
 			}
 			ln -sf /etc/sv/lightdm /var/service/
 		}
-		desktop_cinnamon(){
+		desktop_cinnamon() {
 			xbps-install -Syu xbps void-repo-multilib pavucontrol dbus xorg cinnamon lightdm lightdm-gtk-greeter lightdm-gtk3-greeter lightdm-gtk-greeter-settings papirus-icon-theme ffmpegthumbnailer &&
 			sudo xbps-install -Syu &&
 			# Add Dbus service
@@ -4673,8 +5163,8 @@ setup(){
 			ln -sf /etc/sv/lightdm /var/service/
 		}
 	}
-	install_gpu_drivers(){
-		intel_drivers(){
+	install_gpu_drivers() {
+		intel_drivers() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			# Enable non-free repo
@@ -4687,33 +5177,33 @@ setup(){
 			}
 			xbps-install -Syu intel-ucode
 		}
-		amd_drivers(){
+		amd_drivers() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu linux-firmware-amd mesa-dri mesa-dri-32bit vulkan-loader mesa-vulkan-radeon amdvlk xf86-video-amdgpu xf86-video-ati mesa-vaapi mesa-vdpau
 		}
 	}
-	install_audio(){
-		pulse_audio(){
+	install_audio() {
+		pulse_audio() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu pulseaudio
 		}
-		alsa_utils(){
+		alsa_utils() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu alsa-utils apulse &&
 			ln -sf /etc/sv/alsa /var/service &&
 			usermod -aG audio "$SUDO_USER"
 		}
-		pipe_wire(){
+		pipe_wire() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu pipewire wireplumber libspa-bluetooth
 		}
 	}
-	install_terminal(){
-		install_urxvt(){
+	install_terminal() {
+		install_urxvt() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu rxvt-unicode
@@ -4738,7 +5228,7 @@ EOF
 			# Create custom Xresources
 			print_xresources "$@"
 		}
-		install_kitty(){
+		install_kitty() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu kitty
@@ -4760,7 +5250,7 @@ EOF
 			print_kitty "$@"
 		}
 	}
-	install_extras(){
+	install_extras() {
 		# Disble ssh server
 		[[ -d /var/service/sshd ]] && {
 			sv down sshd
@@ -4773,7 +5263,7 @@ EOF
 		# Install gaming software
 		xbps-install -Syu wine wine-32bit libwine libwine-32bit wine-mono winetricks
 	}
-	install_dev_software(){
+	install_dev_software() {
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		# Install development software
@@ -4789,7 +5279,7 @@ EOF
 		# Update man pages
 		makewhatis /usr/share/man
 	}
-	install_dotfiles(){
+	install_dotfiles() {
 		# Create custom bashrc
 		print_bashrc "$@"
 		# Create custom vimrc
@@ -4811,27 +5301,27 @@ EOF
 		echo "Done"
 		echo "Run 'source /home/${SUDO_USER}/.bashrc' to reload shell"
 	}
-	install_browser(){
-		chromium(){
+	install_browser() {
+		chromium() {
 			sudo xbps-install -Syu chromium
 		}
-		firefox(){
+		firefox() {
 			sudo xbps-install -Syu firefox
 		}
 	}
-	install_media_player(){
-		vlc(){
+	install_media_player() {
+		vlc() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			sudo xbps-install -Syu vlc
 		}
-		mpv(){
+		mpv() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			sudo xbps-install -Syu mpv
 		}
 	}
-	install_vm(){
+	install_vm() {
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		xbps-install -Syu virt-manager qemu &&
@@ -4840,27 +5330,27 @@ EOF
 		ln -sf /etc/sv/virtlogd /var/service/ &&
 		usermod -aG libvirt "$SUDO_USER"
 	}
-	install_printer_drivers(){
-		hp_printer(){
+	install_printer_drivers() {
+		hp_printer() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			xbps-install -Syu cups hplip xsane cups-filters &&
 			ln -sf /etc/sv/cupsd /var/service/
 		}
-		brother_printer(){
+		brother_printer() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			sudo xbps-install -Syu cups cups-filters brother-brlaser xsane &&
 			ln -sf /etc/sv/cupsd /var/service/
 		}
-		epson_printer(){
+		epson_printer() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
 			sudo xbps-install -Syu cups cups-filters epson-inkjet-printer-escpr imagescan iscan-data &&
 			ln -sf /etc/sv/cupsd /var/service/
 		}
 	}
-	change_timezone(){
+	change_timezone() {
 		# Set Timezone
 		zone_count=1
 		# Show available timezone files
@@ -4954,7 +5444,7 @@ EOF
 			;;
 		esac
 	}
-	install_backlight_control(){
+	install_backlight_control() {
 		init_program="$(< /proc/1/status)"
 		init_program="${init_program/*Name:}"
 		init_program="${init_program/Umask:*}"
@@ -5034,7 +5524,7 @@ EOF
 			echo "Done"
 		}
 	}
-	install_networking(){
+	install_networking() {
 		# Update xbps and enable multi-lib repo
 		xbps-install -Syu xbps void-repo-multilib &&
 		xbps-install -Syu git dnscrypt-proxy NetworkManager bluez
@@ -5072,7 +5562,7 @@ EOF
 			ln -sf /etc/sv/dnscrypt-proxy /var/service/
 		} || sv up dnscrypt-proxy
 	}
-	get_user_options(){
+	get_user_options() {
 		print_banner
 		print_warning "Setting up Voidlinux"
 		# Handles DE Installation
@@ -5729,8 +6219,8 @@ EOF
 # Platform: Device Agnostic
 # Dependencies: bash
 #--------------------------------------------------------------
-tfetch(){
-	print_help(){
+tfetch() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -5741,7 +6231,7 @@ tfetch(){
 		echo -e "System resource information tool"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Source Linux OS details
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			source "/etc/os-release" 2>/dev/null ||
@@ -5762,7 +6252,7 @@ tfetch(){
 			USER="${_@P}"
 		}
 	}
-	get_hostname(){
+	get_hostname() {
 		[[ $USER == "shell" || $EUID -eq 2000 ]] && {
 			echo -e " ${color_cyan}$HOSTNAME@$USER${no_color}"
 			color_blue=$color_cyan &&
@@ -5778,7 +6268,7 @@ tfetch(){
 			return 0
 		}
 	}
-	get_device_name(){
+	get_device_name() {
 		[[ -f /sys/firmware/devicetree/base/model ]] && {
 			IFS= read -r -d '' device_name < /sys/firmware/devicetree/base/model
 		}
@@ -5791,7 +6281,7 @@ tfetch(){
 		}
 		echo -e "$device_name\n"
 	}
-	get_os_name(){
+	get_os_name() {
 		# Handles Android
 		[[ -d /system/app/ ]] && {
 			echo "Android $android_version $HOSTTYPE"
@@ -5801,13 +6291,13 @@ tfetch(){
 			echo "$PRETTY_NAME $HOSTTYPE"
 		}
 	}
-	get_kernel(){
+	get_kernel() {
 		kernel_version="$(< /proc/version)"
 		kernel_version="${kernel_version/\(*}"
 		kernel_version="${kernel_version/version\ }"
 		echo "$kernel_version"
 	}
-	get_init(){
+	get_init() {
 		# Handles proper systems
 		[[ -d /proc/1 ]] && {
 			init_program="$(< /proc/1/status)"
@@ -5821,7 +6311,7 @@ tfetch(){
 			echo "init"
 		}
 	}
-	get_pkgs(){
+	get_pkgs() {
 		# Handles Linux with xbps
 		[[ $(type -p xbps-install) ]] && {
 			package_count="0"
@@ -5849,11 +6339,11 @@ tfetch(){
 			echo "${package_count//[[:space:]]} apks"
 		}
 	}
-	get_shell(){
+	get_shell() {
 		[[ -n $BASH ]] && echo -e "${BASH##*/} ${BASH_VERSION/-*}"
 		[[ -z $BASH ]] && echo -e "${SHELL##*/}"
 	}
-	get_desktop(){
+	get_desktop() {
 		desktop_environment="${XDG_CURRENT_DESKTOP:=$DESKTOP_SESSION}"
 		[[ -n ${desktop_environment//[[:space:]]} && -z $XDG_SESSION_TYPE ]] && {
 			echo -e "${desktop_environment}"
@@ -5862,7 +6352,7 @@ tfetch(){
 			echo -e "${desktop_environment} (${XDG_SESSION_TYPE})"
 		}
 	}
-	get_cpu(){
+	get_cpu() {
 		# Handles Android devices
 		[[ -d /sys/class/power_supply/battery ]] && {
 			cpu_name="$cpu_file"
@@ -5918,7 +6408,7 @@ tfetch(){
 			echo -e "${cpu_name} (${cpu_cores}) @ ${cpu_clock_speed}Mhz"
 		}
 	}
-	get_cpu_clusters(){
+	get_cpu_clusters() {
 		array_counter=1
 		for cpu_cluster in /sys/devices/system/cpu/cpufreq/policy*; do
 			# Create Array containing clockspeed of each CPU cluster
@@ -5948,7 +6438,7 @@ tfetch(){
 		cpu_info="${cpu_info[@]}"
 		echo -e "${cpu_info%,*}"
 	}
-	get_gpu(){
+	get_gpu() {
 		# Handles Mediatek GPUs
 		[[ -d /proc/gpufreq ]] && {
 			gpu_name="$cpu_file"
@@ -5968,7 +6458,7 @@ tfetch(){
 			echo -e "${gpu_name} @ ${gpu_clock_speed}Mhz - ($gpu_utilization Utilization)"
 		}
 	}
-	get_battery_stats(){
+	get_battery_stats() {
 		[[ -d /sys/class/power_supply/BAT0 ]] && {
 			battery_status="$(< /sys/class/power_supply/BAT0/status)"
 			battery_capacity="$(< /sys/class/power_supply/BAT0/capacity)"
@@ -5995,7 +6485,7 @@ tfetch(){
 		}
 		echo -e "${battery_status}, ${battery_capacity}%"
 	}
-	get_cpu_temp(){
+	get_cpu_temp() {
 		[[ -d /sys/class/power_supply/battery ]] && {
 			cpu_temp="$(< /sys/class/thermal/thermal_zone3/temp)"
 			cpu_temp_decimal="$((cpu_temp % 1000))"
@@ -6011,7 +6501,7 @@ tfetch(){
 		usage_visualizer="$cpu_temp"
 		echo -e "$(print_usage_bar) ${cpu_temp}.${cpu_temp_decimal}°C"
 	}
-	get_gpu_temp(){
+	get_gpu_temp() {
 		# Handles Snapdragron GPUs
 		[[ -f /sys/class/kgsl/kgsl-3d0/temp ]] && {
 			gpu_temp="$(< /sys/class/kgsl/kgsl-3d0/temp)"
@@ -6022,14 +6512,14 @@ tfetch(){
 			echo -e "$(print_usage_bar) ${gpu_temp}.${gpu_temp_decimal}°C"
 		}
 	}
-	get_battery_temp(){
+	get_battery_temp() {
 		battery_temp="$(< /sys/class/power_supply/battery/temp)"
 		battery_temp_decimal="$((battery_temp % 10))"
 		battery_temp="$((battery_temp / 10))"
 		usage_visualizer="$battery_temp"
 		echo -e "$(print_usage_bar) ${battery_temp}.${battery_temp_decimal}°C"
 	}
-	get_mem(){
+	get_mem() {
 		# Get MemTotal
 		total_mem="${mem_file/*MemTotal: }"
 		total_mem="${total_mem/ kB*}"
@@ -6044,7 +6534,7 @@ tfetch(){
 		usage_visualizer="$((( used_mem * 100 ) / total_mem ))"
 		echo -e "$(print_usage_bar) $used_mem / $total_mem MiB (${usage_visualizer}%)"
 	}
-	get_swap(){
+	get_swap() {
 		# Get SwapTotal
 		total_swap="${mem_file/*SwapTotal: }"
 		total_swap="${total_swap/ kB*}"
@@ -6063,7 +6553,7 @@ tfetch(){
 			echo -e "$(print_usage_bar) $used_swap / $total_swap MiB"
 		}
 	}
-	get_uptime(){
+	get_uptime() {
 		system_uptime="$(< /proc/uptime)"
 		system_uptime="${system_uptime/.*}"
 		in_days="$((system_uptime / 60 / 60 / 24)) days"
@@ -6078,7 +6568,7 @@ tfetch(){
 		system_uptime="${in_days} ${in_hours} ${in_minutes} ${in_seconds}"
 		echo -e "$system_uptime"
 	}
-	tfetch_config(){
+	tfetch_config() {
 		echo ""
 		get_hostname "$@"
 		echo -e " -----------------"
@@ -6128,7 +6618,7 @@ tfetch(){
 		echo -e "${color_blue} Uptime:   ${color_white}$(get_uptime)${no_color}\n"
 		exit 0
 	}
-	tfetch_config_noroot(){
+	tfetch_config_noroot() {
 		echo ""
 		get_hostname "$@"
 		echo -e " -----------------"
@@ -6167,8 +6657,8 @@ tfetch(){
 # Platform: Device Agnostic
 # Dependencies: 7zip, touch, rm
 #--------------------------------------------------------------
-touchzip(){
-	print_help(){
+touchzip() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION] [FILENAME] [FILE...]\n"
@@ -6181,7 +6671,7 @@ touchzip(){
 		echo -e "Create 7z archive"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Prevent bad system call error as non-root user
 		[[ -d "/system/app/" && $EUID -gt 0 ]] && print_not_root_user
 		archive_name="$2"
@@ -6211,13 +6701,13 @@ touchzip(){
 			exit 1
 		}
 	}
-	failed_to_create(){
+	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 7z archive '${archive_name}.7z'"
 		rm "${archive_name}.7z" 2>/dev/null
 		exit 1
 	}
-	encrypted_archive(){
+	encrypted_archive() {
 		print_warning "Creating an encrypted 7z archive\n"
 		# Handles password creation
 		create_password "$@"
@@ -6227,14 +6717,14 @@ touchzip(){
 		unset file_password file_password2
 		exit 0
 	}
-	unencrypted_archive(){
+	unencrypted_archive() {
 		print_warning "Creating an unencrypted 7z archive\n"
 		7z a -snl -snh -t7z -mx1 -mmt"$cpu_core_count" -y "${archive_name}.7z" "${@:3}" &>/dev/null &&
 		print_success "Created unencrypted 7z archive '${archive_name}.7z'" ||
 		failed_to_create "$@"
 		exit 0
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-h | --help)
@@ -6281,8 +6771,8 @@ touchzip(){
 # Platform: Device Agnostic
 # Dependencies: vim
 #--------------------------------------------------------------
-viw(){
-	print_help(){
+viw() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]"
@@ -6295,7 +6785,7 @@ viw(){
 		echo -e "Open specified folder in vim netrw"
 		exit 0
 	}
-	check_input_argument(){
+	check_input_argument() {
 		folder_name="$1"
 		# Check for required dependencies
 		[[ ! $(type -p vim) ]] && print_missing_dependencies "vim"
@@ -6317,8 +6807,8 @@ viw(){
 # Platform: voidlinux chroot
 # Dependencies: mkdir, cp, ls, xbps
 #--------------------------------------------------------------
-void-backup(){
-	print_help(){
+void-backup() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -6329,7 +6819,7 @@ void-backup(){
 		echo -e "Chroot package cache backup tool"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Chroot environment check
 		# Check if device is Android or device is a Linux desktop
 		[[ -d /system/app || -d /sys/class/power_supply/BAT0 ]] ||
@@ -6352,11 +6842,11 @@ void-backup(){
 		cache_source_directory="/var/cache/xbps"
 		cache_backup_directory="/media/Misc/xbps-cache"
 	}
-	failed_copy(){
+	failed_copy() {
 		print_error "Failed to backup xbps package cache"
 		exit 1
 	}
-	backup_cache(){
+	backup_cache() {
 		[[ ! $(type -p xbps-install) ]] && print_missing_dependencies "xbps"
 		# Check if external storage is available
 		[[ -z $(ls -A "$external_storage" 2>/dev/null) ]] && {
@@ -6374,7 +6864,7 @@ void-backup(){
 		failed_copy "$@"
 		exit 0
 	}
-	check_input_option(){
+	check_input_option() {
 		[[ $# -gt 2 ]] && print_help
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
@@ -6413,8 +6903,8 @@ void-backup(){
 # Platform: voidlinux chroot
 # Dependencies: mkdir, cp, ls, xbps
 #--------------------------------------------------------------
-void-deploy(){
-	print_help(){
+void-deploy() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -6427,7 +6917,7 @@ void-deploy(){
 		echo -e "Chroot post-install and post-mount setup tool"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Chroot environment check
 		# Check if device is Android or device is a Linux desktop
 		[[ -d /system/app || -d /sys/class/power_supply/BAT0 ]] ||
@@ -6451,7 +6941,7 @@ void-deploy(){
 		cache_backup_directory="/media/Misc/xbps-cache"
 		cache_directory="$cache_backup_directory"
 	}
-	post_install_setup(){
+	post_install_setup() {
 		# Exit if vim and tmux are installed
 		[[ $(type -p tmux) && $(type -p vim) ]] && {
 			print_error "Chroot has already been setup"
@@ -6494,13 +6984,13 @@ void-deploy(){
 		}
 		print_error "Network isn't ready yet" && exit 1
 	}
-	password_mismatch(){
+	password_mismatch() {
 		echo ""
 		print_error "Failed to change '$@' user password"
 		print_aligned "Passwords do not match"
 		exit 1
 	}
-	change_timezone(){
+	change_timezone() {
 		# Set Timezone
 		zone_count=1
 		# Show available timezone files
@@ -6594,7 +7084,7 @@ void-deploy(){
 			;;
 		esac
 	}
-	post_boot_setup(){
+	post_boot_setup() {
 		[[ $HOSTNAME == "$USER" ]] && {
 			print_error "Chroot has already been setup"
 			 exit 1
@@ -6680,7 +7170,7 @@ void-deploy(){
 		su "$user_name" && source "/etc/profile"
 		exit 0
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-h | --help)
@@ -6722,8 +7212,8 @@ void-deploy(){
 # Platform: Android
 # Dependencies: mount, losetup, busybox, lsof, fallocate, mke2fs
 #--------------------------------------------------------------
-void-install(){
-	print_help(){
+void-install() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -6734,7 +7224,7 @@ void-install(){
 		echo -e "Chroot installation tool"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app ]] && print_os_error
 		# Run only on arm64 Android
@@ -6768,19 +7258,19 @@ void-install(){
 			exit 1
 		}
 	}
-	download_fail(){
+	download_fail() {
 		print_error "Something went wrong"
 		print_aligned "Failed to download '$rootfs_file'"
 		rm -r "${tmp_dir:=/data/local/tmp}/${rootfs_file}" "${tmp_dir:=/data/local/tmp}/sha256sum.txt" 2>/dev/null
 		exit 1
 	}
-	download_fail_shasum(){
+	download_fail_shasum() {
 		print_error "Something went wrong"
 		print_aligned "Failed to download 'sha256sum.txt'"
 		rm -r "${tmp_dir:=/data/local/tmp}/sha256sum.txt" 2>/dev/null
 		exit 1
 	}
-	check_file_hash(){
+	check_file_hash() {
 		# Get file hashsum
 		downloaded_file_hash="$(busybox sha256sum ${tmp_dir}/${rootfs_file})"
 		downloaded_file_hash="${downloaded_file_hash//\ *}"
@@ -6799,7 +7289,7 @@ void-install(){
 			exit 1
 		}
 	}
-	fetch_rootfs(){
+	fetch_rootfs() {
 		print_warning "Downloading 'sha256sum.txt'\n"
 		shasum_file="https://repo-default.voidlinux.org/live/current/sha256sum.txt"
 		# Download sha256sum.txt
@@ -6824,7 +7314,7 @@ void-install(){
 		# Check downloaded file hashsum
 		check_file_hash "$@"
 	}
-	install_preparation(){
+	install_preparation() {
 		# Check if rootfs has already been downloaded
 		[[ -f ${tmp_dir}/sha256sum.txt ]] && {
 			# Get rootfs filename
@@ -6881,7 +7371,7 @@ void-install(){
 		mkdir -p "$chroot_install_dir" || print_write_error "$chroot_install_dir"
 		mkdir -p "$chroot_image_dir" || print_write_error "$chroot_image_dir"
 	}
-	create_image(){
+	create_image() {
 		# Download and confirm rootfs file hashsum
 		install_preparation "$@"
 		# Create chroot container
@@ -6913,7 +7403,7 @@ void-install(){
 			;;
 		esac
 	}
-	chroot_installation(){
+	chroot_installation() {
 		# Create chroot container
 		create_image "$@"
 		# Extract rootfs in chroot container
@@ -6975,8 +7465,8 @@ void-install(){
 # Platform: Android
 # Dependencies: losetup, mount, mkdir
 #--------------------------------------------------------------
-void-mount(){
-	print_help(){
+void-mount() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -6987,7 +7477,7 @@ void-mount(){
 		echo -e "Chroot initialization tool"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			print_os_error
@@ -7016,7 +7506,7 @@ void-mount(){
 			mkdir -p "$chroot_install_dir" 2>/dev/null
 		}
 	}
-	chroot_mount(){
+	chroot_mount() {
 		mount -t ext4 "$block_device" "$chroot_install_dir"
 		mount -t proc /proc "$chroot_install_dir/proc/"
 		mount -t sysfs /sys "$chroot_install_dir/sys/"
@@ -7045,7 +7535,7 @@ void-mount(){
 		chroot "$chroot_install_dir" tether void-deploy --setup
 		exit 0
 	}
-	chroot_mount_main(){
+	chroot_mount_main() {
 		# Handles unmounted chroot container and inactive block device
 		[[ ! $(losetup -j "$chroot_image") ]] && {
 			losetup "$block_device" "$chroot_image"
@@ -7078,8 +7568,8 @@ void-mount(){
 # Platform: Android
 # Dependencies: losetup, umount, lsof, wc, rm
 #--------------------------------------------------------------
-void-umount(){
-	print_help(){
+void-umount() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -7091,7 +7581,7 @@ void-umount(){
 		echo -e "Chroot unmount tool"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			print_os_error
@@ -7134,12 +7624,12 @@ void-umount(){
 			exit 1
 		}
 	}
-	failed_delete(){
+	failed_delete() {
 		print_error "Something went wrong"
 		print_aligned "Failed to remove chroot"
 		exit 1
 	}
-	unmount_chroot(){
+	unmount_chroot() {
 		# Handles mounted chroot container with no running processes
 		[[ -f "$chroot_install_dir/bin/bash" ]] && {
 			cd "/sdcard"
@@ -7175,7 +7665,7 @@ void-umount(){
 		print_error "Chroot not mounted"
 		exit 1
 	}
-	remove_chroot(){
+	remove_chroot() {
 		print_warning "This action is irreversible\n"
 		read -rep "Do you want to proceed (y/n) " option_args
 		case "$option_args" in
@@ -7224,7 +7714,7 @@ void-umount(){
 			;;
 		esac
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-h | --help)
@@ -7263,8 +7753,8 @@ void-umount(){
 # Platform: Android
 # Dependencies: 7zip, ls, pm, date, mkdir
 #--------------------------------------------------------------
-whatsapp-backup(){
-	print_help(){
+whatsapp-backup() {
+	print_help() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION]\n"
@@ -7279,7 +7769,7 @@ whatsapp-backup(){
 		echo -e "Create and restore whatsapp backups"
 		exit 0
 	}
-	check_dependencies(){
+	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
 			print_os_error
@@ -7334,7 +7824,7 @@ whatsapp-backup(){
 		# Get date and time in YY.MM.DD.HH.MM format
 		current_date="$(date +%y.%m.%d.%H%M)"
 	}
-	failed_to_create(){
+	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'whatsapp-backup.${current_date}.7z'"
 		rm -rf "$whatsapp_backup_dir/whatsapp-backup.${current_date}.7z" 2>/dev/null
@@ -7342,12 +7832,12 @@ whatsapp-backup(){
 		cd "$current_dir"
 		exit 1
 	}
-	failed_to_extract(){
+	failed_to_extract() {
 		echo ""
 		print_error "Failed to extract '${backup_list[$backup_option]}'"
 		exit 1
 	}
-	encrypted_backup_whatsapp(){
+	encrypted_backup_whatsapp() {
 		print_warning "Creating encrypted backup 'whatsapp-backup.${current_date}.7z'\n"
 		# Handles password creation
 		create_password "$@"
@@ -7363,7 +7853,7 @@ whatsapp-backup(){
 		cd "$current_dir"
 		exit 0
 	}
-	unencrypted_backup_whatsapp(){
+	unencrypted_backup_whatsapp() {
 		print_warning "Creating unencrypted backup 'whatsapp-backup.${current_date}.7z'\n"
 		cd "$whatsapp_dir"
 		mkdir -p "$whatsapp_backup_dir" || print_write_error "$whatsapp_backup_dir"
@@ -7376,7 +7866,7 @@ whatsapp-backup(){
 		cd "$current_dir"
 		exit 0
 	}
-	restore_whatsapp(){
+	restore_whatsapp() {
 		# Set variables for available backups
 		array_counter=1
 		for avail_backup in $(ls -A "$whatsapp_backup_dir" 2>/dev/null); do
@@ -7422,7 +7912,7 @@ whatsapp-backup(){
 			;;
 		esac
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-en | --encrypt)
@@ -7496,7 +7986,7 @@ whatsapp-backup(){
 # Platform: Device Agnostic
 # Dependencies: bash, ls, ln, sed, grep, mkdir
 #--------------------------------------------------------------
-tether(){
+tether() {
 	# Check for required dependencies
 	for mis_dep in ls ln sed grep mkdir; do
 		[[ ! $(type -p $mis_dep) ]] && {
@@ -7509,7 +7999,7 @@ tether(){
 	# Declare installation directory
 	folder_name="$2"
 	# Output names of all declared functions
-	print_function_names(){
+	print_function_names() {
 		for function_spaced in ${applet_name//tether}; do
 			[[ $function_spaced != *_* ]] && {
 				function_space+="${function_spaced}, "
@@ -7518,7 +8008,7 @@ tether(){
 		echo "${function_space%,*}"
 	}
 	# Count declared applets/functions
-	req_func(){
+	req_func() {
 		func_count=0
 		for applet_count in ${applet_name//tether}; do
 			[[ $applet_count != *_* ]] && {
@@ -7527,7 +8017,7 @@ tether(){
 		done
 		echo "$func_count"
 	}
-	print_help(){
+	print_help() {
 		echo -e "${script_name} ${script_version}-${HOSTTYPE} (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [FUNCTION] [ARGUMENTS...]"
@@ -7546,7 +8036,7 @@ tether(){
 		print_function_names
 		exit 0
 	}
-	check_input_option(){
+	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-h | --help)

@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.12.1443"
+script_version="23.12.15.0118"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4282,6 +4282,10 @@ settings put global private_dns_mode off
 #--------------------------------------------------------------
 settings put global captive_portal_detection_enabled 0
 settings put global captive_portal_mode 0
+settings put global captive_portal_http_url ""
+settings put global captive_portal_https_url ""
+settings put global captive_portal_fallback_url ""
+settings put global captive_portal_other_fallback_urls ""
 
 #--------------------------------------------------------------
 # Disable monitoring and killing of phantom app processes

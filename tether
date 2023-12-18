@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.18.0822"
+script_version="23.12.18.0853"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5026,7 +5026,7 @@ setup() {
 	}
 	install_desktop() {
 		desktop_kde() {
-			xbps-install -Syu xbps void-repo-multilib kde5 dolphin kdegraphics-thumbnailers spectacle okular gwenview xorg sddm elisa papirus-icon-theme ffmpegthumbnailer &&
+			xbps-install -Syu xbps void-repo-multilib kde5 dolphin kdegraphics-thumbnailers spectacle okular gwenview xorg sddm elisa papirus-icon-theme ffmpegthumbnailer noto-fonts-cjk &&
 			sudo xbps-install -Syu &&
 			# Add Dbus service
 			ln -sf /etc/sv/dbus /var/service/
@@ -5064,7 +5064,7 @@ setup() {
 			ln -sf /etc/sv/sddm /var/service/
 		}
 		desktop_gnome() {
-			xbps-install -Syu xbps void-repo-multilib gnome-core gdm dbus xorg gnome-tweaks eog qt5ct rhythmbox fontmanager totem papirus-icon-theme ffmpegthumbnailer &&
+			xbps-install -Syu xbps void-repo-multilib gnome-core gdm dbus xorg gnome-tweaks eog qt5ct rhythmbox fontmanager totem papirus-icon-theme ffmpegthumbnailer noto-fonts-cjk &&
 			sudo xbps-install -Syu &&
 			# Add Dbus service
 			ln -sf /etc/sv/dbus /var/service/
@@ -5105,7 +5105,7 @@ setup() {
 			ln -sf /etc/sv/gdm /var/service/
 		}
 		desktop_xfce() {
-			xbps-install -Syu xbps void-repo-multilib pavucontrol dbus xorg xfce4 xfwm4 lightdm lightdm-gtk-greeter lightdm-gtk3-greeter lightdm-gtk-greeter-settings papirus-icon-theme ffmpegthumbnailer &&
+			xbps-install -Syu xbps void-repo-multilib pavucontrol dbus xorg xfce4 xfwm4 lightdm lightdm-gtk-greeter lightdm-gtk3-greeter lightdm-gtk-greeter-settings papirus-icon-theme ffmpegthumbnailer noto-fonts-cjk &&
 			sudo xbps-install -Syu &&
 			# Remove bloat
 			xbps-remove -RFy xfce4-taskmanager mousepad &&
@@ -5139,7 +5139,7 @@ setup() {
 			ln -sf /etc/sv/lightdm /var/service/
 		}
 		desktop_cinnamon() {
-			xbps-install -Syu xbps void-repo-multilib pavucontrol dbus xorg cinnamon lightdm lightdm-gtk-greeter lightdm-gtk3-greeter lightdm-gtk-greeter-settings papirus-icon-theme ffmpegthumbnailer &&
+			xbps-install -Syu xbps void-repo-multilib pavucontrol dbus xorg cinnamon lightdm lightdm-gtk-greeter lightdm-gtk3-greeter lightdm-gtk-greeter-settings papirus-icon-theme ffmpegthumbnailer noto-fonts-cjk &&
 			sudo xbps-install -Syu &&
 			# Add Dbus service
 			ln -sf /etc/sv/dbus /var/service/

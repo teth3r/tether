@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.15.1400"
+script_version="23.12.18.0822"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -533,7 +533,13 @@ none="\[\e[00m\]"
 	export HOME="$phone_storage"
 	export TERM="xterm-256color"
 	export SHELL="$0"
-	export PATH=/sbin:/system/bin:/bin
+	export PATH=/system/bin:/system/xbin:/sbin
+
+	# Expand path for devices with termux installed
+	[[ -n $(pm -l 2>/dev/null | grep "com.termux$") ]] && {
+		export PATH=/data/data/com.termux/files/usr/bin:/system/bin:/system/xbin:/sbin
+	}
+
 	export TMPDIR="/data/local/tmp"
 	# Fixes empty $USER in non-root termux
 	[[ -z $USER ]] && {
@@ -693,7 +699,7 @@ export USER=$(id -un)
 export PWD=$(pwd)
 export TERM="xterm-256color"
 export SHELL="$0"
-export PATH=/sbin:/system/bin:/bin
+export PATH=/system/bin:/system/xbin:/sbin
 export TMPDIR="/data/local/tmp"
 
 alias external='cd $external_storage'
@@ -3163,6 +3169,8 @@ dotfiles() {
 						cp -f "$module_directory/system/etc/bash/.bashrc" "$termux_directory/usr/etc" &&
 						print_success "Finished updating '$termux_directory/usr/etc/.bashrc'" ||
 						print_error "Failed to update '$termux_directory/usr/etc/.bashrc'"
+						# Populate PATH with tether-utils
+						tether --silent /data/data/com.termux/files/usr/bin
 						rm -rf "$termux_directory/usr/etc/bash.bashrc" 2>/dev/null
 						rm -rf "$termux_directory"/usr/etc/motd* 2>/dev/null
 						exit 0

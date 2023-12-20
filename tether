@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.18.0853"
+script_version="23.12.20.0920"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3170,7 +3170,7 @@ dotfiles() {
 						print_success "Finished updating '$termux_directory/usr/etc/.bashrc'" ||
 						print_error "Failed to update '$termux_directory/usr/etc/.bashrc'"
 						# Populate PATH with tether-utils
-						tether --silent /data/data/com.termux/files/usr/bin
+						/bin/tether --silent /data/data/com.termux/files/usr/bin
 						rm -rf "$termux_directory/usr/etc/bash.bashrc" 2>/dev/null
 						rm -rf "$termux_directory"/usr/etc/motd* 2>/dev/null
 						exit 0

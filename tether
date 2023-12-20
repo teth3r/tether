@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.20.0920"
+script_version="23.12.20.1049"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4697,6 +4697,14 @@ hostname "$device_user"
 	current_date="$(date +%y.%m.%d.%H%M)"
 	setprop tether_dnscrypt_runtime "$current_date"
 }
+
+#--------------------------------------------------------------
+# Add check for boot_complete trigger (Incase user has no password set)
+#--------------------------------------------------------------
+while [[ $(getprop sys.boot_completed) -ne 1 ]]; do
+	# Delay to prevent excessive CPU usage on startup
+	read -rt "2" <> <(:) || :
+done
 
 #--------------------------------------------------------------
 # Check if /data partition is decrypted (user unlocks device after booting)

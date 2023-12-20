@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.20.1155"
+script_version="23.12.20.1222"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -399,9 +399,6 @@ alias google='ping -c4 google.com'
 # Use vi/vim keybindings
 set -o vi
 
-# Use 'cd' tab-completions for 'pp'
-complete -o nospace -F _cd pp
-
 #--------------------------------------------------------------
 # Platform: Device Agnostic
 # Dependencies: cd
@@ -608,6 +605,9 @@ none="\[\e[00m\]"
 
 	alias edittether="vi /home/${SUDO_USER:=$USER}/.local/bin/tether"
 
+	# Use 'cd' tab-completions for 'pp'
+	complete -o nospace -F _cd pp
+
 	[[ $EUID -eq 0 || $USER == "root" ]] && {
 		blue=$magenta
 		PS1="${white}┌─[${blue}\t${white}] [${blue}\h@\u${white}] [${green}\w${white}]\n${white}╰── ${yellow}$ ${none}"
@@ -644,6 +644,9 @@ none="\[\e[00m\]"
 	alias editblockedips="vi /etc/dnscrypt-proxy/blocked-ips.txt"
 
 	alias edittether="vi /home/${SUDO_USER:=$USER}/.local/bin/tether"
+
+	# Use 'cd' tab-completions for 'pp'
+	complete -o nospace -F _cd pp
 
 	[[ $EUID -eq 0 || $USER == "root" ]] && {
 		blue=$magenta

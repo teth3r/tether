@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="23.12.23.2218"
+script_version="2024.01.01.1758"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3926,7 +3926,7 @@ omaps-backup() {
 		# Set current current directory
 		current_dir="$PWD"
 		# Get date and time in YY.MM.DD.HH.MM format
-		current_date="$(date +%y.%m.%d.%H%M)"
+		current_date="$(date +%Y.%m.%d.%H%M)"
 	}
 	failed_to_create() {
 		print_error "Something went wrong"
@@ -4197,7 +4197,7 @@ opencamera-backup() {
 		# Set current current directory
 		current_dir="$PWD"
 		# Get date and time in YY.MM.DD.HH.MM format
-		current_date="$(date +%y.%m.%d.%H%M)"
+		current_date="$(date +%Y.%m.%d.%H%M)"
 	}
 	failed_to_create() {
 		print_error "Something went wrong"
@@ -4443,7 +4443,7 @@ package() {
 		# Get current directory
 		current_dir="$PWD"
 		# Get date and time in YY.MM.DD.HH.MM format
-		current_date="$(date +%y.%m.%d.%H%M)"
+		current_date="$(date +%Y.%m.%d.%H%M)"
 		# Declare module backup directory
 		backup_dir="$external_storage/Misc/module-backup"
 		# Only run if magisk is installed
@@ -4695,7 +4695,7 @@ hostname "$device_user"
 	dnscrypt_loader &
 
 	# Log service runtime
-	current_date="$(date +%y.%m.%d.%H%M)"
+	current_date="$(date +%Y.%m.%d.%H%M)"
 	setprop tether_dnscrypt_runtime "$current_date"
 }
 
@@ -4818,7 +4818,7 @@ device_config put activity_manager max_empty_time_millis 360000000
 #--------------------------------------------------------------
 # Log script runtime
 #--------------------------------------------------------------
-current_date="$(date +%y.%m.%d.%H%M)"
+current_date="$(date +%Y.%m.%d.%H%M)"
 setprop tether_performance_runtime "$current_date"
 
 #--------------------------------------------------------------
@@ -7840,7 +7840,7 @@ whatsapp-backup() {
 		# Set current current directory
 		current_dir="$PWD"
 		# Get date and time in YY.MM.DD.HH.MM format
-		current_date="$(date +%y.%m.%d.%H%M)"
+		current_date="$(date +%Y.%m.%d.%H%M)"
 	}
 	failed_to_create() {
 		print_error "Something went wrong"

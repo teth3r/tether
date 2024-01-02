@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.01.1758"
+script_version="2024.01.02.1359"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4436,10 +4436,14 @@ package() {
 		tmp_dir="/data/local/tmp"
 		# Remove directory incase it already exists
 		rm -r "$package_tmp_dir" 2>/dev/null
+
 		# Dnscrypt version
 		dnscrypt_version="2.1.5"
 		# 7zip version
 		z_version="2301"
+		# Iosevka version
+		iosevka_version="28.0.3"
+
 		# Get current directory
 		current_dir="$PWD"
 		# Get date and time in YY.MM.DD.HH.MM format
@@ -4453,11 +4457,13 @@ package() {
 		}
 		# Check if sed is installed
 		[[ ! $(type -p sed) ]] && print_missing_dependencies "sed"
+
 		# Create module package directories
 		mkdir -p "$package_tmp_dir/system/app" 2>/dev/null || print_write_error "$package_tmp_dir/system/app"
 		mkdir -p "$package_tmp_dir/system/bin" 2>/dev/null || print_write_error "$package_tmp_dir/system/bin"
 		mkdir -p "$package_tmp_dir/system/etc" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc"
 		mkdir -p "$package_tmp_dir/system/product" 2>/dev/null || print_write_error "$package_tmp_dir/system/product"
+
 		# Check for required dependencies
 		for mis_dep in busybox; do
 			# Copy magisk busybox if not found in PATH
@@ -4479,6 +4485,7 @@ package() {
 		cd "$current_dir"
 		exit 1
 	}
+
 	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'tether.$current_date.zip'"
@@ -4486,17 +4493,24 @@ package() {
 		cd "$current_dir"
 		exit 1
 	}
+
 	download_dnscrypt() {
 		mkdir -p "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/dnscrypt-proxy"
 		cd "$package_tmp_dir"
 		print_warning "Downloading 'dnscrypt-proxy version $dnscrypt_version'\n"
 		# Download dnscrypt-proxy for arm64 Android
-		busybox wget https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/${dnscrypt_version}/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip -O "$package_tmp_dir/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip" &>/dev/null ||
+		download_link="https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/${dnscrypt_version}/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
+		output_path="$package_tmp_dir/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
+
+		busybox wget "$download_link" -O "$output_path" &>/dev/null ||
 		download_fail "dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
+
 		# Extract downloaded zip file
 		busybox unzip dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip &>/dev/null
+
 		cp -rf "$package_tmp_dir/android-arm64/dnscrypt-proxy" "$package_tmp_dir/system/bin/" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/dnscrypt-proxy"
 		rm -r "$package_tmp_dir/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip" "$package_tmp_dir/android-arm64" 2>/dev/null
+
 		# Download custom config files for dnscrypt-proxy
 		print_warning "Downloading 'dnscrypt-proxy' config files\n"
 		busybox wget https://github.com/teth3r/blocklist/archive/refs/heads/main.zip -O "$package_tmp_dir/main.zip" &>/dev/null ||
@@ -4557,7 +4571,33 @@ package() {
 		./tether --silent "$package_tmp_dir/system/bin"
 		tether_version="$(./tether -V)"
 		rm tether 2>/dev/null
-		
+	}
+	download_custom_iosevka() {
+		print_warning "Downloading 'Iosevka version $iosevka_version'\n"
+		# Download latest version of Iosevka custom build
+		busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka.7z -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
+		download_fail "Iosevka version $iosevka_version"
+		mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
+		cd "$package_tmp_dir/system/bin"
+		./7z x $package_tmp_dir/system/bin/Iosevka.7z &>/dev/null
+		# Populate font directory
+		cp Iosevka-Regular.ttf $package_tmp_dir/system/fonts/NotoSerif-Regular.ttf
+		cp Iosevka-Bold.ttf $package_tmp_dir/system/fonts/NotoSerif-Bold.ttf
+		cp Iosevka-BoldItalic.ttf $package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf
+		cp Iosevka-Italic.ttf $package_tmp_dir/system/fonts/NotoSerif-Italic.ttf
+		rm $package_tmp_dir/system/bin/*.md $package_tmp_dir/system/bin/Iosevka*
+		# Create font symbolic-links
+		cd $package_tmp_dir/system/fonts
+		# SourceSansPro
+		ln -sf NotoSerif-Regular.ttf SourceSansPro-Regular.ttf 2>/dev/null
+		ln -sf NotoSerif-Bold.ttf SourceSansPro-Bold.ttf 2>/dev/null
+		ln -sf NotoSerif-BoldItalic.ttf SourceSansPro-BoldItalic.ttf 2>/dev/null
+		ln -sf NotoSerif-Italic.ttf SourceSansPro-Italic.ttf 2>/dev/null
+		# DroidSans
+		ln -sf NotoSerif-Regular.ttf DroidSans.ttf 2>/dev/null
+		ln -sf NotoSerif-Regular.ttf DroidSansMono.ttf 2>/dev/null
+		ln -sf NotoSerif-Bold.ttf DroidSans-Bold.ttf 2>/dev/null
+		cd $package_tmp_dir
 	}
 	populate_dir() {
 		print_warning "Populating module directories\n"
@@ -4842,6 +4882,7 @@ EOF
 	package_main() {
 		print_warning "Creating 'tether.$current_date' Magisk module"
 		print_aligned "This may take a while\n"
+
 		download_dnscrypt "$@"
 		download_bash "$@"
 		download_adb "$@"
@@ -4850,15 +4891,31 @@ EOF
 		populate_dir "$@"
 		create_module_prop "$@"
 		create_customize "$@"
+		create_service "$@"
+		# Add execute permissions to $package_tmp_dir binaries
+		chmod +x $package_tmp_dir/system/bin/*
+
+		# Add custom fonts
+		read -rep "Replace system fonts with Iosevka (y/n) " font_option
+		echo ""
+		case "$font_option" in
+			 Y | y)
+				download_custom_iosevka "$@"
+				create_post_fs "$@"
+			;;
+			*)
+				print_warning "Skipping Iosevka font installation\n"
+			;;
+		esac
+
 		# Populate font/ if custom font files exist
 		[[ -f $tmp_dir/fonts/NotoSerif-Regular.ttf ]] && {
+			print_warning "Adding user provided font files\n"
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cp -r $tmp_dir/fonts/*.ttf "$package_tmp_dir/system/fonts" 2>/dev/null
 			create_post_fs "$@"
 		}
-		create_service "$@"
-		# Add execute permissions
-		chmod +x $package_tmp_dir/system/bin/*
+
 		# update module version
 		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop"
 		# update module description

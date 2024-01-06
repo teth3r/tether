@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.02.1359"
+script_version="2024.01.06.1858"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3816,14 +3816,13 @@ mktouch() {
 			print_error "Cannot create directory '$folder_name': File exists"
 			exit 1
 		}
-		# Check if a file exist with $folder_name
+		# Check if $file_name is not provided
 		[[ $# -eq 1 ]] && {
 			print_error "Missing source file operand after '$folder_name'"
 			print_notification
 		}
 	}
 	check_input_argument() {
-		folder_name="$1"
 		for file_name in "${@:2}"; do
 			unset exit_status
 			case "$file_name" in
@@ -4875,6 +4874,11 @@ dotfiles --mkshrc
 # Add custom dotfiles for bash
 #--------------------------------------------------------------
 dotfiles --bashrc
+
+#--------------------------------------------------------------
+# Create 2GB swapfile
+#--------------------------------------------------------------
+swapfile --on 2048MB "$MODDIR/swapfile0"
 
 exit 0
 EOF
@@ -6287,6 +6291,273 @@ EOF
 	input_option_type_two "$@"
 	check_dependencies "$@"
 	get_user_options "$@"
+	exit
+}
+
+#--------------------------------------------------------------
+# Platform: Device Agnostic
+# Dependencies: mkswap, swapon, swapoff, dd, df, awk, pgrep
+#--------------------------------------------------------------
+swapfile() {
+	print_help() {
+		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
+		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
+		echo -e "Usage:    $script_name [OPTION] [FILESIZE] [FILENAME]\n"
+		echo -e "Examples: $script_name"
+		echo -e "          $script_name --on 2048M ~/.local/share/swapfile0"
+		echo -e "          $script_name --off ~/.local/share/swapfile0\n"
+		echo -e "Options: -h, --help     Print out this message"
+		echo -e "             --on       Create and Enable swapfile"
+		echo -e "             --off      Disable and Delete swapfile"
+		echo -e "         -V, --version  Show version information\n"
+		echo -e "Creates a swapfile with user specified parameters"
+		exit 0
+	}
+
+	check_dependencies() {
+		# Prevent bad system call error as non-root user
+		print_not_root_user
+
+		# Check for required dependencies
+		for mis_dep in mkswap swapon swapoff dd df awk pgrep; do
+			[[ ! $(type -p $mis_dep) ]] && {
+				print_missing_dependencies "$mis_dep"
+			}
+		done
+	}
+
+	check_free_storage() {
+		# Workaround for missing `df -m` on Android
+		free_storage="$(df -k "$storage_checker" 2>/dev/null | awk 'NR==2 {print $4}' 2>/dev/null)"
+		free_storage="${free_storage//[A-Z]}"
+
+		[[ $size_suffix =~ m|M|mb|mB|Mb|MB ]] && {
+			size_check="$((user_value * 1024))"
+		}
+
+		[[ $size_suffix =~ g|G|gb|gB|Gb|GB ]] && {
+			size_check="$((user_value * 1024 * 1024))"
+		}
+
+		[[ $free_storage -le $size_check ]] && {
+			print_error "Cannot create '$file_name' swapfile: Insufficient storage"
+			exit 1
+		}
+	}
+
+	not_a_swapfile() {
+		[[ ! -f $file_name ]] && {
+			print_error "Cannot stat '$file_name': No such file or directory"
+			exit 1
+		}
+
+		[[ $(< /proc/swaps) != *${file_name}* || ! -s $file_name ]] && {
+			print_error "Cannot disable '$file_name': File is not a swapfile"
+			exit 1
+		}
+	}
+
+	multiple_instances() {
+		[[ $(pgrep -fc "swapfile --o" 2>/dev/null) -gt 2 ]] && {
+			print_error "Previous running instance of '$script_name' detected"
+			print_aligned "Exiting"
+			exit 1
+		}
+	}
+
+	create_swapfile() {
+		# Input argument should follow the syntax
+		# $script_name --on 2048M ~/.local/share/swapfile0"
+		[[ $# -lt 3 || $# -gt 3 ]] && {
+			print_syntax_error
+		}
+
+		# Process user input and seperate characters from integers
+		user_value="$2"
+		user_value="${user_value//[aA-zZ]}"
+
+		size_suffix="$2"
+		size_suffix="${size_suffix//[0.0-9.90-9]}"
+
+		# Check for invalid user input
+		integer_checker="${user_value//[0.0-9.90-9]}"
+		integer_checker="${integer_checker//[[:space:]]}"
+		[[ -n $integer_checker || -z $user_value ]] && {
+			print_error "Input swapfile size in MB or GB"
+			print_aligned "Example: 5G, 10GB, 5120M, 10240MB"
+			exit 1
+		}
+
+		# Declare user specified file name
+		file_name="$3"
+
+		# Check if a file exist with $file_name
+		[[ -e $file_name ]] && {
+			print_error "Cannot create '$file_name' swapfile: File exists"
+			exit 1
+		}
+
+		# Declare file path
+		# Downloads/user/new/ -> Downloads/user/new
+		folder_name="${file_name%\/}"
+		# Downloads/user/new -> Downloads/user
+		folder_name="${folder_name%\/*}"
+
+		# Use current directory if user only specified a file name
+		[[ -z ${folder_name/*$file_name*} ]] && {
+			folder_name="$PWD"
+		}
+
+		# Folder to check for disk space
+		storage_checker="$folder_name"
+		[[ ! -d $folder_name ]] && {
+			storage_checker="$PWD"
+		}
+
+		# Check available device storage
+		check_free_storage "$@"
+
+		# Create destination directory
+		mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+
+		# Create swapfile
+		case "$size_suffix" in
+			m | M | mb | mB | Mb | MB)
+				[[ $user_value -lt 100 ]] && {
+					print_error "${user_value}MB is too small for swapfile"
+					exit 1
+				}
+
+				print_warning "Creating ${user_value}MB swapfile"
+				print_aligned "This may take a while\n"
+				dd if=/dev/zero of=$file_name bs=1M count="$user_value" &>/dev/null || exit_status=1
+				chown root:root "$file_name" 2>/dev/null &&
+				chmod 0600 "$file_name" 2>/dev/null &&
+				mkswap "$file_name" &>/dev/null &&
+				swapon "$file_name" &>/dev/null && exit_status=0
+				size_suffix="MB"
+				[[ $exit_status -eq 0 ]] && {
+					print_success "Finished creating ${user_value}${size_suffix} swapfile"
+					exit 0
+				}
+				print_error "Something went wrong: Failed to create '$file_name' swapfile"
+				exit 1
+			;;
+			g | G | gb | gB | Gb | GB)
+				# Bash converts Floats to Integers
+				[[ $user_value -le 0 ]] && {
+					print_error "${user_value}GB is too small for swapfile"
+					exit 1
+				}
+
+				print_warning "Creating ${user_value}GB swapfile"
+				print_aligned "This may take a while\n"
+				dd if=/dev/zero of=$file_name bs=1G count="$user_value" &>/dev/null || exit_status=1
+				chown root:root "$file_name" 2>/dev/null &&
+				chmod 0600 "$file_name" 2>/dev/null &&
+				mkswap "$file_name" &>/dev/null &&
+				swapon "$file_name" &>/dev/null && exit_status=0
+				size_suffix="GB"
+				[[ $exit_status -eq 0 ]] && {
+					print_success "Finished creating ${user_value}${size_suffix} swapfile"
+					exit 0
+				}
+				print_error "Something went wrong: Failed to create '$file_name' swapfile"
+				exit 1
+			;;
+			*)
+				print_error "Input swapfile size in MB or GB"
+				print_aligned "Example: 5G, 10GB, 5120M, 10240MB"
+				exit 1
+			;;
+		esac
+	}
+
+	# Disable and delete swapfile
+	delete_swapfile() {
+		# Input argument should follow the syntax
+		# $script_name --off ~/.local/share/swapfile0"
+		[[ $# -lt 2 || $# -gt 2 ]] && {
+			print_syntax_error
+		}
+
+		# Declare user specified file name
+		file_name="$2"
+
+		# Check if file_name is valid
+		not_a_swapfile "$@"
+
+		print_warning "Disabling '$file_name' swapfile"
+		print_aligned "This may take a while\n"
+
+		swapoff "$file_name" 2>/dev/null &&
+		rm -r "$file_name" 2>/dev/null
+		print_success "Finished disabling '$file_name' swapfile"
+		exit 0
+	}
+
+	check_input_option() {
+		for primary_options in "${@:1}"; do
+			case "$primary_options" in
+				-h | --help)
+					print_help
+				;;
+				--off)
+					# Check for multiple running instances
+					multiple_instances "$@"
+
+					# Check used swap
+					used_swap="$(free -m | awk '/Swap:/ {print $3}' 2>/dev/null)"
+					[[ $used_swap -gt 500 ]] && {
+						print_warning "Swapfile is currently in use: Disabling it might cause problems\n"
+						read -rep "Do you want to proceed (y/n) " user_option
+						echo ""
+						case "$user_option" in
+							 Y | y)
+								delete_swapfile "$@"
+							;;
+							*)
+								run_on_exit "$@"
+							;;
+						esac
+					}
+					delete_swapfile "$@"
+				;;
+				--on)
+					# Check for multiple running instances
+					multiple_instances "$@"
+
+					create_swapfile "$@"
+				;;
+				-V | --version)
+					print_version
+				;;
+				-*)
+					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
+						print_error "Invalid option '${primary_options}'"
+						print_notification
+					}
+					print_error "Invalid option -- '${primary_options#*\-}'"
+					print_notification
+				;;
+				*)
+					for secondary_options in "${@:2}"; do
+						case "$secondary_options" in
+							-h | --help)
+								print_help
+							;;
+						esac
+					done
+					print_syntax_error
+				;;
+			esac
+		done
+	}
+
+	trap 'remove_file_on_exit "$file_name"' 1 2 3 15
+	print_no_argument "$@"
+	check_dependencies "$@"
+	check_input_option "$@"
 	exit
 }
 

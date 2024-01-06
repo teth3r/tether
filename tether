@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.06.1905"
+script_version="2024.01.06.1945"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4580,13 +4580,13 @@ package() {
 		cd "$package_tmp_dir/system/bin"
 		./7z x $package_tmp_dir/system/bin/Iosevka.7z &>/dev/null
 		# Populate font directory
-		cp Iosevka-Regular.ttf $package_tmp_dir/system/fonts/NotoSerif-Regular.ttf
-		cp Iosevka-Bold.ttf $package_tmp_dir/system/fonts/NotoSerif-Bold.ttf
-		cp Iosevka-BoldItalic.ttf $package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf
-		cp Iosevka-Italic.ttf $package_tmp_dir/system/fonts/NotoSerif-Italic.ttf
-		rm $package_tmp_dir/system/bin/*.md $package_tmp_dir/system/bin/Iosevka*
+		cp Iosevka-Regular.ttf "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf"
+		cp Iosevka-Bold.ttf "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf"
+		cp Iosevka-BoldItalic.ttf "$package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf"
+		cp Iosevka-Italic.ttf "$package_tmp_dir/system/fonts/NotoSerif-Italic.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Italic.ttf"
+		rm "$package_tmp_dir"/system/bin/*.md "$package_tmp_dir"/system/bin/Iosevka* 2>/dev/null
 		# Create font symbolic-links
-		cd $package_tmp_dir/system/fonts
+		cd "$package_tmp_dir/system/fonts"
 		# SourceSansPro
 		ln -sf NotoSerif-Regular.ttf SourceSansPro-Regular.ttf 2>/dev/null
 		ln -sf NotoSerif-Bold.ttf SourceSansPro-Bold.ttf 2>/dev/null
@@ -4596,7 +4596,7 @@ package() {
 		ln -sf NotoSerif-Regular.ttf DroidSans.ttf 2>/dev/null
 		ln -sf NotoSerif-Regular.ttf DroidSansMono.ttf 2>/dev/null
 		ln -sf NotoSerif-Bold.ttf DroidSans-Bold.ttf 2>/dev/null
-		cd $package_tmp_dir
+		cd "$package_tmp_dir"
 	}
 	populate_dir() {
 		print_warning "Populating module directories\n"

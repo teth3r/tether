@@ -19,6 +19,7 @@ benchmark
 . package
 . replace-su
 . setup
+. swapfile
 . tfetch
 . tether
 . touchzip
@@ -47,6 +48,7 @@ benchmark
 **package** | ping, magisk, sed | Android (root) | Usage: ` package [OPTION] ` <p> Magisk module packaging tool. Run `package --help` for more details. |
 **replace-su** | mount, unmount | Android (root) | Usage: ` replace-su [OPTION] ` <p> Removes phh-su from AOSP GSI releases >= 12, allowing the use of custom root solutions like `magisk`. Run `replace-su --help` for more details. |
 **setup** | ping, xbps | Voidlinux | Usage: ` setup [OPTION] ` <p> Post-installation setup tool for Voidlinux. Run `setup --help` for more details. |
+**swapfile** | awk, dd, df, mkswap, pgrep, swapoff, swapon | Device Agnostic | Usage: ` swapfile [OPTION] [FILSIZE] [FILENAME] ` <p> Swapfile management tool, create and disable swapfiles on the go. Run `swapfile --help` for more details. |
 **tfetch** |  | Device Agnostic | Usage: ` tfetch [OPTION] ` <p> System resource information tool, has no external dependencies. Run `tfetch --help` for more details. |
 **touchzip** | 7z, rm, touch | Device Agnostic (requires root on Android) | Usage: ` touchzip [OPTION] [FILENAME] [FILE...] ` <p> This tool creates an encrypted/unencrypted 7z archive of the specified files. Run `touchzip --help` for more details. |
 **viw** | vim | Device Agnostic | Usage: ` viw [FOLDER] ` <p> Terminal filemanager using Vim Netrw. Run `viw --help` for more details. |

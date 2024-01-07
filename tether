@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.07.1941"
+script_version="2024.01.07.2057"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -129,6 +129,7 @@ print_aligned() {
 #--------------------------------------------------------------
 run_on_exit() {
 	echo -e "\n" && print_error "Aborted" &&
+	unset file_password file_password2
 	exit 1
 }
 
@@ -138,6 +139,7 @@ run_on_exit() {
 remove_file_on_exit() {
 	echo -e "\n" && print_error "Aborted" &&
 	rm -r "$@" 2>/dev/null
+	unset file_password file_password2
 	exit 1
 }
 

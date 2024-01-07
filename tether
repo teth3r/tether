@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.06.1945"
+script_version="2024.01.07.1358"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -6428,19 +6428,21 @@ swapfile() {
 					exit 1
 				}
 
+				exit_status=0
 				print_warning "Creating ${user_value}MB swapfile"
 				print_aligned "This may take a while\n"
 				dd if=/dev/zero of=$file_name bs=1M count="$user_value" &>/dev/null || exit_status=1
 				chown root:root "$file_name" 2>/dev/null &&
 				chmod 0600 "$file_name" 2>/dev/null &&
 				mkswap "$file_name" &>/dev/null &&
-				swapon "$file_name" &>/dev/null && exit_status=0
+				swapon "$file_name" &>/dev/null || exit_status=1
 				size_suffix="MB"
 				[[ $exit_status -eq 0 ]] && {
 					print_success "Finished creating ${user_value}${size_suffix} swapfile"
 					exit 0
 				}
 				print_error "Something went wrong: Failed to create '$file_name' swapfile"
+				rm -r "$file_name" 2>/dev/null
 				exit 1
 			;;
 			g | G | gb | gB | Gb | GB)
@@ -6450,19 +6452,21 @@ swapfile() {
 					exit 1
 				}
 
+				exit_status=0
 				print_warning "Creating ${user_value}GB swapfile"
 				print_aligned "This may take a while\n"
 				dd if=/dev/zero of=$file_name bs=1G count="$user_value" &>/dev/null || exit_status=1
 				chown root:root "$file_name" 2>/dev/null &&
 				chmod 0600 "$file_name" 2>/dev/null &&
 				mkswap "$file_name" &>/dev/null &&
-				swapon "$file_name" &>/dev/null && exit_status=0
+				swapon "$file_name" &>/dev/null || exit_status=1
 				size_suffix="GB"
 				[[ $exit_status -eq 0 ]] && {
 					print_success "Finished creating ${user_value}${size_suffix} swapfile"
 					exit 0
 				}
 				print_error "Something went wrong: Failed to create '$file_name' swapfile"
+				rm -r "$file_name" 2>/dev/null
 				exit 1
 			;;
 			*)
@@ -6484,9 +6488,6 @@ swapfile() {
 		# Declare user specified file name
 		file_name="$2"
 
-		# Check if file_name is valid
-		not_a_swapfile "$@"
-
 		print_warning "Disabling '$file_name' swapfile"
 		print_aligned "This may take a while\n"
 
@@ -6503,12 +6504,22 @@ swapfile() {
 					print_help
 				;;
 				--off)
+					# Declare file name
+					file_name="$2"
+
 					# Check for multiple running instances
 					multiple_instances "$@"
 
-					# Check used swap
-					used_swap="$(free -m | awk '/Swap:/ {print $3}' 2>/dev/null)"
-					[[ $used_swap -gt 500 ]] && {
+					# Check if file_name is valid
+					not_a_swapfile "$@"
+
+					# Check used swap space for the specified file
+					used_swap="$(< /proc/swaps)"
+					used_swap="${used_swap//*"$filename"}"
+					used_swap="$(echo ${used_swap//\/*} | awk '{print $3}')"
+
+					# /proc/swaps stores values in KB
+					[[ $used_swap -gt 204796 ]] && {
 						print_warning "Swapfile is currently in use: Disabling it might cause problems\n"
 						read -rep "Do you want to proceed (y/n) " user_option
 						echo ""
@@ -6521,6 +6532,7 @@ swapfile() {
 							;;
 						esac
 					}
+
 					delete_swapfile "$@"
 				;;
 				--on)

@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.07.1557"
+script_version="2024.01.07.1941"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4572,13 +4572,28 @@ package() {
 		rm tether 2>/dev/null
 	}
 	download_custom_iosevka() {
-		print_warning "Downloading 'Iosevka version $iosevka_version'\n"
-		# Download latest version of Iosevka custom build
-		busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka.7z -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
-		download_fail "Iosevka version $iosevka_version"
-		mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-		cd "$package_tmp_dir/system/bin"
-		./7z x $package_tmp_dir/system/bin/Iosevka.7z &>/dev/null
+		[[ $font_variant == "sans" ]] && {
+			print_warning "Downloading 'Iosevka version $iosevka_version'\n"
+			# Download latest version of Iosevka custom build
+			busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka.7z -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
+			download_fail "Iosevka version $iosevka_version"
+
+			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
+			cd "$package_tmp_dir/system/bin"
+			./7z x $package_tmp_dir/system/bin/Iosevka.7z &>/dev/null
+		}
+
+		[[ $font_variant == "slab" ]] && {
+			print_warning "Downloading 'Iosevka-slab version $iosevka_version'\n"
+			# Download latest version of Iosevka custom build
+			busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka-slab.7z -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
+			download_fail "Iosevka-slab version $iosevka_version"
+
+			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
+			cd "$package_tmp_dir/system/bin"
+			./7z x $package_tmp_dir/system/bin/Iosevka-slab.7z &>/dev/null
+		}
+
 		# Populate font directory
 		cp Iosevka-Regular.ttf "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf"
 		cp Iosevka-Bold.ttf "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf"
@@ -4904,8 +4919,21 @@ EOF
 		echo ""
 		case "$font_option" in
 			 Y | y)
-				download_custom_iosevka "$@"
-				create_post_fs "$@"
+				# Select font variant
+				read -rep "Select Iosevka font variant 1.Sans-serifs 2.Slab-serifs " font_type
+				echo ""
+				case "$font_type" in
+					1)
+						font_variant="sans"
+						download_custom_iosevka "$@"
+						create_post_fs "$@"
+					;;
+					*)
+						font_variant="slab"
+						download_custom_iosevka "$@"
+						create_post_fs "$@"
+					;;
+				esac
 			;;
 			*)
 				print_warning "Skipping Iosevka font installation\n"

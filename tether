@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.07.1358"
+script_version="2024.01.07.1557"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -6515,16 +6515,16 @@ swapfile() {
 
 					# Check used swap space for the specified file
 					used_swap="$(< /proc/swaps)"
-					used_swap="${used_swap//*"$filename"}"
+					used_swap="${used_swap//*"$file_name"}"
 					used_swap="$(echo ${used_swap//\/*} | awk '{print $3}')"
 
 					# /proc/swaps stores values in KB
 					[[ $used_swap -gt 204796 ]] && {
 						print_warning "Swapfile is currently in use: Disabling it might cause problems\n"
 						read -rep "Do you want to proceed (y/n) " user_option
-						echo ""
 						case "$user_option" in
 							 Y | y)
+								echo ""
 								delete_swapfile "$@"
 							;;
 							*)
@@ -6724,7 +6724,7 @@ tfetch() {
 			cpu_cores="$((cpu_cores + 1))"
 		}
 		# Handles Intel CPUs
-		[[ -d /sys/class/power_supply/BAT0 ]] || [[ ! -d /sys/class/kgsl && ! -d /sys/class/power_supply/battery ]] || [[ ! -d /proc/gpufreq && ! -d /sys/class/power_supply/battery ]] && {
+		[[ -d /sys/class/power_supply/BAT0 && $cpu_file != *AuthenticAMD* ]] || [[ ! -d /sys/class/kgsl && ! -d /sys/class/power_supply/battery ]] || [[ ! -d /proc/gpufreq && ! -d /sys/class/power_supply/battery ]] && {
 			cpu_name="$cpu_file"
 			cpu_name="${cpu_name/*model name}"
 			cpu_name="${cpu_name/ @ *}"
@@ -6932,47 +6932,47 @@ tfetch() {
 		echo -e " -----------------"
 		# Show only if device name is available
 		[[ -d /sys/devices/virtual/dmi/id || -f /sys/firmware/devicetree/base/model || -f /proc/device-tree/model ]] && {
-			echo -e "${color_blue} Device:   ${color_white}$(get_device_name)"
+			echo -e "${color_blue} Device:   ${color_white}$(get_device_name)${no_color}"
 		}
-		echo -e "${color_blue} OS:       ${color_white}$(get_os_name)"
-		echo -e "${color_blue} Kernel:   ${color_white}$(get_kernel)"
-		echo -e "${color_blue} Init:     ${color_white}$(get_init)"
-		echo -e "${color_blue} Packages: ${color_white}$(get_pkgs)"
-		echo -e "${color_blue} Shell:    ${color_white}$(get_shell)"
+		echo -e "${color_blue} OS:       ${color_white}$(get_os_name)${no_color}"
+		echo -e "${color_blue} Kernel:   ${color_white}$(get_kernel)${no_color}"
+		echo -e "${color_blue} Init:     ${color_white}$(get_init)${no_color}"
+		echo -e "${color_blue} Packages: ${color_white}$(get_pkgs)${no_color}"
+		echo -e "${color_blue} Shell:    ${color_white}$(get_shell)${no_color}"
 		# Show on non-root Linux desktop
 		[[ -n ${XDG_CURRENT_DESKTOP:=$DESKTOP_SESSION} ]] && {
-			echo -e "${color_blue} Desktop:  ${color_white}$(get_desktop)"
+			echo -e "${color_blue} Desktop:  ${color_white}$(get_desktop)${no_color}"
 		}
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU:      ${color_white}$(get_cpu)"
+			echo -e "${color_blue} CPU:      ${color_white}$(get_cpu)${no_color}"
 		}
 		# Show only on Android or desktops with $cpu_core_count <= 8
 		[[ -d /sys/class/power_supply/battery || $cpu_core_count -le 8 ]] && {
-			echo -e "${color_blue} CPU_CLK:  ${color_white}$(get_cpu_clusters)"
+			echo -e "${color_blue} CPU_CLK:  ${color_white}$(get_cpu_clusters)${no_color}"
 		}
 		# Show only on Android with Mediatek or Snapdragon SOC
 		[[ -f /proc/gpufreq/cur_freq || -f /sys/class/kgsl/kgsl-3d0/gpuclk ]] && {
-			echo -e "${color_blue} GPU:      ${color_white}$(get_gpu)"
+			echo -e "${color_blue} GPU:      ${color_white}$(get_gpu)${no_color}"
 		}
 		# Show only if battery is available
 		[[ -d /sys/class/power_supply/BAT0 || -d /sys/class/power_supply/battery ]] && {
-			echo -e "${color_blue} Battery:  ${color_white}$(get_battery_stats)"
+			echo -e "${color_blue} Battery:  ${color_white}$(get_battery_stats)${no_color}"
 		}
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU Temp: ${color_white}$(get_cpu_temp)"
+			echo -e "${color_blue} CPU Temp: ${color_white}$(get_cpu_temp)${no_color}"
 		}
 		# Show only on Android with Snapdragon SOC
 		[[ -f /sys/class/kgsl/kgsl-3d0/temp ]] && {
-			echo -e "${color_blue} GPU Temp: ${color_white}$(get_gpu_temp)"
+			echo -e "${color_blue} GPU Temp: ${color_white}$(get_gpu_temp)${no_color}"
 		}
 		# Show only on Android
 		[[ -f /sys/class/power_supply/battery/temp ]] && {
-			echo -e "${color_blue} BAT Temp: ${color_white}$(get_battery_temp)"
+			echo -e "${color_blue} BAT Temp: ${color_white}$(get_battery_temp)${no_color}"
 		}
-		echo -e "${color_blue} RAM:      ${color_white}$(get_mem)"
-		echo -e "${color_blue} Swap:     ${color_white}$(get_swap)"
+		echo -e "${color_blue} RAM:      ${color_white}$(get_mem)${no_color}"
+		echo -e "${color_blue} Swap:     ${color_white}$(get_swap)${no_color}"
 		echo -e "${color_blue} Uptime:   ${color_white}$(get_uptime)${no_color}\n"
 		exit 0
 	}
@@ -6981,22 +6981,22 @@ tfetch() {
 		get_hostname "$@"
 		echo -e " -----------------"
 		[[ -f /product/etc/build.prop ]] && {
-			echo -e "${color_blue} OS:       ${color_white}$(get_os_name)"
+			echo -e "${color_blue} OS:       ${color_white}$(get_os_name)${no_color}"
 		}
-		echo -e "${color_blue} Shell:    ${color_white}$(get_shell)"
+		echo -e "${color_blue} Shell:    ${color_white}$(get_shell)${no_color}"
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU:      ${color_white}$(get_cpu)"
+			echo -e "${color_blue} CPU:      ${color_white}$(get_cpu)${no_color}"
 		}
 		# Show only on Android or desktops with $cpu_core_count <= 8
 		[[ -d /sys/class/power_supply/battery || $cpu_core_count -le 8 ]] && {
-			echo -e "${color_blue} CPU_CLK:  ${color_white}$(get_cpu_clusters)"
+			echo -e "${color_blue} CPU_CLK:  ${color_white}$(get_cpu_clusters)${no_color}"
 		}
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU Temp: ${color_white}$(get_cpu_temp)"
+			echo -e "${color_blue} CPU Temp: ${color_white}$(get_cpu_temp)${no_color}"
 		}
-		echo -e "${color_blue} RAM:      ${color_white}$(get_mem)"
+		echo -e "${color_blue} RAM:      ${color_white}$(get_mem)${no_color}"
 		echo -e "${color_blue} Swap:     ${color_white}$(get_swap)${no_color}\n"
 		exit 0
 	}

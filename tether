@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.08.1049"
+script_version="2024.01.08.1551"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4589,10 +4589,10 @@ package() {
 		}
 
 		[[ $font_variant == "slab" ]] && {
-			print_warning "Downloading 'Iosevka-slab version $iosevka_version'\n"
+			print_warning "Downloading 'Iosevka-Slab version $iosevka_version'\n"
 			# Download latest version of Iosevka custom build
 			busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka-slab.7z -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
-			download_fail "Iosevka-slab version $iosevka_version"
+			download_fail "Iosevka-Slab version $iosevka_version"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cd "$package_tmp_dir/system/bin"
@@ -4920,12 +4920,15 @@ EOF
 		chmod +x $package_tmp_dir/system/bin/*
 
 		# Add custom fonts
+		print_warning "Adding custom fonts\n"
+
 		read -rep "Replace system fonts with Iosevka (y/n) " font_option
 		echo ""
 		case "$font_option" in
 			 Y | y)
 				# Select font variant
-				read -rep "Select Iosevka font variant 1.Sans-serifs 2.Slab-serifs " font_type
+				echo -e "1. Sans-serif\n2. Slab-serif\n"
+				read -rep "Select Iosevka typeface: " font_type
 				echo ""
 				case "$font_type" in
 					1)
@@ -5468,7 +5471,7 @@ EOF
 		# Show available timezone files
 		for zone_files in /usr/share/zoneinfo/*; do
 			[[ -d $zone_files && ${zone_files##*/} != posix && ${zone_files##*/} != right ]] && {
-				printf "${zone_count}.${zone_files##*/}  "
+				printf "${zone_count}. ${zone_files##*/}  "
 				time_zone[$zone_count]="$zone_files"
 				zone_count=$((zone_count + 1))
 			}
@@ -5498,7 +5501,7 @@ EOF
 					# List subzones files
 					zone_count=1
 					for sub_zone_files in ${time_zone[$tz_option]}/*; do
-						printf "${zone_count}.${sub_zone_files##*/}  "
+						printf "${zone_count}. ${sub_zone_files##*/}  "
 						sub_zone[$zone_count]="$sub_zone_files"
 						zone_count=$((zone_count + 1))
 					done
@@ -5516,7 +5519,7 @@ EOF
 						# List all sublocale files
 						zone_count=1
 						for sub_region_files in ${sub_zone[$tz_locale]}/*; do
-							printf "${zone_count}.${sub_region_files##*/}  "
+							printf "${zone_count}. ${sub_region_files##*/}  "
 							sub_region[$zone_count]="$sub_region_files"
 							zone_count=$((zone_count + 1))
 						done
@@ -5678,47 +5681,43 @@ EOF
 		print_banner
 		print_warning "Setting up Voidlinux"
 		# Handles DE Installation
-		echo -e "\nInstall Desktop Environment: \n1.KDE \n2.Gnome \n3.Xfce \n4.Cinnamon \n5.Skip \n6.Exit\n"
+		echo -e "\nInstall Desktop Environment: \n1. KDE \n2. Gnome \n3. Xfce \n4. Cinnamon \n5. Skip \n6. Exit\n"
 		read -rep "Select Desktop: " de_option
+		echo ""
 		case "$de_option" in
 			1)
-				echo ""
 				print_warning "Installing KDE\n"
 				install_desktop && desktop_kde && error_check="desktop" &&
 				echo "" &&
 				print_success "Finished installing KDE"
 			;;
 			2)
-				echo ""
 				print_warning "Installing Gnome\n"
 				install_desktop && desktop_gnome && error_check="desktop" &&
 				echo "" &&
 				print_success "Finished installing Gnome"
 			;;
 			3)
-				echo ""
 				print_warning "Installing Xfce\n"
 				install_desktop && desktop_xfce && error_check="desktop" &&
 				echo "" &&
 				print_success "Finished installing Xfce"
 			;;
 			4)
-				echo ""
 				print_warning "Installing Cinnamon\n"
 				install_desktop && desktop_cinnamon && error_check="desktop" &&
 				echo "" &&
 				print_success "Finished installing Cinnamon"
 			;;
 			5)
-				echo ""
 				print_warning "Skipping Desktop Environment Installation"
 				error_check="desktop"
 			;;
 			6)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${de_option#*\-} || -z ${de_option/\-\-*} ]] && {
 					print_error "Invalid option '${de_option}'" &&
 					exit 1
@@ -5727,7 +5726,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${de_option}'" &&
 				exit 1
 			;;
@@ -5739,33 +5737,31 @@ EOF
 			exit 1
 		}
 		# Handles GPU Driver Installation
-		echo -e "\nInstall GPU Drivers: \n1.Intel \n2.AMD/radeon \n3.Skip \n4.Exit\n"
+		echo -e "\nInstall GPU Drivers: \n1. Intel \n2. AMD/radeon \n3. Skip \n4. Exit\n"
 		read -rep "Select GPU: " gpu_option
+		echo ""
 		case "$gpu_option" in
 			1)
-				echo ""
 				print_warning "Installing Intel GPU Drivers\n"
 				install_gpu_drivers && intel_drivers && error_check="gpu" &&
 				echo "" &&
 				print_success "Finished installing Intel GPU Drivers"
 			;;
 			2)
-				echo ""
 				print_warning "Installing AMD GPU Drivers\n"
 				install_gpu_drivers && amd_drivers && error_check="gpu" &&
 				echo "" &&
 				print_success "Finished installing AMD GPU Drivers"
 			;;
 			3)
-				echo ""
 				print_warning "Skipping GPU Driver Installation"
 				error_check="gpu"
 			;;
 			4)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${gpu_option#*\-} || -z ${gpu_option/\-\-*} ]] && {
 					print_error "Invalid option '${gpu_option}'" &&
 					exit 1
@@ -5774,7 +5770,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${gpu_option}'" &&
 				exit 1
 			;;
@@ -5786,26 +5781,25 @@ EOF
 			exit 1
 		}
 		# Handles VM Software Installation
-		echo -e "\nInstall VM Software (qemu, virt-manager): \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall VM Software (qemu, virt-manager): \n1. Yes \n2. Skip \n3. Exit\n"
 		read -rep "Select option: " vm_option
+		echo ""
 		case "$vm_option" in
 			1)
-				echo ""
 				print_warning "Installing Virtual Machine software\n"
 				install_vm && error_check="vm" &&
 				echo "" &&
 				print_success "Finished installing Virtual Machine software"
 			;;
 			2)
-				echo ""
 				print_warning "Skipping VM Software Installation"
 				error_check="vm"
 			;;
 			3)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${vm_option#*\-} || -z ${vm_option/\-\-*} ]] && {
 					print_error "Invalid option '${vm_option}'" &&
 					exit 1
@@ -5814,7 +5808,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${vm_option}'" &&
 				exit 1
 			;;
@@ -5826,40 +5819,37 @@ EOF
 			exit 1
 		}
 		# Handles Printer Software Installation
-		echo -e "\nInstall Printer Software: \n1.HP \n2.Epson \n3.Brother \n4.Skip \n5.Exit\n"
+		echo -e "\nInstall Printer Software: \n1. HP \n2. Epson \n3. Brother \n4. Skip \n5. Exit\n"
 		read -rep "Select Printer: " printer_option
+		echo ""
 		case "$printer_option" in
 			1)
-				echo ""
 				print_warning "Installing HP Printer Software\n"
 				install_printer_drivers && hp_printer && error_check="printer" &&
 				echo "" &&
 				print_success "Finished installing HP Printer software"
 			;;
 			2)
-				echo ""
 				print_warning "Installing Epson Printer Software\n"
 				install_printer_drivers && epson_printer && error_check="printer" &&
 				echo "" &&
 				print_success "Finished installing Epson Printer software"
 			;;
 			3)
-				echo ""
 				print_warning "Installing Brother Printer Software\n"
 				install_printer_drivers && brother_printer && error_check="printer" &&
 				echo "" &&
 				print_success "Finished installing Brother Printer software"
 			;;
 			4)
-				echo ""
 				print_warning "Skipping Printer Software Installation"
 				error_check="printer"
 			;;
 			5)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${printer_option#*\-} || -z ${printer_option/\-\-*} ]] && {
 					print_error "Invalid option '${printer_option}'" &&
 					exit 1
@@ -5868,7 +5858,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${printer_option}'" &&
 				exit 1
 			;;
@@ -5880,40 +5869,37 @@ EOF
 			exit 1
 		}
 		# Handles Audio Software Installation
-		echo -e "\nInstall Audio Software: \n1.Pulseaudio \n2.ALSA \n3.Pipewire \n4.Skip \n5.Exit\n"
+		echo -e "\nInstall Audio Software: \n1. Pulseaudio \n2. ALSA \n3. Pipewire \n4. Skip \n5. Exit\n"
 		read -rep "Select Audio: " audio_option
+		echo ""
 		case "$audio_option" in
 			1)
-				echo ""
 				print_warning "Installing Pulseaudio\n"
 				install_audio && pulse_audio && error_check="audio" &&
 				echo "" &&
 				print_success "Finished installing Pulseaudio"
 			;;
 			2)
-				echo ""
 				print_warning "Installing ALSA\n"
 				install_audio && alsa_utils && error_check="audio" &&
 				echo "" &&
 				print_success "Finished installing ALSA"
 			;;
 			3)
-				echo ""
 				print_warning "Installing Pipewire\n"
 				install_audio && pipe_wire && error_check="audio" &&
 				echo "" &&
 				print_success "Finished installing Pipewire"
 			;;
 			4)
-				echo ""
 				print_warning "Skipping Audio Software Installation"
 				error_check="audio"
 			;;
 			5)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${audio_option#*\-} || -z ${audio_option/\-\-*} ]] && {
 					print_error "Invalid option '${audio_option}'" &&
 					exit 1
@@ -5922,7 +5908,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${audio_option}'" &&
 				exit 1
 			;;
@@ -5934,33 +5919,31 @@ EOF
 			exit 1
 		}
 		# Handles Terminal Software Installation
-		echo -e "\nInstall Terminal: \n1.Urxvt \n2.Kitty \n3.Skip \n4.Exit\n"
+		echo -e "\nInstall Terminal: \n1. Urxvt \n2. Kitty \n3. Skip \n4. Exit\n"
 		read -rep "Select Terminal: " term_option
+		echo ""
 		case "$term_option" in
 			1)
-				echo ""
 				print_warning "Installing Urxvt\n"
 				install_terminal && install_urxvt && error_check="terminal" &&
 				echo "" &&
 				print_success "Finished installing Urxvt"
 			;;
 			2)
-				echo ""
 				print_warning "Installing Kitty\n"
 				install_terminal && install_kitty && error_check="terminal" &&
 				echo "" &&
 				print_success "Finished installing Kitty"
 			;;
 			3)
-				echo ""
 				print_warning "Skipping Terminal Installation"
 				error_check="terminal"
 			;;
 			4)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${term_option#*\-} || -z ${term_option/\-\-*} ]] && {
 					print_error "Invalid option '${term_option}'" &&
 					exit 1
@@ -5969,7 +5952,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${term_option}'" &&
 				exit 1
 			;;
@@ -5981,26 +5963,25 @@ EOF
 			exit 1
 		}
 		# Handles Extra Software Installation
-		echo -e "\nInstall Extra/Misc Software (krita, libreoffice, wine): \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall Extra/Misc Software (krita, libreoffice, wine): \n1. Yes \n2. Skip \n3. Exit\n"
 		read -rep "Select option: " extras_option
+		echo ""
 		case "$extras_option" in
 			1)
-				echo ""
 				print_warning "Installing Extra/Misc Software\n"
 				install_extras && error_check="extras" &&
 				echo "" &&
 				print_success "Finished installing Extra/Misc software"
 			;;
 			2)
-				echo ""
 				print_warning "Skipping Extra/Misc Software Installation"
 				error_check="extras"
 			;;
 			3)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${extras_option#*\-} || -z ${extras_option/\-\-*} ]] && {
 					print_error "Invalid option '${extras_option}'" &&
 					exit 1
@@ -6009,7 +5990,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${extras_option}'" &&
 				exit 1
 			;;
@@ -6021,26 +6001,25 @@ EOF
 			exit 1
 		}
 		# Handles Development Software Installation
-		echo -e "\nInstall Development Software (gcc, rust, cargo, vim): \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall Development Software (gcc, rust, cargo, vim): \n1. Yes \n2. Skip \n3. Exit\n"
 		read -rep "Select option: " dev_option
+		echo ""
 		case "$dev_option" in
 			1)
-				echo ""
 				print_warning "Installing Development Software\n"
 				install_dev_software && error_check="development" &&
 				echo "" &&
 				print_success "Finished installing development software"
 			;;
 			2)
-				echo ""
 				print_warning "Skipping Development Software Installation"
 				error_check="development"
 			;;
 			3)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${dev_option#*\-} || -z ${dev_option/\-\-*} ]] && {
 					print_error "Invalid option '${dev_option}'" &&
 					exit 1
@@ -6049,7 +6028,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${dev_option}'" &&
 				exit 1
 			;;
@@ -6061,26 +6039,25 @@ EOF
 			exit 1
 		}
 		# Handles Dotfiles Installation
-		echo -e "\nInstall Dotfiles (bash, tmux, vim, urxvt): \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall Dotfiles (bash, tmux, vim, urxvt): \n1. Yes \n2. Skip \n3. Exit\n"
 		read -rep "Select option: " dotfiles_option
+		echo ""
 		case "$dotfiles_option" in
 			1)
-				echo ""
 				print_warning "Installing Dotfiles\n"
 				install_dotfiles && error_check="dotfiles" &&
 				echo "" &&
 				print_success "Finished installing Dotfiles"
 			;;
 			2)
-				echo ""
 				print_warning "Skipping Dotfiles Installation"
 				error_check="dotfiles"
 			;;
 			3)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${dotfiles_option#*\-} || -z ${dotfiles_option/\-\-*} ]] && {
 					print_error "Invalid option '${dotfiles_option}'" &&
 					exit 1
@@ -6089,7 +6066,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${dotfiles_option}'" &&
 				exit 1
 			;;
@@ -6101,33 +6077,31 @@ EOF
 			exit 1
 		}
 		# Handles Browser Installation
-		echo -e "\nInstall Browser Software: \n1.Chromium \n2.Firefox \n3.Skip \n4.Exit\n"
+		echo -e "\nInstall Browser Software: \n1. Chromium \n2. Firefox \n3. Skip \n4. Exit\n"
 		read -rep "Select Browser: " browser_option
+		echo ""
 		case "$browser_option" in
 			1)
-				echo ""
 				print_warning "Installing Chromium\n"
 				install_browser && chromium && error_check="browser" &&
 				echo "" &&
 				print_success "Finished installing Chromium"
 			;;
 			2)
-				echo ""
 				print_warning "Installing Firefox\n"
 				install_browser && firefox && error_check="browser" &&
 				echo "" &&
 				print_success "Finished installing Firefox"
 			;;
 			3)
-				echo ""
 				print_warning "Skipping Browser Software Installation"
 				error_check="browser"
 			;;
 			4)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${browser_option#*\-} || -z ${browser_option/\-\-*} ]] && {
 					print_error "Invalid option '${browser_option}'" &&
 					exit 1
@@ -6136,7 +6110,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${browser_option}'" &&
 				exit 1
 			;;
@@ -6148,33 +6121,31 @@ EOF
 			exit 1
 		}
 		# Handles Media-Player Installation
-		echo -e "\nInstall Media-Player Software: \n1.VLC \n2.MPV \n3.Skip \n4.Exit\n"
+		echo -e "\nInstall Media-Player Software: \n1. VLC \n2. MPV \n3. Skip \n4. Exit\n"
 		read -rep "Select Media-Player: " media_player_option
+		echo ""
 		case "$media_player_option" in
 			1)
-				echo ""
 				print_warning "Installing VLC\n"
 				install_media_player && vlc && error_check="media_player" &&
 				echo "" &&
 				print_success "Finished installing VLC"
 			;;
 			2)
-				echo ""
 				print_warning "Installing MPV\n"
 				install_media_player && mpv && error_check="media_player" &&
 				echo "" &&
 				print_success "Finished installing MPV"
 			;;
 			3)
-				echo ""
 				print_warning "Skipping Media-Player Software Installation"
 				error_check="media_player"
 			;;
 			4)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${media_player_option#*\-} || -z ${media_player_option/\-\-*} ]] && {
 					print_error "Invalid option '${media_player_option}'" &&
 					exit 1
@@ -6183,37 +6154,34 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${media_player_option}'" &&
 				exit 1
 			;;
 		esac
 		[[ $error_check != "media_player" ]] && {
-			echo ""
 			print_error "Something went wrong"
 			print_aligned "Couldn't install media-player software"
 			exit 1
 		}
 		# Handles Setting timezone
-		echo -e "\nChange Default Timezone: \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nChange Default Timezone: \n1. Yes \n2. Skip \n3. Exit\n"
 		read -rep "Select option: " time_zone_option
+		echo ""
 		case "$time_zone_option" in
 			1)
-				echo ""
 				print_warning "Changing Timezone\n"
 				change_timezone && error_check="timezone" &&
 				print_success "Finished Changing Timezone"
 			;;
 			2)
-				echo ""
 				print_warning "Skipping Timezone Change"
 				error_check="timezone"
 			;;
 			3)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${time_zone_option#*\-} || -z ${time_zone_option/\-\-*} ]] && {
 					print_error "Invalid option '${time_zone_option}'" &&
 					exit 1
@@ -6222,7 +6190,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${time_zone_option}'" &&
 				exit 1
 			;;
@@ -6233,26 +6200,25 @@ EOF
 			exit 1
 		}
 		# Handles Automatic Backlight Control
-		echo -e "\nInstall Automatic Backlight Control: \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall Automatic Backlight Control: \n1. Yes \n2. Skip \n3. Exit\n"
 		read -rep "Select option: " auto_backlight_option
+		echo ""
 		case "$auto_backlight_option" in
 			1)
-				echo ""
 				print_warning "Installing Automatic Backlight Control\n"
 				install_backlight_control && error_check="auto_backlight" &&
 				echo "" &&
 				print_success "Finished installing Automatic Backlight Control"
 			;;
 			2)
-				echo ""
 				print_warning "Skipping Automatic Backlight Control"
 				error_check="auto_backlight"
 			;;
 			3)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${auto_backlight_option#*\-} || -z ${auto_backlight_option/\-\-*} ]] && {
 					print_error "Invalid option '${auto_backlight_option}'" &&
 					exit 1
@@ -6261,7 +6227,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${auto_backlight_option}'" &&
 				exit 1
 			;;
@@ -6278,28 +6243,27 @@ EOF
 			exit 1
 		}
 		# Handles Networking Software Installation
-		echo -e "\nInstall Networking Software: \n1.Yes \n2.Skip \n3.Exit\n"
+		echo -e "\nInstall Networking Software: \n1. Yes \n2. Skip \n3. Exit\n"
 		read -rep "Select option: " network_option
+		echo ""
 		case "$network_option" in
 			1)
-				echo ""
 				print_warning "Installing Networking Software\n"
 				install_networking && error_check="network" &&
 				echo "" &&
 				print_success "Finished setting up void linux"
 			;;
 			2)
-				echo ""
 				print_warning "Skipping Networking Software Installation\n"
 				print_error "Nothing left to do, exiting"
 				error_check="network"
 				exit 1
 			;;
 			3)
-				run_on_exit
+				print_error "Aborted" &&
+				exit 1
 			;;
 			-*)
-				echo ""
 				[[ -z ${network_option#*\-} || -z ${network_option/\-\-*} ]] && {
 					print_error "Invalid option '${network_option}'" &&
 					exit 1
@@ -6308,7 +6272,6 @@ EOF
 				exit 1
 			;;
 			*)
-				echo ""
 				print_error "Invalid option '${network_option}'" &&
 				exit 1
 			;;
@@ -7387,7 +7350,7 @@ void-deploy() {
 		# Show available timezone files
 		for zone_files in /usr/share/zoneinfo/*; do
 			[[ -d $zone_files && ${zone_files##*/} != posix && ${zone_files##*/} != right ]] && {
-				printf "${zone_count}.${zone_files##*/}  "
+				printf "${zone_count}. ${zone_files##*/}  "
 				time_zone[$zone_count]="$zone_files"
 				zone_count=$((zone_count + 1))
 			}
@@ -7417,7 +7380,7 @@ void-deploy() {
 					# List subzones files
 					zone_count=1
 					for sub_zone_files in ${time_zone[$tz_option]}/*; do
-						printf "${zone_count}.${sub_zone_files##*/}  "
+						printf "${zone_count}. ${sub_zone_files##*/}  "
 						sub_zone[$zone_count]="$sub_zone_files"
 						zone_count=$((zone_count + 1))
 					done
@@ -7435,7 +7398,7 @@ void-deploy() {
 						# List all sublocale files
 						zone_count=1
 						for sub_region_files in ${sub_zone[$tz_locale]}/*; do
-							printf "${zone_count}.${sub_region_files##*/}  "
+							printf "${zone_count}. ${sub_region_files##*/}  "
 							sub_region[$zone_count]="$sub_region_files"
 							zone_count=$((zone_count + 1))
 						done

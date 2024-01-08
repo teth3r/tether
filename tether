@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.07.2057"
+script_version="2024.01.08.1049"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -2263,8 +2263,10 @@ EOF
 # Create custom vim colorscheme
 #--------------------------------------------------------------
 print_vim_color() {
-	mkdir -p /usr/share/vim/vim90/colors 2>/dev/null
-	cat 2>/dev/null << "EOF" > /usr/share/vim/vim90/colors/tether.vim
+	for vim_dir in /usr/share/vim/*/colors; do
+		[[ -d $vim_dir ]] && {
+			mkdir -p "$vim_dir" 2>/dev/null
+			cat 2>/dev/null << "EOF" > "$vim_dir"/tether.vim
 "--------------------------------------------------------------
 " Name:         tether
 " Description:  color scheme by tether
@@ -2580,7 +2582,9 @@ hi PreProc ctermfg=4 ctermbg=NONE cterm=bold
 "--------------------------------------------------------------
 hi Folded ctermfg=14 ctermbg=NONE cterm=bold
 EOF
-	chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /usr/share/vim/vim90/colors/tether.vim 2>/dev/null
+			chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" "$vim_dir"/tether.vim 2>/dev/null
+		}
+	done
 }
 
 #--------------------------------------------------------------
@@ -3208,17 +3212,16 @@ dotfiles() {
 				;;
 				-v | --vim)
 					[[ $(type -p vim) ]] && {
-						# Run only root user on first run
-						chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /usr/share/vim/vim90/colors/tether.vim 2>/dev/null ||
+						chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /usr/share/vim/*/colors/tether.vim 2>/dev/null ||
 						print_not_root_user
 						# Update .vimrc
 						print_vimrc "$@" &&
 						print_success "Finished updating '~/.vimrc'" ||
 						print_error "Failed to update '~/.vimrc'"
-						# Update /usr/share/vim/vim90/colors/tether.vim
+						# Update /usr/share/vim/*/colors/tether.vim
 						print_vim_color "$@" &&
-						print_success "Finished updating '/usr/share/vim/vim90/colors/tether.vim'" ||
-						print_error "Failed to update '/usr/share/vim/vim90/colors/tether.vim'"
+						print_success "Finished updating '$vim_dir/tether.vim'" ||
+						print_error "Failed to update '$vim_dir/tether.vim'"
 						exit 0
 					}
 					print_missing_dependencies "vim"
@@ -7537,7 +7540,7 @@ void-deploy() {
 			chattr +i /etc/resolv.conf
 			# Create custom vim colorscheme
 			print_vim_color "$@"
-			chown "$user_name":"$user_name" /usr/share/vim/vim90/colors/tether.vim 2>/dev/null
+			chown "$user_name":"$user_name" /usr/share/vim/*/colors/tether.vim 2>/dev/null
 			echo ""
 			print_success "Done, switching to new user '$user_name'"
 			print_aligned "Run 'tether $script_name --install' to finish setting up chroot\n"

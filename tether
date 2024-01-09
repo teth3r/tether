@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.08.2106"
+script_version="2024.01.09.0909"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5449,7 +5449,7 @@ EOF
 		hp_printer() {
 			# Update xbps and enable multi-lib repo
 			xbps-install -Syu xbps void-repo-multilib &&
-			xbps-install -Syu cups hplip xsane cups-filters &&
+			xbps-install -Syu cups hplip-gui xsane cups-filters &&
 			ln -sf /etc/sv/cupsd /var/service/
 		}
 		brother_printer() {
@@ -6299,8 +6299,7 @@ swapfile() {
 		echo -e "$script_name (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [OPTION] [FILESIZE] [FILENAME]\n"
-		echo -e "Examples: $script_name"
-		echo -e "          $script_name --on 2048M ~/.local/share/swapfile0"
+		echo -e "Examples: $script_name --on 2048M ~/.local/share/swapfile0"
 		echo -e "          $script_name --off ~/.local/share/swapfile0\n"
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "             --on       Create and Enable swapfile"

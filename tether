@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.09.0909"
+script_version="2024.01.10.0807"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4735,6 +4735,13 @@ device_user="tether"
 hostname "$device_user"
 
 #--------------------------------------------------------------
+# Remove swapfile if device was rebooted
+#--------------------------------------------------------------
+[[ -f $MODDIR/swapfile0 && $(< /proc/swaps) != *$MODDIR/swapfile0* ]]
+	rm -r "$MODDIR"/swapfile0 2>/dev/null
+}
+
+#--------------------------------------------------------------
 # Enable and configure dnscrypt-proxy if installed and config files are available
 #--------------------------------------------------------------
 [[ -f /system/bin/dnscrypt-proxy && -f /system/etc/dnscrypt-proxy/dnscrypt-proxy.toml ]] && {
@@ -4834,6 +4841,11 @@ mem_total="${mem_total//[[:space:]]}"
 }
 
 #--------------------------------------------------------------
+# Create 2GB swapfile
+#--------------------------------------------------------------
+swapfile --on 2048MB "$MODDIR/swapfile0"
+
+#--------------------------------------------------------------
 # Show clock seconds in status bar
 #--------------------------------------------------------------
 settings put secure clock_seconds 1
@@ -4894,11 +4906,6 @@ dotfiles --mkshrc
 # Add custom dotfiles for bash
 #--------------------------------------------------------------
 dotfiles --bashrc
-
-#--------------------------------------------------------------
-# Create 2GB swapfile
-#--------------------------------------------------------------
-swapfile --on 2048MB "$MODDIR/swapfile0"
 
 exit 0
 EOF

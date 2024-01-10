@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.10.0956"
+script_version="2024.01.10.1829"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4761,7 +4761,7 @@ hostname "$device_user"
 #--------------------------------------------------------------
 # Remove swapfile if device was rebooted
 #--------------------------------------------------------------
-[[ -f $MODDIR/swapfile0 && $(< /proc/swaps) != *$MODDIR/swapfile0* ]] && {
+[[ -f $MODDIR/swapfile0 ]] && {
 	rm -r "$MODDIR"/swapfile0 2>/dev/null
 	read -rt "4" <> <(:) || :
 }
@@ -4904,9 +4904,9 @@ dotfiles --mkshrc
 dotfiles --bashrc
 
 #--------------------------------------------------------------
-# Create 2GB swapfile
+# Create 1.5GB swapfile
 #--------------------------------------------------------------
-swapfile --on 2048MB "$MODDIR/swapfile0"
+swapfile --on 1536MB "$MODDIR/swapfile0"
 
 exit 0
 EOF

@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.14.2249"
+script_version="2024.01.14.2327"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5055,7 +5055,7 @@ EOF
 		# update module version
 		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop"
 		# update module description
-		sed -i "s/description\=.*/description\=Installs $tether_version/" "$package_tmp_dir/module.prop"
+		sed -i "s/description\=.*/description\=Installs tether $tether_version/" "$package_tmp_dir/module.prop"
 		# Copy module files to tether/
 		mkdir -p "$tmp_dir/tether" 2>/dev/null || print_write_error "$tmp_dir/tether"
 		cp -rf $package_tmp_dir/* $tmp_dir/tether 2>/dev/null

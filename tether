@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.14.0947"
+script_version="2024.01.14.2249"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4661,7 +4661,7 @@ package() {
 		download_fail "tether"
 		chmod +x "$package_tmp_dir/tether"
 		./tether --silent "$package_tmp_dir/system/bin"
-		tether_version="$(./tether -V)"
+		tether_version="$(./tether --version)"
 		rm tether 2>/dev/null
 	}
 	download_custom_iosevka() {

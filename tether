@@ -39,7 +39,7 @@ script_name="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-script_version="2024.01.10.1829"
+script_version="2024.01.14.0947"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -223,7 +223,7 @@ print_not_normal_user() {
 # Print version info
 #--------------------------------------------------------------
 print_version() {
-	echo -e "${script_name} ${script_version}-${HOSTTYPE}"
+	echo -e "${script_version}"
 	exit 0
 }
 
@@ -258,7 +258,7 @@ input_option_type_one() {
 			-h | --help)
 				print_help
 			;;
-			-V | --version)
+			--version)
 				print_version
 			;;
 			-*)
@@ -286,7 +286,7 @@ input_option_type_two() {
 			-h | --help)
 				print_help
 			;;
-			-V | --version)
+			--version)
 				print_version
 			;;
 			-*)
@@ -1282,39 +1282,127 @@ user_pref("gfx.downloadable_fonts.enabled", false);
 //--------------------------------------------------------------
 // Set custom cursive font
 //--------------------------------------------------------------
+user_pref("font.name.cursive.ar", "Iosevka");
+user_pref("font.name.cursive.el", "Iosevka");
+user_pref("font.name.cursive.he", "Iosevka");
+user_pref("font.name.cursive.th", "Iosevka");
+user_pref("font.name.cursive.x-armn", "Iosevka");
+user_pref("font.name.cursive.x-beng", "Iosevka");
+user_pref("font.name.cursive.x-cans", "Iosevka");
+user_pref("font.name.cursive.x-cyrillic", "Iosevka");
+user_pref("font.name.cursive.x-devanagari", "Iosevka");
+user_pref("font.name.cursive.x-ethi", "Iosevka");
+user_pref("font.name.cursive.x-geor", "Iosevka");
+user_pref("font.name.cursive.x-gujr", "Iosevka");
+user_pref("font.name.cursive.x-guru", "Iosevka");
+user_pref("font.name.cursive.x-khmr", "Iosevka");
+user_pref("font.name.cursive.x-knda", "Iosevka");
 user_pref("font.name.cursive.x-math", "Iosevka");
+user_pref("font.name.cursive.x-mlym", "Iosevka");
+user_pref("font.name.cursive.x-orya", "Iosevka");
+user_pref("font.name.cursive.x-sinh", "Iosevka");
+user_pref("font.name.cursive.x-tamil", "Iosevka");
+user_pref("font.name.cursive.x-telu", "Iosevka");
+user_pref("font.name.cursive.x-tibt", "Iosevka");
 user_pref("font.name.cursive.x-unicode", "Iosevka");
 user_pref("font.name.cursive.x-western", "Iosevka");
 
 //--------------------------------------------------------------
 // Set custom monospace font
 //--------------------------------------------------------------
-user_pref("font.name.monospace.x-math", "Iosevka");
-user_pref("font.name.monospace.x-unicode", "Iosevka");
-user_pref("font.name.monospace.x-western", "Iosevka");
 user_pref("font.name-list.monospace.x-math", "Iosevka");
 user_pref("font.name-list.monospace.x-unicode", "Iosevka");
 user_pref("font.name-list.monospace.x-western", "Iosevka");
 
+user_pref("font.name.monospace.ar", "Iosevka");
+user_pref("font.name.monospace.el", "Iosevka");
+user_pref("font.name.monospace.he", "Iosevka");
+user_pref("font.name.monospace.th", "Iosevka");
+user_pref("font.name.monospace.x-armn", "Iosevka");
+user_pref("font.name.monospace.x-beng", "Iosevka");
+user_pref("font.name.monospace.x-cans", "Iosevka");
+user_pref("font.name.monospace.x-cyrillic", "Iosevka");
+user_pref("font.name.monospace.x-devanagari", "Iosevka");
+user_pref("font.name.monospace.x-ethi", "Iosevka");
+user_pref("font.name.monospace.x-geor", "Iosevka");
+user_pref("font.name.monospace.x-gujr", "Iosevka");
+user_pref("font.name.monospace.x-guru", "Iosevka");
+user_pref("font.name.monospace.x-khmr", "Iosevka");
+user_pref("font.name.monospace.x-knda", "Iosevka");
+user_pref("font.name.monospace.x-math", "Iosevka");
+user_pref("font.name.monospace.x-mlym", "Iosevka");
+user_pref("font.name.monospace.x-orya", "Iosevka");
+user_pref("font.name.monospace.x-sinh", "Iosevka");
+user_pref("font.name.monospace.x-tamil", "Iosevka");
+user_pref("font.name.monospace.x-telu", "Iosevka");
+user_pref("font.name.monospace.x-tibt", "Iosevka");
+user_pref("font.name.monospace.x-unicode", "Iosevka");
+user_pref("font.name.monospace.x-western", "Iosevka");
+
 //--------------------------------------------------------------
 // Set custom sans-serif font
 //--------------------------------------------------------------
-user_pref("font.name.sans-serif.x-math", "Iosevka");
-user_pref("font.name.sans-serif.x-unicode", "Iosevka");
-user_pref("font.name.sans-serif.x-western", "Iosevka");
 user_pref("font.name-list.sans-serif.x-math", "Iosevka");
 user_pref("font.name-list.sans-serif.x-unicode", "Iosevka");
 user_pref("font.name-list.sans-serif.x-western", "Iosevka");
 
+user_pref("font.name.sans-serif.ar", "Iosevka");
+user_pref("font.name.sans-serif.el", "Iosevka");
+user_pref("font.name.sans-serif.he", "Iosevka");
+user_pref("font.name.sans-serif.th", "Iosevka");
+user_pref("font.name.sans-serif.x-armn", "Iosevka");
+user_pref("font.name.sans-serif.x-beng", "Iosevka");
+user_pref("font.name.sans-serif.x-cans", "Iosevka");
+user_pref("font.name.sans-serif.x-cyrillic", "Iosevka");
+user_pref("font.name.sans-serif.x-devanagari", "Iosevka");
+user_pref("font.name.sans-serif.x-ethi", "Iosevka");
+user_pref("font.name.sans-serif.x-geor", "Iosevka");
+user_pref("font.name.sans-serif.x-gujr", "Iosevka");
+user_pref("font.name.sans-serif.x-guru", "Iosevka");
+user_pref("font.name.sans-serif.x-khmr", "Iosevka");
+user_pref("font.name.sans-serif.x-knda", "Iosevka");
+user_pref("font.name.sans-serif.x-math", "Iosevka");
+user_pref("font.name.sans-serif.x-mlym", "Iosevka");
+user_pref("font.name.sans-serif.x-orya", "Iosevka");
+user_pref("font.name.sans-serif.x-sinh", "Iosevka");
+user_pref("font.name.sans-serif.x-tamil", "Iosevka");
+user_pref("font.name.sans-serif.x-telu", "Iosevka");
+user_pref("font.name.sans-serif.x-tibt", "Iosevka");
+user_pref("font.name.sans-serif.x-unicode", "Iosevka");
+user_pref("font.name.sans-serif.x-western", "Iosevka");
+
 //--------------------------------------------------------------
 // Set custom serif font
 //--------------------------------------------------------------
-user_pref("font.name.serif.x-math", "Iosevka");
-user_pref("font.name.serif.x-unicode", "Iosevka");
-user_pref("font.name.serif.x-western", "Iosevka");
 user_pref("font.name-list.serif.x-math", "Iosevka");
 user_pref("font.name-list.serif.x-unicode", "Iosevka");
 user_pref("font.name-list.serif.x-western", "Iosevka");
+
+user_pref("font.name.serif.ar", "Iosevka");
+user_pref("font.name.serif.el", "Iosevka");
+user_pref("font.name.serif.he", "Iosevka");
+user_pref("font.name.serif.th", "Iosevka");
+user_pref("font.name.serif.x-armn", "Iosevka");
+user_pref("font.name.serif.x-beng", "Iosevka");
+user_pref("font.name.serif.x-cans", "Iosevka");
+user_pref("font.name.serif.x-cyrillic", "Iosevka");
+user_pref("font.name.serif.x-devanagari", "Iosevka");
+user_pref("font.name.serif.x-ethi", "Iosevka");
+user_pref("font.name.serif.x-geor", "Iosevka");
+user_pref("font.name.serif.x-gujr", "Iosevka");
+user_pref("font.name.serif.x-guru", "Iosevka");
+user_pref("font.name.serif.x-khmr", "Iosevka");
+user_pref("font.name.serif.x-knda", "Iosevka");
+user_pref("font.name.serif.x-math", "Iosevka");
+user_pref("font.name.serif.x-mlym", "Iosevka");
+user_pref("font.name.serif.x-orya", "Iosevka");
+user_pref("font.name.serif.x-sinh", "Iosevka");
+user_pref("font.name.serif.x-tamil", "Iosevka");
+user_pref("font.name.serif.x-telu", "Iosevka");
+user_pref("font.name.serif.x-tibt", "Iosevka");
+user_pref("font.name.serif.x-unicode", "Iosevka");
+user_pref("font.name.serif.x-western", "Iosevka");
+
 EOF
 	# Add exist status for Android
 	[[ -d /system/app/ && -f /system/build.prop ]] && {
@@ -2844,7 +2932,7 @@ benchmark() {
 		echo -e "          $script_name --iteration 20\n"
 		echo -e "Options: -h,  --help       Print out this message"
 		echo -e "         -it, --iteration  Number of iterations to perform"
-		echo -e "         -V,  --version    Show version information\n"
+		echo -e "              --version    Show version information\n"
 		echo -e "Single core performance benchmark using Mersenne primality test"
 		exit 0
 	}
@@ -2926,7 +3014,7 @@ benchmark() {
 					prime_test_benchmark "$@"
 					exit 0
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -2965,7 +3053,7 @@ chroot-backup() {
 		echo -e "Options: -en, --encrypt    Create an encrypted backup"
 		echo -e "         -h,  --help       Print out this message"
 		echo -e "         -un, --unencrypt  Create an unencrypted backup"
-		echo -e "         -V,  --version    Show version information\n"
+		echo -e "              --version    Show version information\n"
 		echo -e "Create chroot image backup in specifed folder"
 		exit 0
 	}
@@ -3055,7 +3143,7 @@ chroot-backup() {
 					check_dependencies "$@"
 					unencrypted_backup "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -3099,7 +3187,7 @@ dotfiles() {
 		echo -e "         -tm, --tmux     Add custom .tmux.conf"
 		echo -e "         -u,  --urxvt    Add custom .Xresources"
 		echo -e "         -v,  --vim      Add custom .vimrc and vim colorscheme"
-		echo -e "         -V,  --version  Show version information\n"
+		echo -e "              --version  Show version information\n"
 		echo -e "Install/Update dotfiles"
 		exit 0
 	}
@@ -3227,7 +3315,7 @@ dotfiles() {
 					print_missing_dependencies "vim"
 					exit 1
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -3272,7 +3360,7 @@ extract() {
 		echo -e "          $script_name /sdcard/*"
 		echo -e "          $script_name file1.zip file2.zip\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Extract archive into archive-name folder"
 		exit 0
 	}
@@ -3375,7 +3463,7 @@ ll() {
 		echo -e "          $script_name -l 1 folder folder2"
 		echo -e "          $script_name -l 1 folder/folder\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "All 'ls' options are also available here\n"
 		echo -e "Expand 'ls' functionality"
 		exit 0
@@ -3391,7 +3479,7 @@ ll() {
 				-h | --help)
 					print_help
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				*)
@@ -3511,7 +3599,7 @@ mkcp() {
 		echo -e "          $script_name newfolder file1 file2"
 		echo -e "          $script_name newfolder *\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Copy file/folder to the specified folder"
 		exit 0
 	}
@@ -3656,7 +3744,7 @@ mkmv() {
 		echo -e "          $script_name newfolder file1 file2"
 		echo -e "          $script_name newfolder *\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Move file/folder to the specified folder"
 		exit 0
 	}
@@ -3803,7 +3891,7 @@ mktouch() {
 		echo -e "          $script_name newfolder file1 file2"
 		echo -e "          $script_name newfolder *\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Create empty file(s) in the specified folder"
 		exit 0
 	}
@@ -3878,7 +3966,7 @@ omaps-backup() {
 		echo -e "         -l,  --list       List all available backups"
 		echo -e "         -un, --unencrypt  Create an unencrypted backup"
 		echo -e "         -r,  --restore    Restore organic maps from available backups"
-		echo -e "         -V,  --version    Show version information\n"
+		echo -e "              --version    Show version information\n"
 		echo -e "Create and restore organic maps backups"
 		exit 0
 	}
@@ -4109,7 +4197,7 @@ omaps-backup() {
 					check_dependencies "$@"
 					restore_omaps "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -4155,7 +4243,7 @@ opencamera-backup() {
 		echo -e "         -l,  --list       List all available backups"
 		echo -e "         -un, --unencrypt  Create an unencrypted backup"
 		echo -e "         -r,  --restore    Restore open camera from available backups"
-		echo -e "         -V,  --version    Show version information\n"
+		echo -e "              --version    Show version information\n"
 		echo -e "Create and restore open camera backups"
 		exit 0
 	}
@@ -4380,7 +4468,7 @@ opencamera-backup() {
 					check_dependencies "$@"
 					restore_ocam "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -4422,7 +4510,7 @@ package() {
 		echo -e "Examples: $script_name"
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Magisk module packaging tool"
 		exit 0
 	}
@@ -4446,7 +4534,7 @@ package() {
 		# 7zip version
 		z_version="2301"
 		# Iosevka version
-		iosevka_version="28.0.4"
+		iosevka_version="28.0.5"
 
 		# Get current directory
 		current_dir="$PWD"
@@ -5051,7 +5139,7 @@ replace-su() {
 		echo -e "Examples: $script_name"
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Replace phh-su with magisk in AOSP GSI"
 		exit 0
 	}
@@ -5120,7 +5208,7 @@ setup() {
 		echo -e "Examples: $script_name"
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Post-installation setup utility for voidlinux"
 		exit 0
 	}
@@ -6312,7 +6400,7 @@ swapfile() {
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "             --on       Create and Enable swapfile"
 		echo -e "             --off      Disable and Delete swapfile"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Creates a swapfile with user specified parameters"
 		exit 0
 	}
@@ -6544,7 +6632,7 @@ swapfile() {
 
 					create_swapfile "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -6588,7 +6676,7 @@ tfetch() {
 		echo -e "Examples: $script_name"
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "System resource information tool"
 		exit 0
 	}
@@ -7028,7 +7116,7 @@ touchzip() {
 		echo -e "Options: -en, --encrypt    Create an encrypted 7z archive"
 		echo -e "         -h,  --help       Print out this message"
 		echo -e "         -un, --unencrypt  Create an unencrypted 7z archive"
-		echo -e "         -V,  --version    Show version information\n"
+		echo -e "              --version    Show version information\n"
 		echo -e "Create 7z archive"
 		exit 0
 	}
@@ -7097,7 +7185,7 @@ touchzip() {
 				-un | --unencrypt)
 					unencrypted_archive "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -7142,7 +7230,7 @@ viw() {
 		echo -e "          $script_name --help"
 		echo -e "          $script_name /usr/share \n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Open specified folder in vim netrw"
 		exit 0
 	}
@@ -7176,7 +7264,7 @@ void-backup() {
 		echo -e "Examples: $script_name --cache\n"
 		echo -e "Options: -c, --cache    Backup xbps package cache"
 		echo -e "         -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Chroot package cache backup tool"
 		exit 0
 	}
@@ -7236,7 +7324,7 @@ void-backup() {
 					check_dependencies "$@"
 					backup_cache
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -7274,7 +7362,7 @@ void-deploy() {
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "         -i, --install  Setup chroot after installation"
 		echo -e "         -s, --setup    Setup chroot after mounting"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Chroot post-install and post-mount setup tool"
 		exit 0
 	}
@@ -7545,7 +7633,7 @@ void-deploy() {
 					check_dependencies "$@"
 					post_boot_setup "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -7581,7 +7669,7 @@ void-install() {
 		echo -e "Examples: $script_name"
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Chroot installation tool"
 		exit 0
 	}
@@ -7834,7 +7922,7 @@ void-mount() {
 		echo -e "Examples: $script_name"
 		echo -e "          $script_name --help\n"
 		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Chroot initialization tool"
 		exit 0
 	}
@@ -7938,7 +8026,7 @@ void-umount() {
 		echo -e "          $script_name --remove\n"
 		echo -e "Options: -h, --help     Print out this message"
 		echo -e "         -r, --remove   Unmount and delete chroot"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "Chroot unmount tool"
 		exit 0
 	}
@@ -8085,7 +8173,7 @@ void-umount() {
 					check_dependencies "$@"
 					remove_chroot "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -8126,7 +8214,7 @@ whatsapp-backup() {
 		echo -e "         -l,  --list       List all available backups"
 		echo -e "         -un, --unencrypt  Create an unencrypted backup"
 		echo -e "         -r,  --restore    Restore whatsapp from available backups"
-		echo -e "         -V,  --version    Show version information\n"
+		echo -e "              --version    Show version information\n"
 		echo -e "Create and restore whatsapp backups"
 		exit 0
 	}
@@ -8313,7 +8401,7 @@ whatsapp-backup() {
 					check_dependencies "$@"
 					restore_whatsapp "$@"
 				;;
-				-V | --version)
+				--version)
 					print_version
 				;;
 				-*)
@@ -8379,18 +8467,19 @@ tether() {
 		echo "$func_count"
 	}
 	print_help() {
-		echo -e "${script_name} ${script_version}-${HOSTTYPE} (C) 2023, Kolade Ayomide Olanrewaju (tether)"
+		echo -e "${script_name} ${script_version} (C) 2023, Kolade Ayomide Olanrewaju (tether)"
 		echo -e "$script_name is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
 		echo -e "Usage:    $script_name [FUNCTION] [ARGUMENTS...]"
 		echo -e "          $script_name [OPTION] [FOLDER]\n"
 		echo -e "Examples: $script_name --install /usr/bin"
 		echo -e "          $script_name touchzip --encrypt dotfiles.7z .bashrc"
 		echo -e "          $script_name extract dotfiles.7z\n"
-		echo -e "Options: -h, --help     Print out this message"
+		echo -e "Options:     --banner   Show program banner"
+		echo -e "         -h, --help     Print out this message"
 		echo -e "         -i, --install  Create symbolic links in the specified folder"
 		echo -e "         -l, --list     List all available functions"
 		echo -e "         -s, --silent   '-i/--install' with hidden output"
-		echo -e "         -V, --version  Show version information\n"
+		echo -e "             --version  Show version information\n"
 		echo -e "\033[1;97m$script_name\033[00m is a multi-call shell script that combines many applets into a single executable."
 		echo -e "Create symbolic links to \033[1;97m$script_name\033[00m for each function and \033[1;97m$script_name\033[00m will act like whatever it was invoked as\n"
 		echo -e "\033[1;97mCurrently defined functions ($(req_func)):\033[00m"
@@ -8400,6 +8489,10 @@ tether() {
 	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
+				--banner)
+					print_banner
+					exit 0
+				;;
 				-h | --help)
 					print_help
 				;;
@@ -8459,8 +8552,8 @@ tether() {
 					}
 					exit 0
 				;;
-				-V | --version)
-					echo -e "${script_name} ${script_version}-${HOSTTYPE}"
+				--version)
+					print_version
 					exit 0
 				;;
 				-*)

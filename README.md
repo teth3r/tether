@@ -11,6 +11,7 @@ benchmark
 . dotfiles
 . extract
 . ll
+. lyrics
 . mkcp
 . mkmv
 . mktouch
@@ -40,6 +41,7 @@ benchmark
 **dotfiles** | vim, tmux, urxvt, termux | Device Agnostic (depending on the option flag) | Usage: ` dotfiles [OPTION] ` <p> Installs custom dotfiles for the specified program. It overwrites existing dotfiles and as such it is recommended to backup existing dotfiles beforehand. Run `dotfiles --help` for more details. |
 **extract** | 7z, bsdtar | Device Agnostic (requires root on Android) | Usage: ` extract [FILE...] ` <p> This is a wrapper for `7z` and `bsdtar` for extracting archive files. It extracts the archive file into a folder using the archive name. Run `extract --help` for more details. |
 **ll** | ls | Device Agnostic | Usage: ` ll [OPTION] [NUMBER] [FOLDER/FILE...] ` <p> This is a wrapper for `ls`, it supports all `ls` arguments and option flags, while simplifying path operations, for example `ls ../..` --> `ll 2`. Run `ll --help` for more details. |
+**lyrics** | curl, find, lltag | Device Agnostic | Usage: ` lyrics [FILENAME] ` <p> Lyrics file `.lrc` downloader. Run `lyrics --help` for more details. |
 **mkcp** | cp, find, ls, mkdir | Device Agnostic | Usage: ` mkcp [FOLDER] [FILE...] ` <p> This tool copies files/folders to the specified folder. It will create the folder if it doesn't already exist. Run `mkcp --help` for more details. |
 **mkmv** | cp, find, ls, mkdir, rm | Device Agnostic | Usage: ` mkmv [FOLDER] [FILE...] ` <p> This tool moves files/folders to the specified folder. It will create the folder if it doesn't already exist. Run `mkmv --help` for more details. |
 **mktouch** | ls, mkdir, touch | Device Agnostic | Usage: ` mktouch [FOLDER] [FILE...] ` <p> This tool creates specified empty file(s) in the specified folder. It will create the folder if it doesn't already exist. Run `mktouch --help` for more details. |

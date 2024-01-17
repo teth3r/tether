@@ -39,7 +39,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.17.0652"
+SCRIPT_VERSION="2024.01.17.0942"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5140,6 +5140,7 @@ package() {
 		echo -e "Magisk module packaging tool"
 		exit 0
 	}
+
 	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app ]] && print_os_error
@@ -5210,6 +5211,7 @@ package() {
 			cp -f /bin/busybox "$package_tmp_dir/system/bin" || print_file_write_error "$package_tmp_dir/system/bin/busybox"
 		}
 	}
+
 	download_fail() {
 		print_error "Something went wrong"
 		print_aligned "Failed to download '$@'"

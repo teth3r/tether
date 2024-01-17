@@ -39,7 +39,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.17.0603"
+SCRIPT_VERSION="2024.01.17.0652"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5147,6 +5147,9 @@ package() {
 		# Run only on arm64 Android
 		[[ $HOSTTYPE != aarch64 ]] && print_os_error
 
+		# Run only as root user
+		print_not_root_user
+
 		# Check for internet connectivity
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
 			print_error "Network isn't ready yet"
@@ -5218,7 +5221,7 @@ package() {
 	failed_to_create() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'tether.$current_date.zip'"
-		rm -r "${package_tmp_dir} $tmp_dir/tether" 2>/dev/null
+		rm -r "${package_tmp_dir}" "$tmp_dir/tether" 2>/dev/null
 		cd "$current_dir"
 		exit 1
 	}
@@ -5734,10 +5737,10 @@ EOF
 		}
 
 		# update module version
-		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop"
+		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# update module description
-		sed -i "s/description\=.*/description\=Installs tether $tether_version/" "$package_tmp_dir/module.prop"
+		sed -i "s/description\=.*/description\=Installs tether $tether_version/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# Copy module files to tether/
 		mkdir -p "$tmp_dir/tether" 2>/dev/null || print_write_error "$tmp_dir/tether"
@@ -5811,7 +5814,7 @@ EOF
 		exit 0
 	}
 
-	trap 'remove_file_on_exit "$package_tmp_dir" "$tmp_dir/tether" ' 1 2 3 15
+	trap 'remove_file_on_exit "$package_tmp_dir" "$tmp_dir/tether"' 1 2 3 15
 	input_option_type_two "$@"
 	check_dependencies "$@"
 	package_main "$@"

@@ -3867,6 +3867,8 @@ lyrics() {
 		title="${title,,}"
 		title="${title//\(}"
 		title="${title//\)}"
+		title="${title//"]"}"
+		title="${title//"["}"
 		title="${title//\-}"
 		title="${title//!}"
 		title="${title//\?}"
@@ -3887,7 +3889,7 @@ lyrics() {
 		title="${title//"ft."*}"
 		title="${title//\.}"
 		title="${title//[[:space:]]}"
-		title="${title//explicit}"
+		title="${title//"explicit"}"
 		title="${title//"bonustrack"}"
 		title="${title//"numbe"}"
 

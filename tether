@@ -39,7 +39,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.17.2343"
+SCRIPT_VERSION="2024.01.17.2349"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3774,7 +3774,7 @@ lyrics() {
 		print_not_normal_user "$@"
 
 		# Check for internet connection
-		[[ ! $(ping -c4 voidlinux.org) ]] && {
+		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
 			print_error "Failed to detect an internet connection"
 			exit 1
 		}

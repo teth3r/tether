@@ -39,7 +39,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.17.0942"
+SCRIPT_VERSION="2024.01.17.2343"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3744,7 +3744,7 @@ ll() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: curl, find, lltag
+# Dependencies: curl, find, lltag, iconv
 #--------------------------------------------------------------
 lyrics() {
 	print_help() {
@@ -3761,7 +3761,7 @@ lyrics() {
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in lltag curl find; do
+		for mis_dep in lltag curl find iconv ping; do
 			[[ ! $(type -p $mis_dep) ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -3772,6 +3772,12 @@ lyrics() {
 
 		# Only run as non root
 		print_not_normal_user "$@"
+
+		# Check for internet connection
+		[[ ! $(ping -c4 voidlinux.org) ]] && {
+			print_error "Failed to detect an internet connection"
+			exit 1
+		}
 	}
 
 	failed_to_fetch() {
@@ -3807,7 +3813,7 @@ lyrics() {
 
 		# Only process audio files
 		! [[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus|.lrc ]] && [[ ! -d $parsed_file ]] && {
-			print_error "'$audio_file' is not a valid or supported audio file"
+			print_error "'$parsed_file' is not a valid or supported audio file"
 			print_aligned "Skipping\n"
 			skip="true"
 			return
@@ -3824,7 +3830,7 @@ lyrics() {
 		[[ -f $lrc_file ]] && {
 			check_lrc="$(< "$lrc_file")"
 			[[ -n $check_lrc ]] && {
-				print_warning "Lyrics file for '$audio_file' already exists"
+				print_warning "Lyrics file for '$parsed_file' already exists"
 				print_aligned "Skipping\n"
 				exit_status=0
 				skip="true"
@@ -3834,7 +3840,7 @@ lyrics() {
 
 		# Handles missing tags
 		[[ -z $artist || -z $title ]] && {
-			print_error "'$audio_file' file has incorrect or invalid metadata"
+			print_error "'$parsed_file' file has incorrect or invalid metadata"
 			print_aligned "Skipping\n"
 			skip="true"
 			return
@@ -3846,59 +3852,62 @@ lyrics() {
 
 		fetch_song_tags "$@"
 
+		# Check if run has been skipped
 		[[ $skip == "true" ]] && return
 
-		# Sanitize artist content
-		artist="${artist//"feat"*}"
-		artist="${artist//"ft."*}"
-		artist="${artist//[[:space:]]}"
-		artist="${artist//\-}"
-		artist="${artist//!}"
-		artist="${artist//=}"
-		artist="${artist//\/}"
-		artist="${artist//&}"
-		artist="${artist//"#"}"
-		artist="${artist//";"*}"
+		# Convert to lowercase
 		artist="${artist,,}"
-		artist="${artist//"with"*}"
-		artist="${artist//","*}"
 
-		# Sanitize title content
+		# Remove all white space
+		artist="${artist//[[:space:]]}"
+
+		# Remove diacritics from strings
+		artist="$(echo "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Sanitize artist string
+		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "“" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "with"; do
+			[[ $sanitize =~ "feat."|"ft."|"featuring"|","|";"|"with" ]] && {
+				artist="${artist//"$sanitize"*}"
+			}
+			artist="${artist//"$sanitize"}"
+		done
+
+		# Fixes issues with Marina's music
+		[[ $artist == "marina" ]] && {
+			artist="${artist/"marina"/"marinathediamonds"}"
+		}
+
+		[[ $artist == "marinaandthediamonds" ]] && {
+			artist="${artist/"marinaandthediamonds"/"marinathediamonds"}"
+		}
+
+		# Useful for "artists" like Tydolla$ign, A$APRocky
+		artist="${artist//"$"/"s"}"
+
+		# Convert to lowercase
 		title="${title,,}"
-		title="${title//\(}"
-		title="${title//\)}"
-		title="${title//"]"}"
-		title="${title//"["}"
-		title="${title//\-}"
-		title="${title//!}"
-		title="${title//\?}"
-		title="${title//=}"
-		title="${title//&}"
-		title="${title//"#"}"
-		title="${title//":"}"
-		title="${title//";"}"
-		title="${title//\'}"
-		title="${title//"’"}"
-		title="${title//"“"}"
-		title="${title//"”"}"
-		title="${title//"‘"}"
-		title="${title//"’"}"
-		title="${title//\/}"
-		title="${title//,}"
-		title="${title//"feat"*}"
-		title="${title//"ft."*}"
-		title="${title//\.}"
+
+		# Remove all white space
 		title="${title//[[:space:]]}"
-		title="${title//"explicit"}"
-		title="${title//"bonustrack"}"
-		title="${title//"numbe"}"
+
+		# Remove diacritics from strings
+		title="$(echo "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Sanitize title string
+		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "*" "“" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
+			[[ $sanitize =~ "feat."|"ft."|"featuring" ]] && {
+				title="${title//"$sanitize"*}"
+			}
+			title="${title//"$sanitize"}"
+		done
 
 		url="https://www.azlyrics.com/lyrics/"$artist"/"$title".html"
 
 		output="$(content_loader "$url")"
 
+		# Check if website gave a valid response
 		[[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha_container"* ]] && {
-			# Sanitize output content
+			# Sanitize output string
 			output="${output//*"Usage of azlyrics.com"}"
 			output="${output//"</div>"*}"
 			output="${output//"<br>"}"
@@ -3907,10 +3916,26 @@ lyrics() {
 			output="${output//"</i>"}"
 			output="${output//"&quot;"}"
 			output="${output//"&amp;"}"
+			output="${output//":]"/"]"}"
 
 			echo "${output}" > "$lrc_file"
 
 			exit_status=0
+		}
+
+		# Check for missing lyrics page
+		[[ $output == *"Welcome to AZLyrics"* ]] && {
+			print_error "No lyrics found for '$parsed_file'"
+			print_aligned "Skipping\n"
+			skip="true"
+			return
+		}
+
+		# Check for rate limit or captcha page
+		[[ $output == *"az_captcha_container"* ]] && {
+			print_error "Captcha response detected"
+			print_aligned "Try again later\n"
+			exit 1
 		}
 
 		# Check for connection problems
@@ -3923,20 +3948,8 @@ lyrics() {
 			}
 		}
 
-		# Check for missing lyrics page
-		[[ $output == *"Welcome to AZLyrics"* ]] && {
-			print_error "No lyrics found for '$audio_file'"
-			print_aligned "Skipping\n"
-			skip="true"
-			return
-		}
-
-		# Check for rate limit or captcha page
-		[[ $output == *"az_captcha_container"* ]] && {
-			print_error "Captcha response detected"
-			print_aligned "Try again later\n"
-			exit 1
-		}
+		# Add delay between each run to prevent a captcha response
+		read -rt "1" <> <(:) || :
 	}
 
 	check_input_argument() {
@@ -3948,88 +3961,32 @@ lyrics() {
 						print_error "Cannot stat '$file_name': No such file or directory"
 					}
 
-					# Remove file name extension
-					lrc_file="${file_name%.*}.lrc"
+					while read sec_file_name; do
+						[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
+							unset exit_status
 
-					# Gets audio_file from file_name and removes the directory path
-					# file_name --> /home/username/folder -> folder
-					audio_file=${file_name##*\/}
+							# Remove file name extension
+							lrc_file="${sec_file_name%.*}.lrc"
 
-					[[ -z $audio_file ]] && {
-						# /home/username/file/*  -> /home/username/file/
-						audio_file=${file_name%\*}
+							parsed_file="$sec_file_name"
 
-						# /home/username/file/  -> /home/username/file
-						audio_file=${audio_file%\/}
+							# Copies file into created destination directory using $new_file_name as base directory
+							# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
+							azlyrics_parser "$sec_file_name"
 
-						# /home/username/file  -> file
-						audio_file=${audio_file##*\/}
-					}
-
-					# Handles if $file_name is a file but not a directory
-					# Handles special files, stuff normally not caught by -f
-					[[ -e $file_name && ! -d $file_name ]] && {
-						unset exit_status
-
-						parsed_file="$file_name"
-
-						azlyrics_parser "$file_name"
-
-						[[ $exit_status != 0 && $skip != "true" ]] && {
-							print_error "Failed to fetch lyrics for '${audio_file%.*}.lrc'"
-							print_aligned "Skipping\n"
-						}
-
-						# Print program run status
-						[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
-							print_success "Added '${audio_file%.*}.lrc' in $file_name\n"
-						}
-					}
-
-					# Handles if $file_name is a directory
-					[[ -d $file_name ]] && {
-						while read sec_file_name; do
-							[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
-								unset exit_status
-
-								# Remove file name extension
-								lrc_file="${sec_file_name%.*}.lrc"
-
-								# Gets audio_file from file_name and removes the directory path
-								# file_name --> /home/username/folder -> folder
-								audio_file=${sec_file_name##*\/}
-
-								[[ -z $audio_file ]] && {
-									# /home/username/file/*  -> /home/username/file/
-									audio_file=${sec_file_name%\*}
-
-									# /home/username/file/  -> /home/username/file
-									audio_file=${audio_file%\/}
-
-									# /home/username/file  -> file
-									audio_file=${audio_file##*\/}
-								}
-
-								parsed_file="$sec_file_name"
-
-								# Copies file into created destination directory using $new_file_name as base directory
-								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
-								azlyrics_parser "$sec_file_name"
-
-								[[ $exit_status != 0 && $skip != "true" ]] && {
-									print_error "Failed to fetch lyrics for '${audio_file%.*}.lrc'"
-									print_aligned "Skipping\n"
-								}
-
-								# Print program run status
-								[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
-									print_success "Added '${audio_file%.*}.lrc' in $sec_file_name\n"
-								}
+							[[ $exit_status != 0 && $skip != "true" ]] && {
+								print_error "Failed to fetch lyrics for '$sec_file_name'"
+								print_aligned "Skipping\n"
 							}
 
-						# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
-						done <<< $(find "$file_name")
-					}
+							# Print program run status
+							[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
+								print_success "Added '${audio_file%.*}.lrc' for '$sec_file_name'\n"
+							}
+						}
+
+					# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
+					done <<< $(find "$file_name")
 				;;
 			esac
 		done
@@ -5153,7 +5110,7 @@ package() {
 
 		# Check for internet connectivity
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
-			print_error "Network isn't ready yet"
+			print_error "Failed to detect an internet connection"
 			exit 1
 		}
 
@@ -5933,7 +5890,7 @@ setup() {
 		print_not_root_user
 
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
-			print_error "Network isn't ready yet"
+			print_error "Failed to detect an internet connection"
 			exit 1
 		}
 	}
@@ -8770,7 +8727,7 @@ void-install() {
 
 		# Check for internet connectivity
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
-			print_error "Network isn't ready yet"
+			print_error "Failed to detect an internet connection"
 			exit 1
 		}
 	}

@@ -39,7 +39,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.17.2349"
+SCRIPT_VERSION="2024.01.18.1349"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -348,7 +348,7 @@ print_usage_bar() {
 	# Handles all $usage_visualizer values > 0
 	out_block="${color_green}"
 
-	for ((blk_counter=0; blk_counter < $usage_counter; blk_counter++)); do
+	for ((blk_counter=0; blk_counter < usage_counter; blk_counter++)); do
 		out_block+="■"
 		# Show ${color_yellow} blocks after 7 ${color_green} blocks
 		[[ $blk_counter -eq 6 ]] && {
@@ -719,7 +719,7 @@ EOF
 print_mkshrc_android() {
 	mkdir -p "$MODULE_DIRECTORY/system/etc" 2>/dev/null
 
-	cat 2>/dev/null << "EOF" > $MODULE_DIRECTORY/system/etc/mkshrc
+	cat 2>/dev/null << "EOF" > "$MODULE_DIRECTORY"/system/etc/mkshrc
 #--------------------------------------------------------------
 # Android
 #--------------------------------------------------------------
@@ -2731,7 +2731,7 @@ EOF
 print_termux_profile() {
 	mkdir -p "$TERMUX_DIRECTORY/usr/etc" 2>/dev/null
 
-	cat 2>/dev/null << "EOF" > $TERMUX_DIRECTORY/usr/etc/profile
+	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/usr/etc/profile
 #--------------------------------------------------------------
 # Source etc/.bashrc for interactive bash login shells:
 #--------------------------------------------------------------
@@ -2748,7 +2748,7 @@ EOF
 print_termux_color() {
 	mkdir -p "$TERMUX_DIRECTORY/home/.termux" 2>/dev/null
 
-	cat 2>/dev/null << "EOF" > $TERMUX_DIRECTORY/home/.termux/colors.properties
+	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/home/.termux/colors.properties
 #--------------------------------------------------------------
 # tether color scheme
 #--------------------------------------------------------------
@@ -2817,7 +2817,7 @@ EOF
 print_termux_config() {
 	mkdir -p "$TERMUX_DIRECTORY/home/.termux" 2>/dev/null
 
-	cat 2>/dev/null << "EOF" > $TERMUX_DIRECTORY/home/.termux/termux.properties
+	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/home/.termux/termux.properties
 ### After making changes and saving you need to run `termux-reload-settings`
 ### to update the terminal.  All information here can also be found on the
 ### wiki: https://wiki.termux.com/wiki/Terminal_Settings
@@ -2997,7 +2997,7 @@ benchmark() {
 			# Use bash to find mersenne numbers
 			# Use mersenne formula 2^n - 1
 			[[ $user_iteration -le 62 ]] && {
-				mersenne_numbers="$(( (2 ** $prime_numbers) - 1 ))"
+				mersenne_numbers="$(( (2 ** prime_numbers) - 1 ))"
 			}
 
 			# Use bc to find mersenne numbers
@@ -3137,7 +3137,7 @@ chroot-backup() {
 
 		# Check for required dependencies
 		for mis_dep in cp mkdir losetup 7z; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -3477,7 +3477,7 @@ extract() {
 
 		# Check for required dependencies
 		for mis_dep in mkdir ls; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -3762,7 +3762,7 @@ lyrics() {
 	check_dependencies() {
 		# Check for required dependencies
 		for mis_dep in lltag curl find iconv ping; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -3810,46 +3810,59 @@ lyrics() {
 			title="${title//*"TITLE="}"
 			title="${title//[A-Z]=*}"
 		}
+	}
 
+	check_audio_files() {
 		# Only process audio files
 		! [[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus|.lrc ]] && [[ ! -d $parsed_file ]] && {
-			print_error "'$parsed_file' is not a valid or supported audio file"
-			print_aligned "Skipping\n"
+			print_error "'$parsed_file' is not a valid or supported audio file\n"
 			skip="true"
+			exit_status=1
 			return
 		}
 
 		# Skip lyric files
 		[[ $parsed_file  =~ .lrc ]] && {
+			check_lrc="$(< "$lrc_file")"
+
+			# Check if lyric file is empty
+			[[ -n $check_lrc ]] && {
+				print_warning "'$parsed_file' is a Lyrics file\n"
+				skip="true"
+				exit_status=0
+				return
+			}
+
+			# Delete lyrics file if it is empty
+			print_error "'$parsed_file' is not a valid Lyrics file\n"
+			rm "$parsed_file" 2>/dev/null
 			skip="true"
-			exit_status=0
+			exit_status=1
 			return
 		}
 
 		# Check if .lrc file already exists
-		[[ -f $lrc_file ]] && {
+		[[ -f $lrc_file ]] && ! [[ $parsed_file =~ .lrc ]] && {
 			check_lrc="$(< "$lrc_file")"
 			[[ -n $check_lrc ]] && {
-				print_warning "Lyrics file for '$parsed_file' already exists"
-				print_aligned "Skipping\n"
-				exit_status=0
+				print_warning "Lyrics file for '$parsed_file' already exists\n"
 				skip="true"
+				exit_status=0
 				return
 			}
 		}
 
 		# Handles missing tags
 		[[ -z $artist || -z $title ]] && {
-			print_error "'$parsed_file' file has incorrect or invalid metadata"
-			print_aligned "Skipping\n"
+			print_error "'$parsed_file' file has incorrect or invalid metadata\n"
 			skip="true"
+			exit_status=1
 			return
 		}
 	}
 
 	azlyrics_parser() {
-		unset skip
-
+		# Create variables with song tags
 		fetch_song_tags "$@"
 
 		# Check if run has been skipped
@@ -3865,7 +3878,7 @@ lyrics() {
 		artist="$(echo "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Sanitize artist string
-		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "“" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "with"; do
+		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "“" "+" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "with"; do
 			[[ $sanitize =~ "feat."|"ft."|"featuring"|","|";"|"with" ]] && {
 				artist="${artist//"$sanitize"*}"
 			}
@@ -3894,12 +3907,20 @@ lyrics() {
 		title="$(echo "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Sanitize title string
-		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "*" "“" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
+		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "*" "+" "“" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
 			[[ $sanitize =~ "feat."|"ft."|"featuring" ]] && {
 				title="${title//"$sanitize"*}"
 			}
 			title="${title//"$sanitize"}"
 		done
+
+		# Skip if missing tags, useful for CJK characters
+		[[ -z $artist || -z $title ]] && {
+			missing_lyrics="true"
+			skip="true"
+			exit_status=1
+			return
+		}
 
 		url="https://www.azlyrics.com/lyrics/"$artist"/"$title".html"
 
@@ -3919,23 +3940,23 @@ lyrics() {
 			output="${output//":]"/"]"}"
 
 			echo "${output}" > "$lrc_file"
-
 			exit_status=0
 		}
 
 		# Check for missing lyrics page
 		[[ $output == *"Welcome to AZLyrics"* ]] && {
-			print_error "No lyrics found for '$parsed_file'"
-			print_aligned "Skipping\n"
+			missing_lyrics="true"
 			skip="true"
+			exit_status=1
 			return
 		}
 
 		# Check for rate limit or captcha page
 		[[ $output == *"az_captcha_container"* ]] && {
-			print_error "Captcha response detected"
-			print_aligned "Try again later\n"
-			exit 1
+			captcha_response="true"
+			skip="true"
+			exit_status=1
+			return
 		}
 
 		# Check for connection problems
@@ -3944,12 +3965,125 @@ lyrics() {
 			[[ $check_lrc == "FAILED" ]] && {
 				exit_status=1
 				rm "$lrc_file" 2>/dev/null
+				failed_fetch="true"
+				skip="true"
+				exit_status=1
+				# recheck internet connection before proceeding
+				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
+					print_error "Failed to detect an internet connection"
+					exit 1
+				}
 				return
 			}
 		}
 
 		# Add delay between each run to prevent a captcha response
 		read -rt "1" <> <(:) || :
+	}
+
+	songlyrics_parser() {
+		# Create variables with song tags
+		fetch_song_tags "$@"
+
+		# Convert to lowercase
+		artist="${artist,,}"
+
+		# Replace all whitespace with -
+		artist="${artist//" "/"-"}"
+
+		# Fix artist naming scheme
+		artist="${artist//"'"/"-"}"
+		artist="${artist//"‘"/"-"}"
+		artist="${artist//"’"/"-"}"
+		artist="${artist//"“"/"-"}"
+		artist="${artist//"”"/"-"}"
+
+		# Useful for "artists" like Tydolla$ign, A$APRocky
+		artist="${artist//"$"/"s"}"
+
+		# Remove diacritics from strings
+		artist="$(echo "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Sanitize artist string
+		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "/" "," "feat." "featuring" "ft." "." "with"; do
+			[[ $sanitize =~ "feat."|"ft."|"featuring"|","|";"|"with" ]] && {
+				artist="${artist//"$sanitize"*}"
+			}
+			artist="${artist//"$sanitize"}"
+		done
+
+		# Convert to lowercase
+		title="${title,,}"
+
+		# Replace all whitespace with -
+		title="${title//" "/"-"}"
+
+		# Fix title naming scheme
+		title="${title//"'"/"-"}"
+		title="${title//"‘"/"-"}"
+		title="${title//"’"/"-"}"
+		title="${title//"“"/"-"}"
+		title="${title//"”"/"-"}"
+
+		# Remove diacritics from strings
+		title="$(echo "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Sanitize title string
+		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "*" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
+			[[ $sanitize =~ "feat."|"ft."|"featuring" ]] && {
+				title="${title//"$sanitize"*}"
+			}
+			title="${title//"$sanitize"}"
+		done
+
+		# Skip if missing tags, useful for CJK characters
+		[[ -z $artist || -z $title ]] && {
+			missing_lyrics="true"
+			skip="true"
+			exit_status=1
+			return
+		}
+
+		url="https://www.songlyrics.com/"$artist"/"${title}"-lyrics/"
+
+		output="$(content_loader "$url")"
+
+		# Check if website gave a valid response
+		[[ $output != *"Missing Album"* ]] && [[ $output != *"We do not have the lyrics for"* ]] && [[ $output != *"Sorry, we have no"* ]] && {
+			# Sanitize output string
+			output="${output//*"iComment-text\">"}"
+			output="${output//"<br /></p>"*}"
+			output="${output//"<br />"}"
+
+			echo "${output}" > "$lrc_file"
+			exit_status=0
+		}
+
+		# Check for missing lyrics page
+		[[ $output == *"Missing Album"* || $output == *"We do not have the lyrics for"* || $output == *"Sorry, we have no"* ]] && {
+			missing_lyrics="true"
+			skip="true"
+			exit_status=1
+			return
+		}
+
+		# Check for connection problems
+		[[ -f $lrc_file ]] && {
+			check_lrc="$(< "$lrc_file")"
+			[[ $check_lrc == "FAILED" ]] && {
+				exit_status=1
+				rm "$lrc_file" 2>/dev/null
+				failed_fetch="true"
+				skip="true"
+				exit_status=1
+				# recheck internet connection before proceeding
+				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
+					print_error "Failed to detect an internet connection"
+					exit 1
+				}
+				return
+			}
+		}
 	}
 
 	check_input_argument() {
@@ -3964,29 +4098,63 @@ lyrics() {
 					while read sec_file_name; do
 						[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
 							unset exit_status
+							unset missing_lyrics
+							unset captcha_response
+							unset failed_fetch
+							unset skip
 
 							# Remove file name extension
 							lrc_file="${sec_file_name%.*}.lrc"
 
 							parsed_file="$sec_file_name"
 
-							# Copies file into created destination directory using $new_file_name as base directory
-							# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
-							azlyrics_parser "$sec_file_name"
+							# Create variables with song tags
+							fetch_song_tags "$@"
 
-							[[ $exit_status != 0 && $skip != "true" ]] && {
-								print_error "Failed to fetch lyrics for '$sec_file_name'"
-								print_aligned "Skipping\n"
-							}
+							# Check if $sec_file_name contains valid files
+							check_audio_files "$@"
 
-							# Print program run status
-							[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
-								print_success "Added '${audio_file%.*}.lrc' for '$sec_file_name'\n"
+							# Only run for audio files
+							[[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus ]] && {
+								# Try www.azlyrics.com first
+								azlyrics_parser "$sec_file_name"
+
+								# Try www.songlyrics.com if azlyrics_parser fails to fetch lyrics
+								[[ $failed_fetch == "true" || $captcha_response == "true" || $missing_lyrics == "true" ]] && {
+									# Reset variables for new run
+									unset exit_status
+									unset missing_lyrics
+									unset captcha_response
+									unset failed_fetch
+									unset skip
+									songlyrics_parser "$sec_file_name"
+								}
+
+								# Handles captcha responses
+								[[ $captcha_response == "true" ]] && {
+									print_error "Captcha response detected"
+									print_aligned "Try again later\n"
+									exit 1
+								}
+
+								# Handles missing lyrics on all parsed websites
+								[[ $missing_lyrics == "true" ]] && {
+									print_error "No lyrics found for '$parsed_file'\n"
+								}
+ 
+								[[ $exit_status != 0 && $skip != "true" ]] || [[ $failed_fetch == "true" ]] && {
+									print_error "Failed to fetch lyrics for '$sec_file_name'\n"
+								}
+ 
+								# Print program run status
+								[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
+									print_success "Added Lyrics file for '$sec_file_name'\n"
+								}
 							}
 						}
 
 					# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
-					done <<< $(find "$file_name")
+					done <<< $(find "$file_name" 2>/dev/null)
 				;;
 			esac
 		done
@@ -4025,7 +4193,7 @@ mkcp() {
 	check_dependencies() {
 		# Check for required dependencies
 		for mis_dep in mkdir cp ls find; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -4200,7 +4368,7 @@ mkmv() {
 	check_dependencies() {
 		# Check for required dependencies
 		for mis_dep in mkdir cp ls find rm; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -4295,7 +4463,7 @@ mkmv() {
 								# home/username/file  -> home
 								dup_file_name="${dup_file_name%%\/*}"
 
-								rm -r "${sec_folder_name}/${new_file_name}/${dup_file_name}" 2>/dev/null
+								rm -r "${sec_folder_name}/${new_file_name:=?}/${dup_file_name:=?}" 2>/dev/null
 							}
 
 							[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
@@ -4380,7 +4548,7 @@ mktouch() {
 	check_dependencies() {
 		# Check for required dependencies
 		for mis_dep in mkdir touch ls; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -4469,7 +4637,7 @@ omaps-backup() {
 
 		# Check for required dependencies
 		for mis_dep in ls 7z pm date mkdir; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -4502,7 +4670,7 @@ omaps-backup() {
 		unset backup_checker
 
 		backup_checker=0
-		for avail_dir in ${omaps_backup_candidates[@]}; do
+		for avail_dir in "${omaps_backup_candidates[@]}"; do
 			[[ -d $avail_dir ]] && {
 				backup_checker=$((backup_checker + 1))
 			}
@@ -4553,7 +4721,7 @@ omaps-backup() {
 		unset avail_dir
 
 		# Create archives of each omaps content folder
-		for avail_dir in ${omaps_backup_candidates[@]}; do
+		for avail_dir in "${omaps_backup_candidates[@]}"; do
 			[[ -d $avail_dir ]] && {
 				file_name="${avail_dir#\/}"
 				file_name="${file_name%%\/*}"
@@ -4587,7 +4755,7 @@ omaps-backup() {
 		unset avail_dir
 
 		# Create archives of each omaps content folder
-		for avail_dir in ${omaps_backup_candidates[@]}; do
+		for avail_dir in "${omaps_backup_candidates[@]}"; do
 			[[ -d $avail_dir ]] && {
 				file_name="${avail_dir#\/}"
 				file_name="${file_name%%\/*}"
@@ -4663,12 +4831,12 @@ omaps-backup() {
 					7z x "${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y 2>/dev/null || failed_to_extract
 
 					# Get names of extracted files
-					for avail_dir in ${omaps_backup_candidates[@]}; do
+					for avail_dir in "${omaps_backup_candidates[@]}"; do
 						file_name="${avail_dir#\/}"
 						file_name="${file_name%%\/*}"
 						[[ -f omaps-${file_name}.7z ]] && {
 							# Extract compressed files in omaps content directories
-							7z x "omaps-${file_name}.7z" -mmt"$CPU_CORE_COUNT" -y -o${avail_dir} 2>/dev/null || failed_to_extract
+							7z x "omaps-${file_name}.7z" -mmt"$CPU_CORE_COUNT" -y -o"${avail_dir}" 2>/dev/null || failed_to_extract
 						}
 					done
 
@@ -4795,7 +4963,7 @@ opencamera-backup() {
 
 		# Check for required dependencies
 		for mis_dep in ls 7z pm date mkdir; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -4821,7 +4989,7 @@ opencamera-backup() {
 		# Handles missing open camera folders
 		unset backup_checker
 		backup_checker=0
-		for avail_dir in ${ocam_backup_candidates[@]}; do
+		for avail_dir in "${ocam_backup_candidates[@]}"; do
 			[[ -d $avail_dir ]] && {
 				backup_checker=$((backup_checker + 1))
 			}
@@ -4873,7 +5041,7 @@ opencamera-backup() {
 
 		# Create archives of each open camera content folder
 		unset avail_dir
-		for avail_dir in ${ocam_backup_candidates[@]}; do
+		for avail_dir in "${ocam_backup_candidates[@]}"; do
 			[[ -d $avail_dir ]] && {
 				file_name="${avail_dir#\/}"
 				file_name="${file_name%%\/*}"
@@ -4906,7 +5074,7 @@ opencamera-backup() {
 
 		# Create archives of each open camera content folder
 		unset avail_dir
-		for avail_dir in ${ocam_backup_candidates[@]}; do
+		for avail_dir in "${ocam_backup_candidates[@]}"; do
 			[[ -d $avail_dir ]] && {
 				file_name="${avail_dir#\/}"
 				file_name="${file_name%%\/*}"
@@ -4979,12 +5147,12 @@ opencamera-backup() {
 					7z x "${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y 2>/dev/null || failed_to_extract
 
 					# Get names of extracted files
-					for avail_dir in ${ocam_backup_candidates[@]}; do
+					for avail_dir in "${ocam_backup_candidates[@]}"; do
 						file_name="${avail_dir#\/}"
 						file_name="${file_name%%\/*}"
 						[[ -f opencamera-${file_name}.7z ]] && {
 							# Extract compressed files in open camera content directories
-							7z x "opencamera-${file_name}.7z" -mmt"$CPU_CORE_COUNT" -y -o${avail_dir} 2>/dev/null || failed_to_extract
+							7z x "opencamera-${file_name}.7z" -mmt"$CPU_CORE_COUNT" -y -o"${avail_dir}" 2>/dev/null || failed_to_extract
 						}
 					done
 
@@ -5153,15 +5321,12 @@ package() {
 		mkdir -p "$package_tmp_dir/system/etc" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc"
 		mkdir -p "$package_tmp_dir/system/product" 2>/dev/null || print_write_error "$package_tmp_dir/system/product"
 
-		# Check for required dependencies
-		for mis_dep in busybox; do
-			# Copy magisk busybox if not found in PATH
-			[[ ! $(type -p $mis_dep) ]] && {
-				cp -f /data/adb/magisk/busybox "$package_tmp_dir/system/bin" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/busybox"
-				chmod +x "$package_tmp_dir/system/bin/busybox"
-				export PATH=$package_tmp_dir/system/bin:$PATH
-			}
-		done
+		# Copy magisk busybox if not found in PATH
+		[[ ! $(type -p "busybox") ]] && {
+			cp -f /data/adb/magisk/busybox "$package_tmp_dir/system/bin" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/busybox"
+			chmod +x "$package_tmp_dir/system/bin/busybox"
+			export PATH=$package_tmp_dir/system/bin:$PATH
+		}
 
 		# Copy busybox to package_tmp_dir if it is in PATH
 		[[ -f /bin/busybox ]] && {
@@ -5292,19 +5457,19 @@ package() {
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cd "$package_tmp_dir/system/bin"
-			7z x $package_tmp_dir/system/bin/Iosevka.7z &>/dev/null
+			7z x "$package_tmp_dir"/system/bin/Iosevka.7z &>/dev/null
 		}
 
 		[[ $font_variant == "slab" ]] && {
 			print_warning "Downloading 'Iosevka-Slab version $iosevka_version'\n"
 
 			# Download latest version of Iosevka custom build
-			busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka-slab.7z -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
+			busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v"${iosevka_version}"/Iosevka-slab.7z -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
 			download_fail "Iosevka-Slab version $iosevka_version"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cd "$package_tmp_dir/system/bin"
-			7z x $package_tmp_dir/system/bin/Iosevka-slab.7z &>/dev/null
+			7z x "$package_tmp_dir"/system/bin/Iosevka-slab.7z &>/dev/null
 		}
 
 		# Populate font directory
@@ -5821,7 +5986,7 @@ replace-su() {
 
 		# Check for required dependencies
 		for mis_dep in mount umount; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -6308,7 +6473,7 @@ EOF
 		# Show available timezone files
 		for zone_files in /usr/share/zoneinfo/*; do
 			[[ -d $zone_files && ${zone_files##*/} != posix && ${zone_files##*/} != right ]] && {
-				printf "${zone_count}. ${zone_files##*/}  "
+				printf '%s. %s  ' "${zone_count}" "${zone_files##*/}"
 				time_zone[$zone_count]="$zone_files"
 				zone_count=$((zone_count + 1))
 			}
@@ -6341,8 +6506,8 @@ EOF
 				[[ $tz_option -ge 1 && $tz_option -le $zone_count ]] && {
 					# List subzones files
 					zone_count=1
-					for sub_zone_files in ${time_zone[$tz_option]}/*; do
-						printf "${zone_count}. ${sub_zone_files##*/}  "
+					for sub_zone_files in "${time_zone[$tz_option]}"/*; do
+						printf '%s. %s  ' "${zone_count}" "${sub_zone_files##*/}"
 						sub_zone[$zone_count]="$sub_zone_files"
 						zone_count=$((zone_count + 1))
 					done
@@ -6361,8 +6526,8 @@ EOF
 					[[ -d ${sub_zone[$tz_locale]} && $tz_locale -ge 1 && $tz_locale -le $zone_count ]] && {
 						# List all sublocale files
 						zone_count=1
-						for sub_region_files in ${sub_zone[$tz_locale]}/*; do
-							printf "${zone_count}. ${sub_region_files##*/}  "
+						for sub_region_files in "${sub_zone[$tz_locale]}"/*; do
+							printf '%s. %s  ' "${zone_count}" "${sub_region_files##*/}"
 							sub_region[$zone_count]="$sub_region_files"
 							zone_count=$((zone_count + 1))
 						done
@@ -7226,7 +7391,7 @@ swapfile() {
 
 		# Check for required dependencies
 		for mis_dep in mkswap swapon swapoff dd df awk pgrep; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -7740,7 +7905,7 @@ tfetch() {
 			cpu_clock_group[$array_checker]="${cpu_clock_group_low[$array_checker]}-${cpu_clock_group_high[$array_checker]}"
 
 			# Show only 0 in case cpu group contains only one core
-			[[ ${cpu_clock_group_low[$array_checker]} == ${cpu_clock_group_high[$array_checker]} ]] && {
+			[[ ${cpu_clock_group_low[$array_checker]} == "${cpu_clock_group_high[$array_checker]}" ]] && {
 				cpu_clock_group[$array_checker]="${cpu_clock_group_low[$array_checker]}"
 			}
 
@@ -8047,7 +8212,7 @@ touchzip() {
 
 		# Check for required dependencies
 		for mis_dep in touch rm 7z; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -8227,7 +8392,7 @@ void-backup() {
 
 		# Check for required dependencies
 		for mis_dep in mkdir cp ls; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -8342,7 +8507,7 @@ void-deploy() {
 
 		# Check for required dependencies
 		for mis_dep in mkdir cp ls; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -8364,7 +8529,7 @@ void-deploy() {
 
 		# Check for required dependencies
 		for mis_dep in ping xbps-install; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -8425,7 +8590,7 @@ void-deploy() {
 		# Show available timezone files
 		for zone_files in /usr/share/zoneinfo/*; do
 			[[ -d $zone_files && ${zone_files##*/} != posix && ${zone_files##*/} != right ]] && {
-				printf "${zone_count}. ${zone_files##*/}  "
+				printf '%s. %s  ' "${zone_count}" "${zone_files##*/}"
 				time_zone[$zone_count]="$zone_files"
 				zone_count=$((zone_count + 1))
 			}
@@ -8458,8 +8623,8 @@ void-deploy() {
 				[[ $tz_option -ge 1 && $tz_option -le $zone_count ]] && {
 					# List subzones files
 					zone_count=1
-					for sub_zone_files in ${time_zone[$tz_option]}/*; do
-						printf "${zone_count}. ${sub_zone_files##*/}  "
+					for sub_zone_files in "${time_zone[$tz_option]}"/*; do
+						printf '%s. %s  ' "${zone_count}" "${sub_zone_files##*/}"
 						sub_zone[$zone_count]="$sub_zone_files"
 						zone_count=$((zone_count + 1))
 					done
@@ -8478,8 +8643,8 @@ void-deploy() {
 					[[ -d ${sub_zone[$tz_locale]} && $tz_locale -ge 1 && $tz_locale -le $zone_count ]] && {
 						# List all sublocale files
 						zone_count=1
-						for sub_region_files in ${sub_zone[$tz_locale]}/*; do
-							printf "${zone_count}. ${sub_region_files##*/}  "
+						for sub_region_files in "${sub_zone[$tz_locale]}"/*; do
+							printf '%s. %s  ' "${zone_count}" "${sub_region_files##*/}"
 							sub_region[$zone_count]="$sub_region_files"
 							zone_count=$((zone_count + 1))
 						done
@@ -8702,7 +8867,7 @@ void-install() {
 
 		# Check for required dependencies
 		for mis_dep in mount losetup busybox lsof fallocate mke2fs; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -8748,19 +8913,19 @@ void-install() {
 
 	check_file_hash() {
 		# Get file hashsum
-		downloaded_file_hash="$(busybox sha256sum ${tmp_dir}/${rootfs_file})"
+		downloaded_file_hash="$(busybox sha256sum "${tmp_dir}"/"${rootfs_file}")"
 		downloaded_file_hash="${downloaded_file_hash//\ *}"
 		downloaded_file_hash="${downloaded_file_hash//[[:space:]]}"
 
 		# Get checksum
-		shasum_file_hash="$(< $tmp_dir/sha256sum.txt)"
-		shasum_file_hash="${shasum_file_hash//*$rootfs_file}"
+		shasum_file_hash="$(< "$tmp_dir"/sha256sum.txt)"
+		shasum_file_hash="${shasum_file_hash//*"$rootfs_file"}"
 		shasum_file_hash="${shasum_file_hash//SHA256*}"
 		shasum_file_hash="${shasum_file_hash//*\ }"
 		shasum_file_hash="${shasum_file_hash//[[:space:]]}"
 
 		# Compare file hashes
-		[[ $downloaded_file_hash != $shasum_file_hash ]] && {
+		[[ $downloaded_file_hash != "$shasum_file_hash" ]] && {
 			print_error "Hash mismatch, possible MITM attack"
 			print_aligned "Try again at a later time"
 			rm -r "${tmp_dir:=/data/local/tmp}/${rootfs_file}" "${tmp_dir:=/data/local/tmp}/sha256sum.txt" 2>/dev/null
@@ -9000,7 +9165,7 @@ void-mount() {
 
 		# Check for required dependencies
 		for mis_dep in losetup mount mkdir; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -9122,7 +9287,7 @@ void-umount() {
 
 		# Check for required dependencies
 		for mis_dep in losetup umount lsof wc mkdir rm; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -9338,7 +9503,7 @@ whatsapp-backup() {
 
 		# Check for required dependencies
 		for mis_dep in ls 7z pm date mkdir; do
-			[[ ! $(type -p $mis_dep) ]] && {
+			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
@@ -9592,7 +9757,7 @@ whatsapp-backup() {
 tether() {
 	# Check for required dependencies
 	for mis_dep in ls ln sed grep mkdir; do
-		[[ ! $(type -p $mis_dep) ]] && {
+		[[ ! $(type -p "$mis_dep") ]] && {
 			print_missing_dependencies "$mis_dep"
 		}
 	done

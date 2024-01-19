@@ -43,7 +43,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.19.1834"
+SCRIPT_VERSION="2024.01.19.1937"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -7170,7 +7170,7 @@ tfetch() {
 			gpu_clock_speed="$((gpu_clock_speed / 1000000))"
 			gpu_utilization="$(< /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage)"
 			gpu_utilization="${gpu_utilization//[[:space:]]}"
-			printf '%s @ %dMhz - (%d%% Utilization)\n' "${gpu_name}" "${gpu_clock_speed}" "$gpu_utilization"
+			printf '%s @ %dMhz - (%s Utilization)\n' "${gpu_name}" "${gpu_clock_speed}" "$gpu_utilization"
 		}
 	}
 
@@ -7320,58 +7320,58 @@ tfetch() {
 		printf '%s\n' " -----------------"
 		# Show only if device name is available
 		[[ -d /sys/devices/virtual/dmi/id || -f /sys/firmware/devicetree/base/model || -f /proc/device-tree/model ]] && {
-			printf '%b Device:   %b %s %b\n' "${color_blue}" "${color_white}" "$(get_device_name)" "${no_color}"
+			printf '%b Device:   %b%s %b\n' "${color_blue}" "${color_white}" "$(get_device_name)" "${no_color}"
 		}
 
-		printf '%b OS:       %b %s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
-		printf '%b Kernel:   %b %s %b\n' "${color_blue}" "${color_white}" "$(get_kernel)" "${no_color}"
-		printf '%b Init:     %b %s %b\n' "${color_blue}" "${color_white}" "$(get_init)" "${no_color}"
-		printf '%b Packages: %b %s %b\n' "${color_blue}" "${color_white}" "$(get_pkgs)" "${no_color}"
-		printf '%b Shell:    %b %s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
+		printf '%b OS:       %b%s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
+		printf '%b Kernel:   %b%s %b\n' "${color_blue}" "${color_white}" "$(get_kernel)" "${no_color}"
+		printf '%b Init:     %b%s %b\n' "${color_blue}" "${color_white}" "$(get_init)" "${no_color}"
+		printf '%b Packages: %b%s %b\n' "${color_blue}" "${color_white}" "$(get_pkgs)" "${no_color}"
+		printf '%b Shell:    %b%s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
 
 		# Show on non-root Linux desktop
 		[[ -n ${XDG_CURRENT_DESKTOP:=$DESKTOP_SESSION} ]] && {
-			printf '%b Desktop:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_desktop)" "${no_color}"
+			printf '%b Desktop:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_desktop)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
+			printf '%b CPU:      %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
 		}
 
 		# Show only on Android or desktops with $CPU_CORE_COUNT <= 8
 		[[ -d /sys/class/power_supply/battery || $CPU_CORE_COUNT -le 8 ]] && {
-			printf '%b CPU_CLK:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
+			printf '%b CPU_CLK:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
 		}
 
 		# Show only on Android with Mediatek or Snapdragon SOC
 		[[ -f /proc/gpufreq/cur_freq || -f /sys/class/kgsl/kgsl-3d0/gpuclk ]] && {
-			printf '%b GPU:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_gpu)" "${no_color}"
+			printf '%b GPU:      %b%s %b\n' "${color_blue}" "${color_white}" "$(get_gpu)" "${no_color}"
 		}
 
 		# Show only if battery is available
 		[[ -d /sys/class/power_supply/BAT0 || -d /sys/class/power_supply/battery ]] && {
-			printf '%b Battery:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_battery_stats)" "${no_color}"
+			printf '%b Battery:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_battery_stats)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
+			printf '%b CPU Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
 		}
 
 		# Show only on Android with Snapdragon SOC
 		[[ -f /sys/class/kgsl/kgsl-3d0/temp ]] && {
-			printf '%b GPU Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_gpu_temp)" "${no_color}"
+			printf '%b GPU Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_gpu_temp)" "${no_color}"
 		}
 
 		# Show only on Android
 		[[ -f /sys/class/power_supply/battery/temp ]] && {
-			printf '%b BAT Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_battery_temp)" "${no_color}"
+			printf '%b BAT Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_battery_temp)" "${no_color}"
 		}
 
-		printf '%b RAM:      %b %b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
-		printf '%b Swap:     %b %b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
-		printf '%b Uptime:   %b %s %b\n\n' "${color_blue}" "${color_white}" "$(get_uptime)" "${no_color}"
+		printf '%b RAM:      %b%b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
+		printf '%b Swap:     %b%b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
+		printf '%b Uptime:   %b%s %b\n\n' "${color_blue}" "${color_white}" "$(get_uptime)" "${no_color}"
 		exit 0
 	}
 	tfetch_config_noroot() {
@@ -7379,28 +7379,28 @@ tfetch() {
 		printf '%s\n' " -----------------"
 
 		[[ -f /product/etc/build.prop ]] && {
-			printf '%b OS:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
+			printf '%b OS:       %b%s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
 		}
 
-		printf '%b Shell    %b %s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
+		printf '%b Shell:    %b%s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
+			printf '%b CPU:      %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
 		}
 
 		# Show only on Android or desktops with $CPU_CORE_COUNT <= 8
 		[[ -d /sys/class/power_supply/battery || $CPU_CORE_COUNT -le 8 ]] && {
-			printf '%b CPU_CLK:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
+			printf '%b CPU_CLK:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
+			printf '%b CPU Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
 		}
 
-		printf '%b RAM:      %b %b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
-		printf '%b Swap:     %b %b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
+		printf '%b RAM:      %b%b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
+		printf '%b Swap:     %b%b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
 		exit 0
 	}
 

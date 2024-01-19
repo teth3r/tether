@@ -1,5 +1,9 @@
 #!/bin/env bash
 
+# shellcheck disable=SC2317   # Notice about unreachable commands
+# shellcheck disable=SC2015   # A && B || C notice
+# shellcheck disable=SC2143   # Style notice about grep -q
+
 # Copyright (C) 2023, Kolade Ayomide Olanrewaju (tether)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -27,7 +31,7 @@
 # Check if bash version is >= 5
 #--------------------------------------------------------------
 [[ ${BASH_VERSINFO[0]} -lt 5 ]] && {
-	echo -e "\033[1;97m[\033[1;31m-\033[1;97m] Bash version 5.0 or later is required \033[00m"
+	printf "\033[1;97m[\033[1;31m-\033[1;97m] 'bash 5.0' or later is required to run this script \n\033[00m"
 	exit 1
 }
 
@@ -39,7 +43,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.18.1349"
+SCRIPT_VERSION="2024.01.19.1834"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -107,36 +111,38 @@ CPU_CORE_COUNT="$((CPU_CORE_COUNT + 1))"
 # Print out error message
 #--------------------------------------------------------------
 print_error() {
-	echo -e "\033[1;97m[\033[1;31m-\033[1;97m] $@ \033[00m"
+	printf '\033[1;97m[\033[1;31m-\033[1;97m] %s \n\033[00m' "$@"
 }
 
 #--------------------------------------------------------------
 # Print out success message
 #--------------------------------------------------------------
 print_success() {
-	echo -e "\033[1;97m[\033[1;32m+\033[1;97m] $@ \033[00m"
+	printf '\033[1;97m[\033[1;32m+\033[1;97m] %s \n\033[00m' "$@"
 }
 
 #--------------------------------------------------------------
 # Print out warning/notice
 #--------------------------------------------------------------
 print_warning() {
-	echo -e "\033[1;97m[\033[1;35m*\033[1;97m] $@ \033[00m"
+	printf '\033[1;97m[\033[1;35m*\033[1;97m] %s \n\033[00m' "$@"
 }
 
 #--------------------------------------------------------------
 # Print out non bold text aligned with print_error
 #--------------------------------------------------------------
 print_aligned() {
-	echo -e "    $@"
+	printf '    %s\n' "$@"
 }
 
 #--------------------------------------------------------------
 # Print out status message on exit
 #--------------------------------------------------------------
 run_on_exit() {
-	echo -e "\n" && print_error "Aborted" &&
-	unset file_password file_password2
+	printf '\n\n'
+	print_error "Aborted"
+	unset file_password
+	unset file_password2
 	exit 1
 }
 
@@ -144,9 +150,11 @@ run_on_exit() {
 # Remove files and print out status message on exit
 #--------------------------------------------------------------
 remove_file_on_exit() {
-	echo -e "\n" && print_error "Aborted" &&
+	printf '\n\n'
+	print_error "Aborted"
 	rm -r "$@" 2>/dev/null
-	unset file_password file_password2
+	unset file_password
+	unset file_password2
 	exit 1
 }
 
@@ -154,7 +162,7 @@ remove_file_on_exit() {
 # Print out notice/guide after error
 #--------------------------------------------------------------
 print_notification() {
-	print_aligned "Try '$SCRIPT_NAME --help' for more information." &&
+	print_aligned "Try '$SCRIPT_NAME --help' for more information."
 	exit 1
 }
 
@@ -171,7 +179,7 @@ print_no_argument() {
 # Print unsupported OS error
 #--------------------------------------------------------------
 print_os_error() {
-	print_error "Unsupported OS detected" &&
+	print_error "Unsupported OS detected"
 	exit 1
 }
 
@@ -179,7 +187,7 @@ print_os_error() {
 # Print missing dependencies error
 #--------------------------------------------------------------
 print_missing_dependencies() {
-	print_error "'$@' is not installed" &&
+	print_error "'$*' is not installed"
 	exit 1
 }
 
@@ -187,17 +195,17 @@ print_missing_dependencies() {
 # Print insufficient write/read permissions error
 #--------------------------------------------------------------
 print_write_error() {
-	print_error "Cannot create directory '$1': Permission denied" &&
+	print_error "Cannot create directory '$1': Permission denied"
 	exit 1
 }
 
 print_file_write_error() {
-	print_error "Cannot create file '$1': Permission denied" &&
+	print_error "Cannot create file '$1': Permission denied"
 	exit 1
 }
 
 print_file_read_error() {
-	print_error "Cannot read '$1' file: Permission denied" &&
+	print_error "Cannot read '$1' file: Permission denied"
 	exit 1
 }
 
@@ -214,14 +222,14 @@ print_syntax_error() {
 #--------------------------------------------------------------
 print_not_root_user() {
 	[[ $EUID -gt 0 ]] && {
-		print_error "Running as non-root user is not supported" &&
+		print_error "Running as non-root user is not supported"
 		exit 1
 	}
 }
 
 print_not_normal_user() {
 	[[ $EUID -eq 0 ]] && {
-		print_error "Running as root user is not supported" &&
+		print_error "Running as root user is not supported"
 		exit 1
 	}
 }
@@ -230,7 +238,7 @@ print_not_normal_user() {
 # Print version info
 #--------------------------------------------------------------
 print_version() {
-	echo -e "${SCRIPT_VERSION}"
+	printf '%s\n' "${SCRIPT_VERSION}"
 	exit 0
 }
 
@@ -239,10 +247,10 @@ print_version() {
 #--------------------------------------------------------------
 create_password() {
 	read -rsp "Input Password: " file_password
-	echo ""
+	printf '\n'
 
 	read -rsp "Verify Password: " file_password2
-	echo -e "\n"
+	printf '\n\n'
 
 	[[ $file_password != "$file_password2" ]] && {
 		print_error "Passwords do not match"
@@ -322,14 +330,14 @@ input_option_type_two() {
 # Print program banner
 #--------------------------------------------------------------
 print_banner() {
-	echo " 
+	printf " 
 ████████╗███████╗████████╗██╗   ██╗███████╗██████═╗
 ╚══██╔══╝██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔═══██ 
    ██║   ███████╗   ██║   ████████║███████╗███████═╗
    ██║   ██╔════╝   ██║   ██╔═══██║██╔════╝██╔═══██║
    ██║   ███████╗   ██║   ██║   ██║███████╗██║   ██║
    ╚═╝   ╚══════╝   ╚═╝   ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝
-"
+\n"
 }
 
 #--------------------------------------------------------------
@@ -367,14 +375,14 @@ print_usage_bar() {
 	done
 
 	# Output colored progress bar
-	echo "${color_white}[ ${out_block}${out_empty} ]"
+	printf '%s[ %s%s ]\n' "${color_white}" "${out_block}" "${out_empty}"
 }
 
 #--------------------------------------------------------------
 # Create custom .bash.rc
 #--------------------------------------------------------------
 print_bashrc() {
-	bash_file="/home/"${SUDO_USER:=$USER}"/.bashrc"
+	bash_file="/home/${SUDO_USER:=$USER}/.bashrc"
 
 	[[ -d /system/app/ && -f /system/build.prop ]] && {
 		mkdir -p "$MODULE_DIRECTORY/system/etc/bash" 2>/dev/null
@@ -421,109 +429,6 @@ alias google='ping -c4 google.com'
 
 # Use vi/vim keybindings
 set -o vi
-
-#--------------------------------------------------------------
-# Platform: Device Agnostic
-# Dependencies: cd
-#--------------------------------------------------------------
-pp() {
-	SCRIPT_NAME="${FUNCNAME[0]}"
-
-	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION] [NUMBER] [FOLDER/FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME /sdcard/folder"
-		echo -e "          $SCRIPT_NAME 1"
-		echo -e "          $SCRIPT_NAME 1 folder"
-		echo -e "          $SCRIPT_NAME -L folder"
-		echo -e "          $SCRIPT_NAME -L 1 folder"
-		echo -e "          $SCRIPT_NAME -L 1 folder/folder\n"
-		echo -e "Options: -h, --help  Print out this message\n"
-		echo -e "All 'cd' options are also available here\n"
-		echo -e "Expand 'cd' functionality"
-		return 0
-	}
-
-	check_input_argument() {
-		# Handles cd
-		# Handles cd 0
-		[[ $# -eq 0 || $1 == "0" ]] && {
-			cd && return || return
-		}
-
-		for primary_options in "${@:1}"; do
-			case "$primary_options" in
-				-h | --help)
-					print_help
-				;;
-				*)
-					unset dir_glob
-					for glob_count in {1..9}; do
-						dir_glob+=../
-						[[ $# -eq 1 ]] && {
-							case "$1" in
-								# Handles pp [NUMBER] ---> pp 1
-								$glob_count)
-									cd "${dir_glob}" && return || return
-								;;
-								# Handles pp [OPTION] ---> pp -L
-								-*)
-									cd "$1" && return || return
-								;;
-							esac
-						}
-
-						[[ $# -eq 2 ]] && {
-							[[ $1 == "$glob_count" ]] && {
-								case "$2" in
-									# Handles pp [NUMBER] [OPTION] ---> pp 2 -L
-									-*)
-										cd "$2" "$dir_glob" && return || return
-									;;
-									# Handles pp [NUMBER] [FILE/FOLDER] ---> pp 2 sys/class
-									*)
-										cd ${dir_glob}$2 2>/dev/null ||
-										cd ${dir_glob}"$2"
-										return
-									;;
-								esac
-								return
-							}
-
-							[[ $2 == "$glob_count" ]] && {
-								case "$1" in
-									# Handles pp [OPTION] [NUMBER] ---> pp -L 2
-									-*)
-										cd "$1" "$dir_glob" && return || return
-									;;
-									# Handles pp [FILE/FOLDER] [NUMBER] ---> pp sys/class 2
-									*)
-										cd ${dir_glob}$1 2>/dev/null ||
-										cd ${dir_glob}"$1"
-										return
-									;;
-								esac
-								return
-							}
-						}
-					done
-
-					# Handles pp [NUMBER] [OPTION] [FILE/FOLDER]... ---> pp 2 -L mnt media
-					# Handles pp [NUMBER] [FILE/FOLDER]... ---> pp 2 mnt media
-					# Handles pp [OPTION] [NUMBER] [FILE/FOLDER]... ---> pp -L 2 mnt media
-					# Handles pp [OPTION] [FILE/FOLDER] ---> pp -L folder1
-					# Handles pp [FILE/FOLDER]... ---> pp folder1
-					# Handles pp [FILE/FOLDER]... [OPTION] ---> pp folder1 folder2 -L
-					cd "$@" && return || return
-				;;
-			esac
-		done
-	}
-
-	check_input_argument "$@"
-	return
-}
 
 # Set colors
 green="\[\e[1;32m\]"
@@ -639,9 +544,6 @@ none="\[\e[00m\]"
 
 	alias edittether="vi /home/${SUDO_USER:=$USER}/.local/bin/tether"
 
-	# Use 'cd' tab-completions for 'pp'
-	complete -o nospace -F _cd pp
-
 	[[ $EUID -eq 0 || $USER == "root" ]] && {
 		blue=$magenta
 		PS1="${white}┌─[${blue}\t${white}] [${blue}\h@\u${white}] [${green}\w${white}]\n${white}╰── ${yellow}$ ${none}"
@@ -681,9 +583,6 @@ none="\[\e[00m\]"
 	alias editblockedips="vi /etc/dnscrypt-proxy/blocked-ips.txt"
 
 	alias edittether="vi /home/${SUDO_USER:=$USER}/.local/bin/tether"
-
-	# Use 'cd' tab-completions for 'pp'
-	complete -o nospace -F _cd pp
 
 	[[ $EUID -eq 0 || $USER == "root" ]] && {
 		blue=$magenta
@@ -760,109 +659,6 @@ alias google='ping -c4 google.com'
 
 MODULE_DIRECTORY=/data/adb/modules/tether
 alias bash='bash --rcfile $MODULE_DIRECTORY/system/etc/bash/.bashrc'
-
-#--------------------------------------------------------------
-# Platform: Device Agnostic
-# Dependencies: cd
-#--------------------------------------------------------------
-pp() {
-	SCRIPT_NAME="pp"
-
-	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION] [NUMBER] [FOLDER/FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME /sdcard/folder"
-		echo -e "          $SCRIPT_NAME 1"
-		echo -e "          $SCRIPT_NAME 1 folder"
-		echo -e "          $SCRIPT_NAME -L folder"
-		echo -e "          $SCRIPT_NAME -L 1 folder"
-		echo -e "          $SCRIPT_NAME -L 1 folder/folder\n"
-		echo -e "Options: -h, --help  Print out this message\n"
-		echo -e "All 'cd' options are also available here\n"
-		echo -e "Expand 'cd' functionality"
-		return 0
-	}
-
-	check_input_argument() {
-		# Handles cd
-		# Handles cd 0
-		[[ $# -eq 0 || $1 == "0" ]] && {
-			cd && return || return
-		}
-
-		for primary_options in "$@"; do
-			case "$primary_options" in
-				-h | --help)
-					print_help
-				;;
-				*)
-					unset dir_glob
-					for glob_count in 1 2 3 4 5 6 7 8 9; do
-						dir_glob+=../
-						[[ $# -eq 1 ]] && {
-							case "$1" in
-								# Handles pp [NUMBER] ---> pp 1
-								$glob_count)
-									cd "${dir_glob}" && return || return
-								;;
-								# Handles pp [OPTION] ---> pp -L
-								-*)
-									cd "$1" && return || return
-								;;
-							esac
-						}
-
-						[[ $# -eq 2 ]] && {
-							[[ $1 == "$glob_count" ]] && {
-								case "$2" in
-									# Handles pp [NUMBER] [OPTION] ---> pp 2 -L
-									-*)
-										cd "$2" "$dir_glob" && return || return
-									;;
-									# Handles pp [NUMBER] [FILE/FOLDER] ---> pp 2 sys/class
-									*)
-										cd ${dir_glob}$2 2>/dev/null ||
-										cd ${dir_glob}"$2"
-										return
-									;;
-								esac
-								return
-							}
-
-							[[ $2 == "$glob_count" ]] && {
-								case "$1" in
-									# Handles pp [OPTION] [NUMBER] ---> pp -L 2
-									-*)
-										cd "$1" "$dir_glob" && return || return
-									;;
-									# Handles pp [FILE/FOLDER] [NUMBER] ---> pp sys/class 2
-									*)
-										cd ${dir_glob}$1 2>/dev/null ||
-										cd ${dir_glob}"$1"
-										return
-									;;
-								esac
-								return
-							}
-						}
-					done
-
-					# Handles pp [NUMBER] [OPTION] [FILE/FOLDER]... ---> pp 2 -L mnt media
-					# Handles pp [NUMBER] [FILE/FOLDER]... ---> pp 2 mnt media
-					# Handles pp [OPTION] [NUMBER] [FILE/FOLDER]... ---> pp -L 2 mnt media
-					# Handles pp [OPTION] [FILE/FOLDER] ---> pp -L folder1
-					# Handles pp [FILE/FOLDER]... ---> pp folder1
-					# Handles pp [FILE/FOLDER]... [OPTION] ---> pp folder1 folder2 -L
-					cd "$@" && return || return
-				;;
-			esac
-		done
-	}
-
-	check_input_argument "$@"
-	return
-}
 
 [[ $USER == "root" ]] && {
 	PS1=$'\e[1;97m┌─[\e[1;35m$(date +%H:%M:%S)\e[1;97m] [\e[1;35m$HOSTNAME@$USER\e[1;97m] [\e[1;32m$PWD\e[1;97m]\n\e[1;97m╰──\e[0m \e[1;33m$\e[0m '
@@ -1465,7 +1261,7 @@ EOF
 # Create custom kitty.conf file
 #--------------------------------------------------------------
 print_kitty() {
-	mkdir -p "/home/"${SUDO_USER:=$USER}"/.config/kitty" 2>/dev/null
+	mkdir -p "/home/${SUDO_USER:=$USER}/.config/kitty" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.config/kitty/kitty.conf
 #--------------------------------------------------------------
@@ -2977,16 +2773,16 @@ EOF
 #--------------------------------------------------------------
 benchmark() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]"
-		echo -e "          $SCRIPT_NAME [OPTION] [NUMBER]\n"
-		echo -e "Examples: $SCRIPT_NAME --help"
-		echo -e "          $SCRIPT_NAME --iteration 20\n"
-		echo -e "Options: -h,  --help       Print out this message"
-		echo -e "         -it, --iteration  Number of iterations to perform"
-		echo -e "              --version    Show version information\n"
-		echo -e "Single core performance benchmark using Mersenne primality test"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
+		printf '          %s [OPTION] [NUMBER]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
+		printf '          %s --iteration 20\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h,  --help       Print out this message\n'
+		printf '         -it, --iteration  Number of iterations to perform\n'
+		printf '              --version    Show version information\n\n'
+		printf 'Single core performance benchmark using Mersenne primality test\n'
 		exit 0
 	}
 
@@ -3003,7 +2799,7 @@ benchmark() {
 			# Use bc to find mersenne numbers
 			# Use mersenne formula 2^n - 1
 			[[ $user_iteration -ge 63 ]] && {
-				mersenne_numbers=$( echo "2 ^ $prime_numbers - 1" | bc )
+				mersenne_numbers=$( printf '%d ^ %d - %d\n' "2" "$prime_numbers" "1" | bc )
 				mersenne_numbers=${mersenne_numbers//\\}
 				mersenne_numbers=${mersenne_numbers//[[:space:]]}
 			}
@@ -3024,16 +2820,18 @@ benchmark() {
 			[[ $primality_checker -eq 1 ]] && {
 				found_mersenne_primes=$(( found_mersenne_primes + 1 ))
 				mersenne_prime_largest="Largest Mersenne prime found M($prime_numbers) = $mersenne_numbers"
-				echo -e "M($prime_numbers) = $mersenne_numbers"
+				printf 'M(%s) = %s\n' "$prime_numbers" "$mersenne_numbers"
 			}
 		done
 
 		# Show number of mersenne primes found
-		print_success "Total Mersenne primes found = ${found_mersenne_primes}\n"
+		print_success "Total Mersenne primes found = ${found_mersenne_primes}"
+		printf '\n'
 
 		# Show the largest mersenne prime found
 		[[ $found_mersenne_primes -gt 0 ]] && {
-			print_success "${mersenne_prime_largest}\n"
+			print_success "${mersenne_prime_largest}"
+			printf '\n'
 		}
 
 		# Show the time taken to process
@@ -3046,7 +2844,9 @@ benchmark() {
 	show_on_exit() {
 		time_suffix="seconds"
 		[[ $SECONDS -eq 1 ]] && time_suffix="${time_suffix%s}"
-		echo -e "\n" && print_error "Aborted\n"
+		printf '\n\n'
+		print_error "Aborted"
+		printf '\n'
 		print_success "Total Time taken = ${SECONDS} ${time_suffix}"
 		exit 1
 	}
@@ -3069,7 +2869,7 @@ benchmark() {
 
 					[[ $user_iteration -ge 32 ]] && {
 						print_warning "This may take a while"
-						echo ""
+						printf '\n'
 					}
 
 					# Switch to bc since bash overflows at > 2 ^ 62
@@ -3077,7 +2877,7 @@ benchmark() {
 						[[ ! $(type -p bc) ]] && print_missing_dependencies "bc"
 						print_warning "Switching from bash to bc"
 						print_aligned "Bash overflows at 2 ^ 63"
-						echo ""
+						printf '\n'
 					}
 
 					prime_test_benchmark "$@"
@@ -3110,172 +2910,27 @@ benchmark() {
 }
 
 #--------------------------------------------------------------
-# Platform: Android
-# Dependencies: cp, mkdir, losetup, 7zip
-#--------------------------------------------------------------
-chroot-backup() {
-	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]"
-		echo -e "          $SCRIPT_NAME [OPTION] [FOLDER]\n"
-		echo -e "Examples: $SCRIPT_NAME --help"
-		echo -e "          $SCRIPT_NAME --encrypt /sdcard/newfolder\n"
-		echo -e "Options: -en, --encrypt    Create an encrypted backup"
-		echo -e "         -h,  --help       Print out this message"
-		echo -e "         -un, --unencrypt  Create an unencrypted backup"
-		echo -e "              --version    Show version information\n"
-		echo -e "Create chroot image backup in specifed folder"
-		exit 0
-	}
-
-	check_dependencies() {
-		# Only run on Android
-		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
-			print_os_error
-		}
-
-		# Check for required dependencies
-		for mis_dep in cp mkdir losetup 7z; do
-			[[ ! $(type -p "$mis_dep") ]] && {
-				print_missing_dependencies "$mis_dep"
-			}
-		done
-
-		# Declare file directory
-		chroot_image="/data/voidimg/void.img"
-		chroot_install_dir="/data/voidlinux"
-		folder_name="$2"
-
-		# Check if source and destination directory are the same
-		[[ ${chroot_image%/*} == "$folder_name" ]] && {
-			print_error "'$folder_name/void.img' and '$chroot_image' are the same file"
-			exit 1
-		}
-
-		# Check if chroot file exists
-		[[ ! -f $chroot_image ]] && {
-			print_error "Chroot image not found"
-			exit 1
-		}
-
-		# Check if a file already exists with $folder_name
-		[[ -f $folder_name ]] && {
-			print_error "Cannot create directory '$folder_name': File exists"
-			exit 1
-		}
-
-		# Check if chroot is mounted
-		[[ -f "$chroot_install_dir/bin/bash" || $(losetup -j "$chroot_image" 2>/dev/null) ]] && {
-			print_error "Chroot image is currently mounted"
-			print_aligned "Run 'void-umount' before proceeding"
-			exit 1
-		}
-
-		# Only run as root user
-		print_not_root_user
-
-		# Handles $SCRIPT_NAME [OPTION]
-		# Handles $SCRIPT_NAME [OPTION] [FOLDER...]
-		[[ $# -lt 2 || $# -gt 2 ]] && {
-			print_syntax_error
-		}
-
-		# Create destination directory
-		mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
-	}
-
-	failed_to_create() {
-		print_error "Something went wrong"
-		print_aligned "Failed to create '${chroot_image##*\/}' backup in '$folder_name'"
-		rm -r "$folder_name/void.7z" 2>/dev/null
-		rm -r "$folder_name/void.img" 2>/dev/null
-		exit 1
-	}
-
-	encrypted_backup() {
-		print_warning "Creating encrypted chroot image backup\n"
-		# Handles password creation
-		input_password "$@"
-		print_warning "Starting backup, this may take a while\n"
-		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$CPU_CORE_COUNT" -mhe=on "${folder_name}/void.7z" "$chroot_image" &>/dev/null ||
-		failed_to_create "$@"
-		unset file_password file_password2
-		print_success "Created encrypted '${chroot_image##*\/}' backup in '$folder_name'"
-		exit 0
-	}
-
-	unencrypted_backup() {
-		print_warning "Creating chroot image backup\n"
-		print_warning "This may take a while\n"
-		cp -f "$chroot_image" "$folder_name" 2>/dev/null ||
-		failed_to_create "$@"
-		print_success "Created '${chroot_image##*/}' backup in '$folder_name'"
-		exit 0
-	}
-
-	check_input_option() {
-		for primary_options in "${@:1}"; do
-			case "$primary_options" in
-				-h | --help)
-					print_help
-				;;
-				-en | --encrypt)
-					check_dependencies "$@"
-					encrypted_backup "$@"
-				;;
-				-un | --unencrypt)
-					check_dependencies "$@"
-					unencrypted_backup "$@"
-				;;
-				--version)
-					print_version
-				;;
-				-*)
-					[[ -z ${primary_options/*-} || -z ${primary_options//--*} ]] && {
-						print_error "Invalid option '${primary_options}'"
-						print_notification
-					}
-
-					print_error "Invalid option -- '${primary_options/*-}'"
-					print_notification
-				;;
-				*)
-					print_error "Invalid option '${primary_options}'"
-					print_notification
-				;;
-			esac
-		done
-	}
-
-	trap 'remove_file_on_exit "${folder_name}/void.7z" "${folder_name}/void.img"' 1 2 3 15
-	print_no_argument "$@"
-	check_input_option "$@"
-	exit
-}
-
-#--------------------------------------------------------------
 # Platform: Device Agnostic
 # Dependencies: bash
 #--------------------------------------------------------------
 dotfiles() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME --vim"
-		echo -e "          $SCRIPT_NAME --bash\n"
-		echo -e "Options: -b,  --bashrc   Add custom .bashrc"
-		echo -e "         -fi, --firefox  Add custom user.js"
-		echo -e "         -h,  --help     Print out this message"
-		echo -e "         -k,  --kitty    Add custom kitty.conf"
-		echo -e "         -m,  --mkshrc   Add custom mkshrc for android"
-		echo -e "         -te, --termux   Add custom colorscheme and prop files"
-		echo -e "         -tm, --tmux     Add custom .tmux.conf"
-		echo -e "         -u,  --urxvt    Add custom .Xresources"
-		echo -e "         -v,  --vim      Add custom .vimrc and vim colorscheme"
-		echo -e "              --version  Show version information\n"
-		echo -e "Install/Update dotfiles"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --vim\n' "$SCRIPT_NAME"
+		printf '          %s --urxvt\n\n' "$SCRIPT_NAME"
+		printf 'Options: -b,  --bashrc   Add custom .bashrc\n'
+		printf '         -fi, --firefox  Add custom user.js\n'
+		printf '         -h,  --help     Print out this message\n'
+		printf '         -k,  --kitty    Add custom kitty.conf\n'
+		printf '         -m,  --mkshrc   Add custom mkshrc for android\n'
+		printf '         -te, --termux   Add custom colorscheme and prop files\n'
+		printf '         -tm, --tmux     Add custom .tmux.conf\n'
+		printf '         -u,  --urxvt    Add custom .Xresources\n'
+		printf '         -v,  --vim      Add custom .vimrc and vim colorscheme\n'
+		printf '              --version  Show version information\n\n'
+		printf 'Install/Update custom dotfiles\n'
 		exit 0
 	}
 
@@ -3292,8 +2947,8 @@ dotfiles() {
 					}
 
 					print_bashrc "$@" &&
-					print_success "Finished updating '/home/"${SUDO_USER:=$USER}"/.bashrc'" ||
-					print_error "Failed to update '/home/"${SUDO_USER:=$USER}"/.bashrc'"
+					print_success "Finished updating '/home/${SUDO_USER:=$USER}/.bashrc'" ||
+					print_error "Failed to update '/home/${SUDO_USER:=$USER}/.bashrc'"
 					# Exit status is gotten from 'print_bashrc'
 					exit
 				;;
@@ -3458,16 +3113,16 @@ dotfiles() {
 #--------------------------------------------------------------
 extract() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]"
-		echo -e "          $SCRIPT_NAME [FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME --help"
-		echo -e "          $SCRIPT_NAME /sdcard/*"
-		echo -e "          $SCRIPT_NAME file1.zip file2.zip\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Extract archive into archive-name folder"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME" 
+		printf '          %s [FILE...]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
+		printf '          %s /sdcard/*\n' "$SCRIPT_NAME"
+		printf '          %s file1.zip file2.zip\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Extract archive file(s) into a folder with the archive name\n'
 		exit 0
 	}
 
@@ -3484,7 +3139,7 @@ extract() {
 	}
 
 	failed_to_extract() {
-		echo ""
+		printf '\n'
 		print_error "Failed to extract '$archive_file'"
 		rm -rf "$folder_name" 2>/dev/null
 		exit_status=1
@@ -3518,14 +3173,14 @@ extract() {
 
 					# Handles if $archive_file is a folder
 					[[ -d $archive_file ]] && {
-						echo ""
+						printf '\n'
 						print_error "Cannot extract '$archive_file': Not a valid archive"
 						exit_status=1
 					}
 
 					# Handles if $archive_file doesn't exist
 					[[ ! -e $archive_file ]] && {
-						echo ""
+						printf '\n'
 						print_error "Cannot extract '$archive_file': No such file"
 						exit_status=1
 					}
@@ -3540,7 +3195,7 @@ extract() {
 						7zip-unrar x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name"  || failed_to_extract
 
 						[[ -n $(ls -A "$folder_name" 2>/dev/null) ]] && {
-							echo ""
+							printf '\n'
 							print_success "Extracted '$archive_file' to '$folder_name'"
 							exit_status=0
 						}
@@ -3556,7 +3211,7 @@ extract() {
 						7z x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name" 2>/dev/null || failed_to_extract
 
 						[[ -n $(ls -A "$folder_name" 2>/dev/null) ]] && {
-							echo ""
+							printf '\n'
 							print_success "Extracted '$archive_file' to '$folder_name'"
 							exit_status=0
 						}
@@ -3572,7 +3227,7 @@ extract() {
 						bsdtar -xf "$archive_file" -C "$folder_name" 2>/dev/null || failed_to_extract
 
 						[[ -n $(ls -A "$folder_name" 2>/dev/null) ]] && {
-							echo ""
+							printf '\n'
 							print_success "Extracted '$archive_file' to '$folder_name'"
 							exit_status=0
 						}
@@ -3595,167 +3250,18 @@ extract() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: ls
-#--------------------------------------------------------------
-ll() {
-	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION] [NUMBER] [FOLDER/FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME /sdcard/folder"
-		echo -e "          $SCRIPT_NAME 1"
-		echo -e "          $SCRIPT_NAME 1 folder"
-		echo -e "          $SCRIPT_NAME -l folder"
-		echo -e "          $SCRIPT_NAME -l 1 folder"
-		echo -e "          $SCRIPT_NAME -l 1 folder folder2"
-		echo -e "          $SCRIPT_NAME -l 1 folder/folder\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "All 'ls' options are also available here\n"
-		echo -e "Expand 'ls' functionality"
-		exit 0
-	}
-
-	check_input_argument() {
-		# Handles ll
-		# Handles ll 0
-		[[ $# -eq 0 || $1 == "0" ]] && {
-			ls -Ah --color=auto && exit
-		}
-
-		for primary_options in "${@:1}"; do
-			case "$primary_options" in
-				-h | --help)
-					print_help
-				;;
-				--version)
-					print_version
-				;;
-				*)
-					[[ ! $(type -p ls) ]] && print_missing_dependencies "ls"
-
-					unset dir_glob
-
-					for glob_count in {1..9}; do
-						dir_glob+=../
-						[[ $# -eq 1 ]] && {
-							# Handles ll [NUMBER] ---> ll 1
-							[[ $1 == "$glob_count" ]] && {
-								echo "${dir_glob%\/}:" && ls -Ah --color=auto "${dir_glob}"
-								exit
-							}
-							# Handles ll [OPTION] ---> ll -rl
-							case "$1" in
-								-*)
-									ls -Ah --color=auto "$1"
-									exit
-								;;
-							esac
-						}
-
-						[[ $# -eq 2 ]] && {
-							# Handles ll [NUMBER] [OPTION] ---> ll 2 -rl
-							[[ $1 == "$glob_count" ]] && {
-								case "$2" in
-									-*)
-										echo "${dir_glob%\/}:" && ls -Ah --color=auto "$2" "$dir_glob" && exit
-									;;
-								esac
-								# Handles ll [NUMBER] [FILE/FOLDER] ---> ll 2 sys/class
-								for new_dir in "${@:2}"; do
-									echo -e "${dir_glob}$new_dir:"
-									ls -Ah --color=auto ${dir_glob}${new_dir} 2>/dev/null ||
-									ls -Ah --color=auto ${dir_glob}"${new_dir}"
-								done
-								exit
-							}
-
-							[[ $2 == "$glob_count" ]] && {
-								case "$1" in
-									# Handles ll [OPTION] [NUMBER] ---> ll -rl 2
-									-*)
-										echo "${dir_glob%\/}:" && ls -Ah --color=auto "$1" "$dir_glob"
-										exit
-									;;
-									# Handles ll [FILE/FOLDER] [NUMBER] ---> ll sys/class 2
-									*)
-										echo "${dir_glob}$1:" && ls -Ah --color=auto ${dir_glob}"$1"
-										exit
-									;;
-								esac
-								exit
-							}
-						}
-
-						[[ $# -gt 2 ]] && {
-							[[ $1 == "$glob_count" ]] && {
-								case "$2" in
-									# Handles ll [NUMBER] [OPTION] [FILE/FOLDER]... ---> ll 2 -rl sys/class proc/sys
-									-*)
-										for dir_next in "${@:3}"; do
-											echo -e "${dir_glob}$dir_next:"
-											ls -Ah --color=auto "$2" ${dir_glob}$dir_next 2>/dev/null ||
-											ls -Ah --color=auto "$2" ${dir_glob}"$dir_next"
-										done
-										exit
-									;;
-									# Handles ll [NUMBER] [FILE/FOLDER]... ---> ll 2 sys/class proc/sys dev/block
-									*)
-										for new_next in "${@:2}"; do
-											echo -e "${dir_glob}$new_next:"
-											ls -Ah --color=auto ${dir_glob}$new_next 2>/dev/null ||
-											ls -Ah --color=auto ${dir_glob}"$new_next"
-										done
-										exit
-									;;
-								esac
-							}
-
-							[[ $2 == "$glob_count" ]] && {
-								case "$1" in
-									# Handles ll [OPTION] [NUMBER] [FILE/FOLDER]... ---> ll -rl 2 sys/class dev/block
-									-*)
-										for dir_sec in "${@:3}"; do
-											echo -e "${dir_glob%\/}/$dir_sec:"
-											ls -Ah --color=auto "$1" ${dir_glob}$dir_sec 2>/dev/null ||
-											ls -Ah --color=auto "$1" ${dir_glob}"$dir_sec"
-										done
-										exit
-									;;
-								esac
-							}
-						}
-					done
-
-					# Handles ll [OPTION] [FILE/FOLDER] ---> ll -s /mnt
-					# Handles ll [FILE/FOLDER]... ---> ll folder1 file1
-					# Handles ll [FILE/FOLDER]... [OPTION] ---> ll folder1 file1 -s
-					ls -Ah --color=auto "$@"
-					exit
-				;;
-			esac
-		done
-	}
-
-	trap 'run_on_exit' 1 2 3 15
-	check_input_argument "$@"
-	exit
-}
-
-#--------------------------------------------------------------
-# Platform: Device Agnostic
 # Dependencies: curl, find, lltag, iconv
 #--------------------------------------------------------------
 lyrics() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [FILENAME]\n"
-		echo -e "Examples: $SCRIPT_NAME AURORA\ -\ Runaway.flac"
-		echo -e "          $SCRIPT_NAME /home/${USER}/Music/*\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Batch download .lrc files for your music library"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [FILE...]\n\n' "$SCRIPT_NAME" 
+		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
+		printf '          %s /home/user/Music/*.flac\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Batch download .lrc files for your music library\n'
 		exit 0
 	}
 
@@ -3781,7 +3287,7 @@ lyrics() {
 	}
 
 	failed_to_fetch() {
-		echo "FAILED"
+		printf 'FAILED\n'
 		exit 1
 	}
 
@@ -3815,7 +3321,8 @@ lyrics() {
 	check_audio_files() {
 		# Only process audio files
 		! [[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus|.lrc ]] && [[ ! -d $parsed_file ]] && {
-			print_error "'$parsed_file' is not a valid or supported audio file\n"
+			print_error "'$parsed_file' is not a valid or supported audio file"
+			printf '\n'
 			skip="true"
 			exit_status=1
 			return
@@ -3827,14 +3334,16 @@ lyrics() {
 
 			# Check if lyric file is empty
 			[[ -n $check_lrc ]] && {
-				print_warning "'$parsed_file' is a Lyrics file\n"
+				print_warning "'$parsed_file' is a Lyrics file"
+				printf '\n'
 				skip="true"
 				exit_status=0
 				return
 			}
 
 			# Delete lyrics file if it is empty
-			print_error "'$parsed_file' is not a valid Lyrics file\n"
+			print_error "'$parsed_file' is not a valid Lyrics file"
+			printf '\n'
 			rm "$parsed_file" 2>/dev/null
 			skip="true"
 			exit_status=1
@@ -3845,7 +3354,8 @@ lyrics() {
 		[[ -f $lrc_file ]] && ! [[ $parsed_file =~ .lrc ]] && {
 			check_lrc="$(< "$lrc_file")"
 			[[ -n $check_lrc ]] && {
-				print_warning "Lyrics file for '$parsed_file' already exists\n"
+				print_warning "Lyrics file for '$parsed_file' already exists"
+				printf '\n'
 				skip="true"
 				exit_status=0
 				return
@@ -3854,7 +3364,8 @@ lyrics() {
 
 		# Handles missing tags
 		[[ -z $artist || -z $title ]] && {
-			print_error "'$parsed_file' file has incorrect or invalid metadata\n"
+			print_error "'$parsed_file' file has incorrect or invalid metadata"
+			printf '\n'
 			skip="true"
 			exit_status=1
 			return
@@ -3875,10 +3386,10 @@ lyrics() {
 		artist="${artist//[[:space:]]}"
 
 		# Remove diacritics from strings
-		artist="$(echo "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Sanitize artist string
-		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "“" "+" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "with"; do
+		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "+" '“' '”' "‘" "’" "/" "," "feat." "featuring" "ft." "." "with"; do
 			[[ $sanitize =~ "feat."|"ft."|"featuring"|","|";"|"with" ]] && {
 				artist="${artist//"$sanitize"*}"
 			}
@@ -3904,10 +3415,10 @@ lyrics() {
 		title="${title//[[:space:]]}"
 
 		# Remove diacritics from strings
-		title="$(echo "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Sanitize title string
-		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "*" "+" "“" "”" "‘" "’" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
+		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "*" "+" '“' '”' "‘" "’" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
 			[[ $sanitize =~ "feat."|"ft."|"featuring" ]] && {
 				title="${title//"$sanitize"*}"
 			}
@@ -3922,7 +3433,7 @@ lyrics() {
 			return
 		}
 
-		url="https://www.azlyrics.com/lyrics/"$artist"/"$title".html"
+		url="https://www.azlyrics.com/lyrics/${artist}/${title}.html"
 
 		output="$(content_loader "$url")"
 
@@ -3939,7 +3450,7 @@ lyrics() {
 			output="${output//"&amp;"}"
 			output="${output//":]"/"]"}"
 
-			echo "${output}" > "$lrc_file"
+			printf '%s\n' "${output}" > "$lrc_file"
 			exit_status=0
 		}
 
@@ -3995,14 +3506,14 @@ lyrics() {
 		artist="${artist//"'"/"-"}"
 		artist="${artist//"‘"/"-"}"
 		artist="${artist//"’"/"-"}"
-		artist="${artist//"“"/"-"}"
-		artist="${artist//"”"/"-"}"
+		artist="${artist//'“'/"-"}"
+		artist="${artist//'”'/"-"}"
 
 		# Useful for "artists" like Tydolla$ign, A$APRocky
 		artist="${artist//"$"/"s"}"
 
 		# Remove diacritics from strings
-		artist="$(echo "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Sanitize artist string
 		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "/" "," "feat." "featuring" "ft." "." "with"; do
@@ -4022,11 +3533,11 @@ lyrics() {
 		title="${title//"'"/"-"}"
 		title="${title//"‘"/"-"}"
 		title="${title//"’"/"-"}"
-		title="${title//"“"/"-"}"
-		title="${title//"”"/"-"}"
+		title="${title//'“'/"-"}"
+		title="${title//'”'/"-"}"
 
 		# Remove diacritics from strings
-		title="$(echo "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Sanitize title string
 		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "*" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
@@ -4044,7 +3555,7 @@ lyrics() {
 			return
 		}
 
-		url="https://www.songlyrics.com/"$artist"/"${title}"-lyrics/"
+		url="https://www.songlyrics.com/${artist}/${title}-lyrics"
 
 		output="$(content_loader "$url")"
 
@@ -4055,7 +3566,7 @@ lyrics() {
 			output="${output//"<br /></p>"*}"
 			output="${output//"<br />"}"
 
-			echo "${output}" > "$lrc_file"
+			printf '%s\n' "${output}" > "$lrc_file"
 			exit_status=0
 		}
 
@@ -4095,7 +3606,7 @@ lyrics() {
 						print_error "Cannot stat '$file_name': No such file or directory"
 					}
 
-					while read sec_file_name; do
+					while read -r sec_file_name; do
 						[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
 							unset exit_status
 							unset missing_lyrics
@@ -4133,28 +3644,32 @@ lyrics() {
 								# Handles captcha responses
 								[[ $captcha_response == "true" ]] && {
 									print_error "Captcha response detected"
-									print_aligned "Try again later\n"
+									print_aligned "Try again later"
+									printf '\n'
 									exit 1
 								}
 
 								# Handles missing lyrics on all parsed websites
 								[[ $missing_lyrics == "true" ]] && {
-									print_error "No lyrics found for '$parsed_file'\n"
+									print_error "No lyrics found for '$parsed_file'"
+									printf '\n'
 								}
  
 								[[ $exit_status != 0 && $skip != "true" ]] || [[ $failed_fetch == "true" ]] && {
-									print_error "Failed to fetch lyrics for '$sec_file_name'\n"
+									print_error "Failed to fetch lyrics for '$sec_file_name'"
+									printf '\n'
 								}
  
 								# Print program run status
 								[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
-									print_success "Added Lyrics file for '$sec_file_name'\n"
+									print_success "Added Lyrics file for '$sec_file_name'"
+									printf '\n'
 								}
 							}
 						}
 
 					# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
-					done <<< $(find "$file_name" 2>/dev/null)
+					done <<< "$(find "$file_name" 2>/dev/null)"
 				;;
 			esac
 		done
@@ -4177,16 +3692,16 @@ lyrics() {
 #--------------------------------------------------------------
 mkcp() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]"
-		echo -e "          $SCRIPT_NAME [FOLDER] [FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME --help"
-		echo -e "          $SCRIPT_NAME newfolder file1 file2"
-		echo -e "          $SCRIPT_NAME newfolder *\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Copy file/folder to the specified folder"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
+		printf '          %s [FOLDER] [FILE...]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
+		printf '          %s output_folder file1 file2\n' "$SCRIPT_NAME"
+		printf '          %s output_folder *\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Copy file(s)/folder(s) to the specified folder\n'
 		exit 0
 	}
 
@@ -4250,7 +3765,7 @@ mkcp() {
 						# folder_name --> foldername/ -> foldername
 						sec_folder_name=${folder_name%\/}
 
-						while read sec_file_name; do
+						while read -r sec_file_name; do
 							[[ -d $sec_file_name ]] && {
 								unset exit_status
 
@@ -4285,7 +3800,7 @@ mkcp() {
 								# home/username/file  -> home
 								dup_file_name="${dup_file_name%%\/*}"
 
-								rm -r "${sec_folder_name}/${new_file_name}/${dup_file_name}" 2>/dev/null
+								rm -r "${sec_folder_name}/${new_file_name:=?}/${dup_file_name:=?}" 2>/dev/null
 							}
 
 							[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
@@ -4317,7 +3832,7 @@ mkcp() {
 								}
 							}
 						# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
-						done <<< $(find "$file_name")
+						done <<< "$(find "$file_name")"
 					}
 
 					# Print program run status
@@ -4352,16 +3867,16 @@ mkcp() {
 #--------------------------------------------------------------
 mkmv() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]"
-		echo -e "          $SCRIPT_NAME [FOLDER] [FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME --help"
-		echo -e "          $SCRIPT_NAME newfolder file1 file2"
-		echo -e "          $SCRIPT_NAME newfolder *\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Move file/folder to the specified folder"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
+		printf '          %s [FOLDER] [FILE...]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
+		printf '          %s output_folder file1 file2\n' "$SCRIPT_NAME"
+		printf '          %s output_folder *\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Move file(s)/folder(s) to the specified folder\n'
 		exit 0
 	}
 
@@ -4427,7 +3942,7 @@ mkmv() {
 						# folder_name --> foldername/ -> foldername
 						sec_folder_name=${folder_name%\/}
 
-						while read sec_file_name; do
+						while read -r sec_file_name; do
 							[[ -d $sec_file_name ]] && {
 								unset exit_status
 
@@ -4495,7 +4010,7 @@ mkmv() {
 								}
 							}
 						# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
-						done <<< $(find "$file_name")
+						done <<< "$(find "$file_name")"
 					}
 
 					# Print program run status
@@ -4528,26 +4043,25 @@ mkmv() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: mkdir, touch, ls
+# Dependencies: mkdir, ls
 #--------------------------------------------------------------
 mktouch() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]"
-		echo -e "          $SCRIPT_NAME [FOLDER] [FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME --help"
-		echo -e "          $SCRIPT_NAME newfolder file1 file2"
-		echo -e "          $SCRIPT_NAME newfolder *\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Create empty file(s) in the specified folder"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
+		printf '          %s [FOLDER] [FILE...]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
+		printf '          %s output_folder file1 file2\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Create empty file(s) in the specified folder\n'
 		exit 0
 	}
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in mkdir touch ls; do
+		for mis_dep in mkdir ls; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -4569,6 +4083,11 @@ mktouch() {
 		}
 	}
 
+	failed_to_create() {
+		print_error "Failed to create '$file_name' in '$folder_name'"
+		exit_status=1
+	}
+
 	check_input_argument() {
 		for file_name in "${@:2}"; do
 			unset exit_status
@@ -4583,9 +4102,9 @@ mktouch() {
 					# Create destination directory
 					mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
-					$(touch "$folder_name/$file_name" 2>/dev/null) &&
+					printf 2>/dev/null '\n' > "${folder_name}"/"${file_name:=?]}" &&
 					print_success "Created '$file_name' in '$folder_name'" ||
-					print_error "Failed to create '$file_name' to '$folder_name'" &&
+					failed_to_create "$@" &&
 					exit_status=0
 				;;
 			esac
@@ -4615,18 +4134,18 @@ mktouch() {
 #--------------------------------------------------------------
 omaps-backup() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME --encrypt"
-		echo -e "          $SCRIPT_NAME --restore\n"
-		echo -e "Options: -en, --encrypt    Create an encrypted backup"
-		echo -e "         -h,  --help       Print out this message"
-		echo -e "         -l,  --list       List all available backups"
-		echo -e "         -un, --unencrypt  Create an unencrypted backup"
-		echo -e "         -r,  --restore    Restore organic maps from available backups"
-		echo -e "              --version    Show version information\n"
-		echo -e "Create and restore organic maps backups"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --encrypt\n' "$SCRIPT_NAME"
+		printf '          %s --restore\n\n' "$SCRIPT_NAME"
+		printf 'Options: -en, --encrypt    Create an encrypted backup\n'
+		printf '         -h,  --help       Print out this message\n'
+		printf '         -l,  --list       List all available backups\n'
+		printf '         -un, --unencrypt  Create an unencrypted backup\n'
+		printf '         -r,  --restore    Restore maps files from available backups\n'
+		printf '              --version    Show version information\n\n'
+		printf 'Create and restore backups of organic maps .mwm files\n'
 		exit 0
 	}
 	check_dependencies() {
@@ -4697,21 +4216,22 @@ omaps-backup() {
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 		rm -rf "${omaps_backup_dir}/omaps-backup.${current_date}.7z" 2>/dev/null
 		# CD back to original directory
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 1
 	}
 
 	failed_to_extract() {
-		echo ""
+		printf '\n'
 		print_error "Failed to extract '${backup_list[$backup_option]}'"
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 		# CD back to original directory
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 1
 	}
 
 	encrypted_backup_omaps() {
-		print_warning "Creating encrypted backup 'omaps-backup.${current_date}.7z'\n"
+		print_warning "Creating encrypted backup 'omaps-backup.${current_date}.7z'"
+		printf '\n'
 
 		# Handles password creation
 		create_password "$@"
@@ -4725,7 +4245,7 @@ omaps-backup() {
 			[[ -d $avail_dir ]] && {
 				file_name="${avail_dir#\/}"
 				file_name="${file_name%%\/*}"
-				cd "${avail_dir%files}"
+				cd "${avail_dir%"files"}" || exit 1
 				# Compress $avail_dir contents
 				7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "omaps-${file_name}.7z" "files/" &>/dev/null &&
 				mv "omaps-${file_name}.7z" "${omaps_backup_dir}/current" 2>/dev/null
@@ -4733,7 +4253,7 @@ omaps-backup() {
 		done
 
 		# Make main archive
-		cd "${omaps_backup_dir}/current"
+		cd "${omaps_backup_dir}/current" || exit 1
 		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$CPU_CORE_COUNT" -mhe=on "omaps-backup.${current_date}.7z" "*" &>/dev/null &&
 		unset file_password file_password2 &&
 		mv "omaps-backup.${current_date}.7z" .. 2>/dev/null ||
@@ -4742,13 +4262,14 @@ omaps-backup() {
 		print_aligned "Check '$omaps_backup_dir'"
 
 		# CD back to original directory
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 		exit 0
 	}
 
 	unencrypted_backup_omaps() {
-		print_warning "Creating unencrypted backup 'omaps-backup.${current_date}.7z'\n"
+		print_warning "Creating unencrypted backup 'omaps-backup.${current_date}.7z'"
+		printf '\n'
 
 		mkdir -p "${omaps_backup_dir}/current"
 
@@ -4759,7 +4280,7 @@ omaps-backup() {
 			[[ -d $avail_dir ]] && {
 				file_name="${avail_dir#\/}"
 				file_name="${file_name%%\/*}"
-				cd "${avail_dir%files}"
+				cd "${avail_dir%"files"}" || exit 1
 				# Compress $avail_dir contents
 				7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "omaps-${file_name}.7z" "files/" &>/dev/null &&
 				mv "omaps-${file_name}.7z" "${omaps_backup_dir}/current" 2>/dev/null
@@ -4767,7 +4288,7 @@ omaps-backup() {
 		done
 
 		# Make main archive
-		cd "${omaps_backup_dir}/current"
+		cd "${omaps_backup_dir}/current" || exit 1
 		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "omaps-backup.${current_date}.7z" "*" &>/dev/null &&
 		mv "omaps-backup.${current_date}.7z" .. 2>/dev/null ||
 		failed_to_create "$@"
@@ -4775,7 +4296,7 @@ omaps-backup() {
 		print_aligned "Check '$omaps_backup_dir'"
 
 		# CD back to original directory
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 		exit 0
 	}
@@ -4784,8 +4305,8 @@ omaps-backup() {
 		# Set variables for available backups
 		array_counter=1
 
-		for avail_backup in $(ls -A "$omaps_backup_dir" 2>/dev/null); do
-			backup_list[$array_counter]="$avail_backup"
+		for avail_backup in "$omaps_backup_dir"/*; do
+			backup_list[array_counter]="${avail_backup//*\/}"
 			array_counter=$((array_counter + 1))
 		done
 
@@ -4797,15 +4318,16 @@ omaps-backup() {
 
 		# List available backups
 		print_banner
-		print_warning "Restoring organic maps\n"
+		print_warning "Restoring organic maps"
+		printf '\n'
 		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
-			echo -e "${array_checker}.${backup_list[$array_checker]}"
+			printf '%s.%s\n' "${array_checker}" "${backup_list[$array_checker]}"
 		done
-		echo ""
+		printf '\n'
 		read -rep "Select preferred backup: " backup_option
 		case "$backup_option" in
 			-*)
-				echo ""
+				printf '\n'
 				[[ -z ${backup_option#*\-} ]] && {
 					print_error "Invalid option '${backup_option}'" &&
 					exit 1
@@ -4815,7 +4337,7 @@ omaps-backup() {
 				exit 1
 			;;
 			*)
-				echo ""
+				printf '\n'
 				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
 					print_warning "Restoring organic maps using '${backup_list[$backup_option]}'"
 
@@ -4823,9 +4345,9 @@ omaps-backup() {
 					mkdir -p "${omaps_backup_dir}/current"
 
 					# Copy selected backup file to $omaps_backup_dir/current
-					cp -rf "$omaps_backup_dir"/${backup_list[$backup_option]} "${omaps_backup_dir}/current" 2>/dev/null &&
+					cp -rf "$omaps_backup_dir"/"${backup_list[$backup_option]}" "${omaps_backup_dir}/current" 2>/dev/null &&
 
-					cd "${omaps_backup_dir}/current"
+					cd "${omaps_backup_dir}/current" || exit 1
 
 					# Extract selected backup file
 					7z x "${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y 2>/dev/null || failed_to_extract
@@ -4840,11 +4362,11 @@ omaps-backup() {
 						}
 					done
 
-					echo "" &&
+					printf '\n' &&
 					print_success "Finished restoring '${backup_list[$backup_option]}'"
 
 					# CD back to original directory
-					cd "$current_dir"
+					cd "$current_dir" || exit 1
 					rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 					exit 0
 				}
@@ -4882,7 +4404,7 @@ omaps-backup() {
 						exit 1
 					}
 
-					echo -e "\033[1;97mAvailable backups:\033[00m"
+					printf '\033[1;97mAvailable backups:\033[00m\n'
 					ls -A "$omaps_backup_dir"
 					exit 0
 				;;
@@ -4936,333 +4458,18 @@ omaps-backup() {
 
 #--------------------------------------------------------------
 # Platform: Android
-# Dependencies: 7zip, ls, pm, date, mkdir
-#--------------------------------------------------------------
-opencamera-backup() {
-	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME --encrypt"
-		echo -e "          $SCRIPT_NAME --restore\n"
-		echo -e "Options: -en, --encrypt    Create an encrypted backup"
-		echo -e "         -h,  --help       Print out this message"
-		echo -e "         -l,  --list       List all available backups"
-		echo -e "         -un, --unencrypt  Create an unencrypted backup"
-		echo -e "         -r,  --restore    Restore open camera from available backups"
-		echo -e "              --version    Show version information\n"
-		echo -e "Create and restore open camera backups"
-		exit 0
-	}
-
-	check_dependencies() {
-		# Only run on Android
-		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
-			print_os_error
-		}
-
-		# Check for required dependencies
-		for mis_dep in ls 7z pm date mkdir; do
-			[[ ! $(type -p "$mis_dep") ]] && {
-				print_missing_dependencies "$mis_dep"
-			}
-		done
-
-		# Only run as root user
-		print_not_root_user
-
-		# Handles no open camera install
-		[[ -z $(pm -l | grep "net.sourceforge.opencamera$" 2>/dev/null) ]] && {
-			print_error "Open Camera is not installed"
-			print_notification
-			exit 1
-		}
-
-		# Set open camera content directories
-		ocam_internal="/sdcard/Android/data/net.sourceforge.opencamera"
-
-		# Array of content directories
-		ocam_backup_candidates=(
-			"$ocam_internal"
-		)
-
-		# Handles missing open camera folders
-		unset backup_checker
-		backup_checker=0
-		for avail_dir in "${ocam_backup_candidates[@]}"; do
-			[[ -d $avail_dir ]] && {
-				backup_checker=$((backup_checker + 1))
-			}
-		done
-
-		# Set open camera backup directory
-		ocam_backup_dir="$phone_storage/Misc/opencamera-backup"
-
-		# Use external storage if available
-		[[ -n $(ls -A "$EXTERNAL_STORAGE" 2>/dev/null) ]] && {
-			ocam_backup_dir="$EXTERNAL_STORAGE/Misc/opencamera-backup"
-		}
-
-		# Set current current directory
-		current_dir="$PWD"
-
-		# Get date and time in YY.MM.DD.HH.MM format
-		current_date="$(date +%Y.%m.%d.%H%M)"
-	}
-
-	failed_to_create() {
-		print_error "Something went wrong"
-		print_aligned "Failed to create 'opencamera-backup.${current_date}.7z'"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-		rm -rf "${ocam_backup_dir}/opencamera-backup.${current_date}.7z" 2>/dev/null
-
-		# CD back to original directory
-		cd "$current_dir"
-		exit 1
-	}
-
-	failed_to_extract() {
-		echo ""
-		print_error "Failed to extract '${backup_list[$backup_option]}'"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-
-		# CD back to original directory
-		cd "$current_dir"
-		exit 1
-	}
-
-	encrypted_backup_ocam() {
-		print_warning "Creating encrypted backup 'opencamera-backup.${current_date}.7z'\n"
-
-		# Handles password creation
-		create_password "$@"
-
-		mkdir -p "${ocam_backup_dir}/current"
-
-		# Create archives of each open camera content folder
-		unset avail_dir
-		for avail_dir in "${ocam_backup_candidates[@]}"; do
-			[[ -d $avail_dir ]] && {
-				file_name="${avail_dir#\/}"
-				file_name="${file_name%%\/*}"
-				cd "${avail_dir%files}"
-				# Compress $avail_dir contents
-				7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "opencamera-${file_name}.7z" "files/" &>/dev/null &&
-				mv "opencamera-${file_name}.7z" "${ocam_backup_dir}/current" 2>/dev/null
-			}
-		done
-
-		# Make main archive
-		cd "${ocam_backup_dir}/current"
-		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$CPU_CORE_COUNT" -mhe=on "opencamera-backup.${current_date}.7z" "*" &>/dev/null &&
-		unset file_password file_password2 &&
-		mv "opencamera-backup.${current_date}.7z" .. 2>/dev/null ||
-		failed_to_create "$@"
-		print_success "Finished encrypting 'opencamera-backup.${current_date}.7z'"
-		print_aligned "Check '$ocam_backup_dir'"
-
-		# CD back to original directory
-		cd "$current_dir"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-		exit 0
-	}
-
-	unencrypted_backup_ocam() {
-		print_warning "Creating unencrypted backup 'opencamera-backup.${current_date}.7z'\n"
-
-		mkdir -p "${ocam_backup_dir}/current"
-
-		# Create archives of each open camera content folder
-		unset avail_dir
-		for avail_dir in "${ocam_backup_candidates[@]}"; do
-			[[ -d $avail_dir ]] && {
-				file_name="${avail_dir#\/}"
-				file_name="${file_name%%\/*}"
-				cd "${avail_dir%files}"
-				# Compress $avail_dir contents
-				7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "opencamera-${file_name}.7z" "files/" &>/dev/null &&
-				mv "opencamera-${file_name}.7z" "${ocam_backup_dir}/current" 2>/dev/null
-			}
-		done
-
-		# Make main archive
-		cd "${ocam_backup_dir}/current"
-		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "opencamera-backup.${current_date}.7z" "*" &>/dev/null &&
-		mv "opencamera-backup.${current_date}.7z" .. 2>/dev/null ||
-		failed_to_create "$@"
-		print_success "Finished creating 'opencamera-backup.${current_date}.7z'"
-		print_aligned "Check '$ocam_backup_dir'"
-
-		# CD back to original directory
-		cd "$current_dir"
-		rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-		exit 0
-	}
-
-	restore_ocam() {
-		# Set variables for available backups
-		array_counter=1
-		for avail_backup in $(ls -A "$ocam_backup_dir" 2>/dev/null); do
-			backup_list[$array_counter]="$avail_backup"
-			array_counter=$((array_counter + 1))
-		done
-
-		# Handles no available backups
-		[[ $array_counter -eq 1 ]] && {
-			print_error "No available backups to restore from"
-			exit 1
-		}
-
-		# List available backups
-		print_banner
-		print_warning "Restoring open camera\n"
-		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
-			echo -e "${array_checker}.${backup_list[$array_checker]}"
-		done
-		echo ""
-		read -rep "Select preferred backup: " backup_option
-		case "$backup_option" in
-			-*)
-				echo ""
-				[[ -z ${backup_option#*\-} ]] && {
-					print_error "Invalid option '${backup_option}'" &&
-					exit 1
-				}
-
-				print_error "Invalid option -- '${backup_option#*\-}'" &&
-				exit 1
-			;;
-			*)
-				echo ""
-				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
-					print_warning "Restoring open camera using '${backup_list[$backup_option]}'"
-					rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-					mkdir -p "${ocam_backup_dir}/current"
-
-					# Copy selected backup file to $ocam_backup_dir/current
-					cp -rf "$ocam_backup_dir"/${backup_list[$backup_option]} "${ocam_backup_dir}/current" 2>/dev/null &&
-					cd "${ocam_backup_dir}/current"
-
-					# Extract selected backup file
-					7z x "${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y 2>/dev/null || failed_to_extract
-
-					# Get names of extracted files
-					for avail_dir in "${ocam_backup_candidates[@]}"; do
-						file_name="${avail_dir#\/}"
-						file_name="${file_name%%\/*}"
-						[[ -f opencamera-${file_name}.7z ]] && {
-							# Extract compressed files in open camera content directories
-							7z x "opencamera-${file_name}.7z" -mmt"$CPU_CORE_COUNT" -y -o"${avail_dir}" 2>/dev/null || failed_to_extract
-						}
-					done
-
-					echo "" &&
-					print_success "Finished restoring '${backup_list[$backup_option]}'"
-
-					# CD back to original directory
-					cd "$current_dir"
-					rm -rf "${ocam_backup_dir}/current" 2>/dev/null
-					exit 0
-				}
-
-				print_error "Invalid option '${backup_option}'" &&
-				exit 1
-			;;
-		esac
-	}
-
-	check_input_option() {
-		for primary_options in "${@:1}"; do
-			case "$primary_options" in
-				-en | --encrypt)
-					check_dependencies "$@"
-
-					# Handles if $ocam_backup exists and is empty
-					[[ -z $(ls -A "$ocam_internal" 2>/dev/null) || ! -d $ocam_internal || $backup_checker -eq 0 ]] && {
-						print_error "There is nothing to backup"
-						print_aligned "Create a backup first using the Open Camera app"
-						exit 1
-					}
-
-					encrypted_backup_ocam "$@"
-				;;
-				-h | --help)
-					print_help
-				;;
-				-l | --list)
-					check_dependencies "$@"
-
-					# Handles no available ocam backup
-					[[ -z $(ls -A "$ocam_backup_dir" 2>/dev/null) ]] && {
-						print_error "No available backups"
-						exit 1
-					}
-
-					echo -e "\033[1;97mAvailable backups:\033[00m"
-					ls -A "$ocam_backup_dir"
-					exit 0
-				;;
-				-un | --unencrypt)
-					check_dependencies "$@"
-
-					# Handles if $ocam_backup exists and is empty
-					[[ -z $(ls -A "$ocam_internal" 2>/dev/null) || ! -d $ocam_internal || $backup_checker -eq 0 ]] && {
-						print_error "There is nothing to backup"
-						print_aligned "Create a backup first using the Open Camera app"
-						exit 1
-					}
-
-					unencrypted_backup_ocam "$@"
-				;;
-				-r | --restore)
-					check_dependencies "$@"
-					restore_ocam "$@"
-				;;
-				--version)
-					print_version
-				;;
-				-*)
-					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
-						print_notification
-					}
-
-					print_error "Invalid option -- '${primary_options#*\-}'"
-					print_notification
-				;;
-				*)
-					for secondary_options in "${@:2}"; do
-						case "$secondary_options" in
-							-h | --help)
-								print_help
-							;;
-						esac
-					done
-					print_syntax_error
-				;;
-			esac
-		done
-	}
-	trap 'remove_file_on_exit "${ocam_backup_dir}/current" "${ocam_backup_dir}/opencamera-backup.${current_date}.7z"' 1 2 3 15
-	print_no_argument "$@"
-	check_input_option "$@"
-	exit
-}
-
-#--------------------------------------------------------------
-# Platform: Android
 # Dependencies: ping, magisk, sed
 #--------------------------------------------------------------
 package() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --help\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Magisk module packaging tool"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s\n' "$SCRIPT_NAME"
+		printf '          %s --help\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Magisk module packaging tool\n'
 		exit 0
 	}
 
@@ -5336,9 +4543,9 @@ package() {
 
 	download_fail() {
 		print_error "Something went wrong"
-		print_aligned "Failed to download '$@'"
+		print_aligned "Failed to download '$*'"
 		rm -r "${package_tmp_dir}" 2>/dev/null
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 1
 	}
 
@@ -5346,14 +4553,15 @@ package() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'tether.$current_date.zip'"
 		rm -r "${package_tmp_dir}" "$tmp_dir/tether" 2>/dev/null
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 1
 	}
 
 	download_dnscrypt() {
 		mkdir -p "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/dnscrypt-proxy"
-		cd "$package_tmp_dir"
-		print_warning "Downloading 'dnscrypt-proxy version $dnscrypt_version'\n"
+		cd "$package_tmp_dir" || exit 1
+		print_warning "Downloading 'dnscrypt-proxy version $dnscrypt_version'"
+		printf '\n'
 
 		# Download dnscrypt-proxy for arm64 Android
 		download_link="https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/${dnscrypt_version}/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
@@ -5363,13 +4571,14 @@ package() {
 		download_fail "dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
 
 		# Extract downloaded zip file
-		busybox unzip dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip &>/dev/null
+		busybox unzip "dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip" &>/dev/null
 
 		cp -rf "$package_tmp_dir/android-arm64/dnscrypt-proxy" "$package_tmp_dir/system/bin/" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/dnscrypt-proxy"
 		rm -r "$package_tmp_dir/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip" "$package_tmp_dir/android-arm64" 2>/dev/null
 
 		# Download custom config files for dnscrypt-proxy
-		print_warning "Downloading 'dnscrypt-proxy' config files\n"
+		print_warning "Downloading 'dnscrypt-proxy' config files"
+		printf '\n'
 		busybox wget https://github.com/teth3r/blocklist/archive/refs/heads/main.zip -O "$package_tmp_dir/main.zip" &>/dev/null ||
 		download_fail "main.zip"
 
@@ -5387,7 +4596,8 @@ package() {
 	}
 
 	download_bash() {
-		print_warning "Downloading 'bash' static binary (ccbins)\n"
+		print_warning "Downloading 'bash' static binary (ccbins)"
+		printf '\n'
 
 		# Download bash static binary from ccbins magisk module repo
 		busybox wget https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/raw/master/bash/bash-arm64 -O "$package_tmp_dir/bash-arm64" &>/dev/null ||
@@ -5397,7 +4607,8 @@ package() {
 	}
 
 	download_adb() {
-		print_warning "Downloading 'adb' static binary (adb-ndk)\n"
+		print_warning "Downloading 'adb' static binary (adb-ndk)"
+		printf '\n'
 
 		# Download adb static binary from adb-ndk magisk module repo
 		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/raw/master/bin/adb.bin-arm64 -O "$package_tmp_dir/adb.bin-arm64" &>/dev/null ||
@@ -5406,7 +4617,8 @@ package() {
 		cp -rf "$package_tmp_dir/adb.bin-arm64" "$package_tmp_dir/system/bin/adb" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/adb"
 
 		# Download fastboot static binary from adb-ndk magisk module repo
-		print_warning "Downloading 'fastboot' static binary (adb-ndk)\n"
+		print_warning "Downloading 'fastboot' static binary (adb-ndk)"
+		printf '\n'
 		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/raw/master/bin/fastboot.bin-arm64 -O "$package_tmp_dir/fastboot.bin-arm64" &>/dev/null ||
 		download_fail "fastboot.bin-arm64"
 
@@ -5415,31 +4627,33 @@ package() {
 	}
 
 	download_zip() {
-		print_warning "Downloading '7zip' static binary\n"
+		print_warning "Downloading '7zip' static binary"
+		printf '\n'
 
 		mkdir -p "$package_tmp_dir/new" 2>/dev/null
 
 		# Download 7zip for arm64 Android
-		busybox wget https://7-zip.org/a/7z${z_version}-linux-arm64.tar.xz -O "$package_tmp_dir/new/7z${z_version}-linux-arm64.tar.xz" &>/dev/null ||
+		busybox wget "https://7-zip.org/a/7z${z_version}-linux-arm64.tar.xz" -O "$package_tmp_dir/new/7z${z_version}-linux-arm64.tar.xz" &>/dev/null ||
 		download_fail "7z${z_version}-linux-arm64.tar.xz"
 
-		cd "$package_tmp_dir/new"
+		cd "$package_tmp_dir/new" || exit 1
 
 		# Extract downloaded archive
 		busybox xz -d "7z${z_version}-linux-arm64.tar.xz" &>/dev/null
 		busybox tar -xf "7z${z_version}-linux-arm64.tar" &>/dev/null
 		cp -rf "$package_tmp_dir/new/7zzs" "$package_tmp_dir/system/bin/7z" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/7z"
-		cd "$package_tmp_dir/system/bin"
+		cd "$package_tmp_dir/system/bin" || exit 1
 		ln -sf 7z 7zip 2>/dev/null
-		cd "$package_tmp_dir"
+		cd "$package_tmp_dir" || exit 1
 		rm -r "$package_tmp_dir/new" 2>/dev/null
 	}
 
 	download_tether() {
-		print_warning "Downloading 'tether'\n"
+		print_warning "Downloading 'tether'"
+		printf '\n'
 
 		# Download latest version of tether
-		busybox wget https://raw.githubusercontent.com/teth3r/tether/master/tether -O "$package_tmp_dir/tether" &>/dev/null ||
+		busybox wget "https://raw.githubusercontent.com/teth3r/tether/master/tether" -O "$package_tmp_dir/tether" &>/dev/null ||
 		download_fail "tether"
 		chmod +x "$package_tmp_dir/tether"
 		./tether --silent "$package_tmp_dir/system/bin"
@@ -5449,27 +4663,29 @@ package() {
 
 	download_custom_iosevka() {
 		[[ $font_variant == "sans" ]] && {
-			print_warning "Downloading 'Iosevka version $iosevka_version'\n"
+			print_warning "Downloading 'Iosevka version $iosevka_version'"
+			printf '\n'
 
 			# Download latest version of Iosevka custom build
-			busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka.7z -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
+			busybox wget "https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka.7z" -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
 			download_fail "Iosevka version $iosevka_version"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-			cd "$package_tmp_dir/system/bin"
-			7z x "$package_tmp_dir"/system/bin/Iosevka.7z &>/dev/null
+			cd "$package_tmp_dir/system/bin" || exit 1
+			7z x "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null
 		}
 
 		[[ $font_variant == "slab" ]] && {
-			print_warning "Downloading 'Iosevka-Slab version $iosevka_version'\n"
+			print_warning "Downloading 'Iosevka-Slab version $iosevka_version'"
+			printf '\n'
 
 			# Download latest version of Iosevka custom build
-			busybox wget https://github.com/teth3r/Iosevka-build/releases/download/v"${iosevka_version}"/Iosevka-slab.7z -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
+			busybox wget "https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka-slab.7z" -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
 			download_fail "Iosevka-Slab version $iosevka_version"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-			cd "$package_tmp_dir/system/bin"
-			7z x "$package_tmp_dir"/system/bin/Iosevka-slab.7z &>/dev/null
+			cd "$package_tmp_dir/system/bin" || exit 1
+			7z x "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null
 		}
 
 		# Populate font directory
@@ -5481,7 +4697,7 @@ package() {
 		rm "$package_tmp_dir"/system/bin/*.md "$package_tmp_dir"/system/bin/Iosevka* 2>/dev/null
 
 		# Create font symbolic-links
-		cd "$package_tmp_dir/system/fonts"
+		cd "$package_tmp_dir/system/fonts" || exit 1
 
 		# SourceSansPro
 		ln -sf NotoSerif-Regular.ttf SourceSansPro-Regular.ttf 2>/dev/null
@@ -5494,39 +4710,41 @@ package() {
 		ln -sf NotoSerif-Regular.ttf DroidSansMono.ttf 2>/dev/null
 		ln -sf NotoSerif-Bold.ttf DroidSans-Bold.ttf 2>/dev/null
 
-		cd "$package_tmp_dir"
+		cd "$package_tmp_dir" || exit 1
 	}
 
 	populate_dir() {
-		print_warning "Populating module directories\n"
+		print_warning "Populating module directories"
+		printf '\n'
 
 		# Populate app/
 		mkdir -p "$package_tmp_dir/system/app/Stk" 2>/dev/null || print_write_error "$package_tmp_dir/system/app/Stk"
-		$(touch "$package_tmp_dir/system/app/Stk/Stk.apk" 2>/dev/null)
+		touch "$package_tmp_dir/system/app/Stk/Stk.apk" 2>/dev/null
 
 		# Populate product/app/
 		# AOSP webview shell
 		mkdir -p "$package_tmp_dir/system/product/app/Browser2" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Browser2"
-		$(touch "$package_tmp_dir/system/product/app/Browser2/Browser2.apk" 2>/dev/null)
+		touch "$package_tmp_dir/system/product/app/Browser2/Browser2.apk" 2>/dev/null
 
 		# AOSP camera app
 		mkdir -p "$package_tmp_dir/system/product/app/Camera2" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Camera2"
-		$(touch "$package_tmp_dir/system/product/app/Camera2/Camera2.apk" 2>/dev/null)
+		touch "$package_tmp_dir/system/product/app/Camera2/Camera2.apk" 2>/dev/null
 
 		# AOSP music player
 		mkdir -p "$package_tmp_dir/system/product/app/Music" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Music"
-		$(touch "$package_tmp_dir/system/product/app/Music/Music.apk" 2>/dev/null)
+		touch "$package_tmp_dir/system/product/app/Music/Music.apk" 2>/dev/null
 
 		# AOSP launcher search bar
 		mkdir -p "$package_tmp_dir/system/product/app/QuickSearchBox" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/QuickSearchBox"
-		$(touch "$package_tmp_dir/system/product/app/QuickSearchBox/QuickSearchBox.apk" 2>/dev/null)
+		touch "$package_tmp_dir/system/product/app/QuickSearchBox/QuickSearchBox.apk" 2>/dev/null
 
 		# Create empty mkshrc file to populate with 'dotfiles --mkshrc'
-		$(touch "$package_tmp_dir/system/etc/mkshrc" 2>/dev/null)
+		touch "$package_tmp_dir/system/etc/mkshrc" 2>/dev/null
 	}
 
 	create_module_prop() {
-		print_warning "Creating 'module.prop'\n"
+		print_warning "Creating 'module.prop'"
+		printf '\n'
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/module.prop"
 id=tether
@@ -5539,7 +4757,8 @@ EOF
 	}
 
 	create_customize() {
-		print_warning "Creating 'customize.sh'\n"
+		print_warning "Creating 'customize.sh'"
+		printf '\n'
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/customize.sh"
 #!/bin/env sh
@@ -5562,7 +4781,8 @@ EOF
 	}
 
 	create_post_fs() {
-		print_warning "Creating 'post-fs-data.sh'\n"
+		print_warning "Creating 'post-fs-data.sh'"
+		printf '\n'
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/post-fs-data.sh"
 #!/bin/env sh
@@ -5611,7 +4831,8 @@ EOF
 	}
 
 	create_service() {
-		print_warning "Creating 'service.sh'\n"
+		print_warning "Creating 'service.sh'"
+		printf '\n'
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/service.sh"
 #!/bin/env bash
@@ -5684,18 +4905,18 @@ rm -f "$test_file" 2>/dev/null
 # Set CPU clockspeed to max
 #--------------------------------------------------------------
 for core_group in /sys/devices/system/cpu/cpufreq/*/scaling_governor; do
-	echo "performance" > "$core_group"
+	printf '%s\n' "performance" > "$core_group"
 done
 
 #--------------------------------------------------------------
 # Set GPU clockspeed to max
 #--------------------------------------------------------------
 [[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
-	echo 2>/dev/null "performance" > /sys/class/kgsl/kgsl-3d0/devfreq/governor
-	echo "0" > /sys/class/kgsl/kgsl-3d0/default_pwrlevel
-	echo "0" > /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel
-	echo "0" > /sys/class/kgsl/kgsl-3d0/min_pwrlevel
-	echo "0" > /sys/class/kgsl/kgsl-3d0/throttling
+	printf 2>/dev/null '%s\n' "performance" > /sys/class/kgsl/kgsl-3d0/devfreq/governor
+	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/default_pwrlevel
+	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel
+	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/min_pwrlevel
+	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/throttling
 }
 
 #--------------------------------------------------------------
@@ -5712,14 +4933,14 @@ done
 #--------------------------------------------------------------
 cpu_core_count="$(cat /sys/devices/system/cpu/online)"
 for dev_cpuset in /dev/cpuset/*/cpus; do
-	echo "$cpu_core_count" > "$dev_cpuset"
+	printf '%s\n' "$cpu_core_count" > "$dev_cpuset"
 done
 
 #--------------------------------------------------------------
 # Enable USB OTG on certain devices
 #--------------------------------------------------------------
 [[ -f /sys/class/power_supply/usb/otg_switch ]] && {
-	echo "1" > /sys/class/power_supply/usb/otg_switch
+	printf '%d\n' "1" > /sys/class/power_supply/usb/otg_switch
 }
 
 #--------------------------------------------------------------
@@ -5807,7 +5028,8 @@ EOF
 
 	package_main() {
 		print_warning "Creating 'tether.$current_date' Magisk module"
-		print_aligned "This may take a while\n"
+		print_aligned "This may take a while"
+		printf '\n'
 
 		download_dnscrypt "$@"
 		download_bash "$@"
@@ -5820,20 +5042,21 @@ EOF
 		create_service "$@"
 
 		# Add execute permissions to $package_tmp_dir binaries
-		chmod +x $package_tmp_dir/system/bin/*
-		export PATH=$package_tmp_dir:$PATH
+		chmod +x "$package_tmp_dir"/system/bin/*
+		export PATH="$package_tmp_dir":$PATH
 
 		# Add custom fonts
-		print_warning "Adding custom fonts\n"
+		print_warning "Adding custom fonts"
+		printf '\n'
 
 		read -rep "Replace system fonts with Iosevka (y/n) " font_option
-		echo ""
+		printf '\n'
 		case "$font_option" in
 			 Y | y)
 				# Select font variant
-				echo -e "1. Sans-serif\n2. Slab-serif\n"
+				printf '1. %s\n2. %s\n\n' "Sans-serif" "Slab-serif"
 				read -rep "Select Iosevka typeface: " font_type
-				echo ""
+				printf '\n'
 				case "$font_type" in
 					1)
 						font_variant="sans"
@@ -5848,15 +5071,17 @@ EOF
 				esac
 			;;
 			*)
-				print_warning "Skipping Iosevka font installation\n"
+				print_warning "Skipping Iosevka font installation"
+				printf '\n'
 			;;
 		esac
 
 		# Populate font/ if custom font files exist
 		[[ -f $tmp_dir/fonts/NotoSerif-Regular.ttf ]] && {
-			print_warning "Adding user provided font files\n"
+			print_warning "Adding user provided font files"
+			printf '\n'
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-			cp -r $tmp_dir/fonts/*.ttf "$package_tmp_dir/system/fonts" 2>/dev/null
+			cp -r "$tmp_dir"/fonts/*.ttf "$package_tmp_dir/system/fonts" 2>/dev/null
 			create_post_fs "$@"
 		}
 
@@ -5868,11 +5093,11 @@ EOF
 
 		# Copy module files to tether/
 		mkdir -p "$tmp_dir/tether" 2>/dev/null || print_write_error "$tmp_dir/tether"
-		cp -rf $package_tmp_dir/* $tmp_dir/tether 2>/dev/null
+		cp -rf "$package_tmp_dir"/* "$tmp_dir"/tether 2>/dev/null
 
 		# Create magisk files
 		mkdir -p "$tmp_dir/tether/META-INF/com/google/android" 2>/dev/null || print_write_error "$tmp_dir/tether/META-INF/com/google/android"
-		echo "#MAGISK" > "$tmp_dir/tether/META-INF/com/google/android/updater-script"
+		printf  '%s\n' "#MAGISK" > "$tmp_dir/tether/META-INF/com/google/android/updater-script"
 
 		cat 2>/dev/null << "EOF" > "$tmp_dir/tether/META-INF/com/google/android/update-binary"
 #!/sbin/sh
@@ -5910,10 +5135,11 @@ install_module
 exit 0
 EOF
 
-		cd "$tmp_dir/tether"
+		cd "$tmp_dir/tether" || exit 1
 
 		print_warning "Almost done"
-		print_aligned "Creating archive file 'tether.$current_date.zip'\n"
+		print_aligned "Creating archive file 'tether.$current_date.zip'"
+		printf '\n'
 
 		# Zip tether/ contents
 		7z a -snl -snh -tzip -mx1 -mmt"$CPU_CORE_COUNT" "tether.$current_date.zip" "*" &>/dev/null ||
@@ -5926,7 +5152,7 @@ EOF
 			print_success "Finished creating 'tether.$current_date.zip'"
 			print_aligned "Check '$backup_dir'"
 			rm -r "$package_tmp_dir" "$tmp_dir/tether" 2>/dev/null
-			cd "$current_dir"
+			cd "$current_dir" || exit 1
 			exit 0
 		}
 
@@ -5934,7 +5160,7 @@ EOF
 		print_success "Finished creating 'tether.$current_date.zip'"
 		print_aligned "Check '/sdcard'"
 		rm -r "$package_tmp_dir" "$tmp_dir/tether" 2>/dev/null
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 0
 	}
 
@@ -5951,14 +5177,14 @@ EOF
 #--------------------------------------------------------------
 replace-su() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --help\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Replace phh-su with magisk in AOSP GSI"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s\n' "$SCRIPT_NAME"
+		printf '          %s --help\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Remove phh-su from AOSP GSI\n'
 		exit 0
 	}
 
@@ -6027,14 +5253,14 @@ replace-su() {
 #--------------------------------------------------------------
 setup() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --help\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Post-installation setup utility for voidlinux"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s\n' "$SCRIPT_NAME"
+		printf '          %s --help\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Post-installation setup utility for voidlinux\n'
 		exit 0
 	}
 
@@ -6146,8 +5372,8 @@ setup() {
 			# Enable tweaks/customizations for qt5 programs
 			env_var_file="$(< /etc/environment)"
 			[[ $env_var_file != *QT_QPA_PLATFORMTHEME* ]] && {
-				echo -e "QT_QPA_PLATFORMTHEME=qt5ct" >> /etc/environment
-				echo -e "QT_LOGGING_RULES=\"qt.svg*.warning=false\"" >> /etc/environment
+				printf '%s\n' "QT_QPA_PLATFORMTHEME=qt5ct" >> /etc/environment
+				printf '%s\n' "QT_LOGGING_RULES=\"qt.svg*.warning=false\"" >> /etc/environment
 			}
 
 			# Fixes missing icon bug
@@ -6244,7 +5470,7 @@ setup() {
 
 			sysctl_file="$(< /etc/sysctl.conf)"
 			[[ $sysctl_file != *dev.i915.perf_stream_paranoid* ]] && {
-				echo -e "dev.i915.perf_stream_paranoid = 0" >> /etc/sysctl.conf
+				printf '%s\n' "dev.i915.perf_stream_paranoid = 0" >> /etc/sysctl.conf
 			}
 
 			# Install microcode-updates
@@ -6287,9 +5513,9 @@ setup() {
 			xbps-install -Syu rxvt-unicode
 
 			# Create vim file association
-			mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
+			mkdir -p "/home/$SUDO_USER/.local/share/applications" || print_write_error "/home/$SUDO_USER/.local/share/applications"
 			chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
-			cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
+			cat 2>/dev/null << "EOF" > "/home/$SUDO_USER/.local/share/applications/vim.desktop"
 [Desktop Entry]
 Version=1.0
 Name=vim
@@ -6299,7 +5525,7 @@ Icon=konsole
 Type=Application
 MimeType=text/plain;
 EOF
-			chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
+			chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" "/home/${SUDO_USER:=$USER}/.local/share/applications/vim.desktop" 2>/dev/null
 
 			# Change uxrvt app/file icon
 			[[ $(< /usr/share/applications/rxvt-unicode.desktop) != *konsole* ]] && {
@@ -6316,9 +5542,9 @@ EOF
 			xbps-install -Syu kitty
 
 			# Create vim file association
-			mkdir -p /home/"$SUDO_USER"/.local/share/applications || print_write_error "/home/"$SUDO_USER"/.local/share/applications"
-			chown -R "$SUDO_USER":"$SUDO_USER" /home/"$SUDO_USER"/.local/ 2>/dev/null
-			cat 2>/dev/null << "EOF" > /home/"$SUDO_USER"/.local/share/applications/vim.desktop
+			mkdir -p "/home/$SUDO_USER/.local/share/applications" || print_write_error "/home/$SUDO_USER/.local/share/applications"
+			chown -R "$SUDO_USER":"$SUDO_USER" "/home/$SUDO_USER/.local/" 2>/dev/null
+			cat 2>/dev/null << "EOF" > "/home/$SUDO_USER/.local/share/applications/vim.desktop"
 [Desktop Entry]
 Version=1.0
 Name=vim
@@ -6401,8 +5627,7 @@ EOF
 			ln -sf /home/"$SUDO_USER"/.vimrc /root
 		}
 
-		echo "Done"
-		echo "Run 'source /home/${SUDO_USER}/.bashrc' to reload shell"
+		printf '%s\n%s\n' "Done" "Run 'source /home/${SUDO_USER}/.bashrc' to reload shell"
 	}
 
 	install_browser() {
@@ -6474,15 +5699,15 @@ EOF
 		for zone_files in /usr/share/zoneinfo/*; do
 			[[ -d $zone_files && ${zone_files##*/} != posix && ${zone_files##*/} != right ]] && {
 				printf '%s. %s  ' "${zone_count}" "${zone_files##*/}"
-				time_zone[$zone_count]="$zone_files"
+				time_zone[zone_count]="$zone_files"
 				zone_count=$((zone_count + 1))
 			}
 		done
 
-		echo -e "\n"
+		printf '\n'
 		# Read user input
 		read -rep "Select Timezone: " tz_option
-		echo ""
+		printf '\n'
 
 		# Handles invalid user input
 		[[ -z $tz_option ]] && {
@@ -6492,7 +5717,7 @@ EOF
 
 		case "$tz_option" in
 			-*)
-				echo ""
+				printf '\n'
 				[[ -z ${tz_option#*\-} || -z ${tz_option/\-\-*} ]] && {
 					print_error "Invalid option '${tz_option}'" &&
 					exit 1
@@ -6508,13 +5733,13 @@ EOF
 					zone_count=1
 					for sub_zone_files in "${time_zone[$tz_option]}"/*; do
 						printf '%s. %s  ' "${zone_count}" "${sub_zone_files##*/}"
-						sub_zone[$zone_count]="$sub_zone_files"
+						sub_zone[zone_count]="$sub_zone_files"
 						zone_count=$((zone_count + 1))
 					done
-					echo -e "\n"
+					printf '\n'
 					# Read user input
 					read -rep "Select Region: " tz_locale
-					echo ""
+					printf '\n'
 
 					# If location in user selection is defined
 					[[ -f ${sub_zone[$tz_locale]} && $tz_locale -ge 1 && $tz_locale -le $zone_count ]] && {
@@ -6528,13 +5753,13 @@ EOF
 						zone_count=1
 						for sub_region_files in "${sub_zone[$tz_locale]}"/*; do
 							printf '%s. %s  ' "${zone_count}" "${sub_region_files##*/}"
-							sub_region[$zone_count]="$sub_region_files"
+							sub_region[zone_count]="$sub_region_files"
 							zone_count=$((zone_count + 1))
 						done
-						echo -e "\n"
+						printf '\n'
 						# Read user input
 						read -rep "Select Location: " sub_locale
-						echo ""
+						printf '\n'
 
 						# If location in user selection is defined
 						[[ -f ${sub_region[$sub_locale]} && $sub_locale -ge 1 && $sub_locale -le $zone_count ]] && {
@@ -6617,11 +5842,11 @@ while :; do
 					break
 				}
 				# Set backlight to 30%
-				echo "77" > "$device_name/brightness"
+				printf '%d\n' "77" > "$device_name/brightness"
 				# Turn off keyboard backlight to save power
 				for kbd in /sys/class/leds/*kbd_backlight; do
 					[[ -f $kbd ]] && {
-						echo "0" > "$kbd/brightness"
+						printf '%d\n' "0" > "$kbd/brightness"
 					}
 				done
 				system_set=1
@@ -6634,7 +5859,7 @@ while :; do
 					break
 				}
 				# Set backlight to 50%
-				echo "128" > "$device_name/brightness"
+				printf '%d\n' "128" > "$device_name/brightness"
 				system_set=2
 			}
 			# Handles battery when plugged in or battery is 100%
@@ -6645,7 +5870,7 @@ while :; do
 					break
 				}
 				# Set backlight to 70%
-				echo "179" > "$device_name/brightness"
+				printf '%d\n' "179" > "$device_name/brightness"
 				system_set=3
 			}
 		}
@@ -6655,7 +5880,7 @@ while :; do
 done
 EOF
 			chmod +x /var/service/backlight/run &&
-			echo "Done"
+			printf '%s\n' "Done"
 		}
 	}
 
@@ -6700,7 +5925,7 @@ EOF
 		# Make resolv.conf immutable
 		chattr -i /etc/resolv.conf
 
-		echo "nameserver 127.0.0.1" > /etc/resolv.conf
+		printf '%s\n' "nameserver 127.0.0.1" > /etc/resolv.conf
 
 		chattr +i /etc/resolv.conf
 
@@ -6714,32 +5939,36 @@ EOF
 		print_warning "Setting up Voidlinux"
 
 		# Handles DE Installation
-		echo -e "\nInstall Desktop Environment: \n1. KDE \n2. Gnome \n3. Xfce \n4. Cinnamon \n5. Skip \n6. Exit\n"
+		printf '\nInstall Desktop Environment: \n1. KDE \n2. Gnome \n3. Xfce \n4. Cinnamon \n5. Skip \n6. Exit\n\n'
 		read -rep "Select Desktop: " de_option
-		echo ""
+		printf '\n'
 		case "$de_option" in
 			1)
-				print_warning "Installing KDE\n"
+				print_warning "Installing KDE"
+				printf '\n'
 				install_desktop && desktop_kde && error_check="desktop" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing KDE"
 			;;
 			2)
-				print_warning "Installing Gnome\n"
+				print_warning "Installing Gnome"
+				printf '\n'
 				install_desktop && desktop_gnome && error_check="desktop" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Gnome"
 			;;
 			3)
-				print_warning "Installing Xfce\n"
+				print_warning "Installing Xfce"
+				printf '\n'
 				install_desktop && desktop_xfce && error_check="desktop" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Xfce"
 			;;
 			4)
-				print_warning "Installing Cinnamon\n"
+				print_warning "Installing Cinnamon"
+				printf '\n'
 				install_desktop && desktop_cinnamon && error_check="desktop" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Cinnamon"
 			;;
 			5)
@@ -6766,27 +5995,29 @@ EOF
 		esac
 
 		[[ $error_check != "desktop" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install Desktop Environment"
 			exit 1
 		}
 
 		# Handles GPU Driver Installation
-		echo -e "\nInstall GPU Drivers: \n1. Intel \n2. AMD/radeon \n3. Skip \n4. Exit\n"
+		printf '\nInstall GPU Drivers: \n1. Intel \n2. AMD/radeon \n3. Skip \n4. Exit\n\n'
 		read -rep "Select GPU: " gpu_option
-		echo ""
+		printf '\n'
 		case "$gpu_option" in
 			1)
-				print_warning "Installing Intel GPU Drivers\n"
+				print_warning "Installing Intel GPU Drivers"
+				printf '\n'
 				install_gpu_drivers && intel_drivers && error_check="gpu" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Intel GPU Drivers"
 			;;
 			2)
-				print_warning "Installing AMD GPU Drivers\n"
+				print_warning "Installing AMD GPU Drivers"
+				printf '\n'
 				install_gpu_drivers && amd_drivers && error_check="gpu" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing AMD GPU Drivers"
 			;;
 			3)
@@ -6813,21 +6044,22 @@ EOF
 		esac
 
 		[[ $error_check != "gpu" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install GPU drivers"
 			exit 1
 		}
 
 		# Handles VM Software Installation
-		echo -e "\nInstall VM Software (qemu, virt-manager): \n1. Yes \n2. Skip \n3. Exit\n"
+		printf '\nInstall VM Software (qemu, virt-manager): \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " vm_option
-		echo ""
+		printf '\n'
 		case "$vm_option" in
 			1)
-				print_warning "Installing Virtual Machine software\n"
+				print_warning "Installing Virtual Machine software"
+				printf '\n'
 				install_vm && error_check="vm" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Virtual Machine software"
 			;;
 			2)
@@ -6854,33 +6086,36 @@ EOF
 		esac
 
 		[[ $error_check != "vm" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install VM software"
 			exit 1
 		}
 
 		# Handles Printer Software Installation
-		echo -e "\nInstall Printer Software: \n1. HP \n2. Epson \n3. Brother \n4. Skip \n5. Exit\n"
+		printf '\nInstall Printer Software: \n1. HP \n2. Epson \n3. Brother \n4. Skip \n5. Exit\n\n'
 		read -rep "Select Printer: " printer_option
-		echo ""
+		printf '\n'
 		case "$printer_option" in
 			1)
-				print_warning "Installing HP Printer Software\n"
+				print_warning "Installing HP Printer Software"
+				printf '\n'
 				install_printer_drivers && hp_printer && error_check="printer" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing HP Printer software"
 			;;
 			2)
-				print_warning "Installing Epson Printer Software\n"
+				print_warning "Installing Epson Printer Software"
+				printf '\n'
 				install_printer_drivers && epson_printer && error_check="printer" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Epson Printer software"
 			;;
 			3)
-				print_warning "Installing Brother Printer Software\n"
+				print_warning "Installing Brother Printer Software"
+				printf '\n'
 				install_printer_drivers && brother_printer && error_check="printer" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Brother Printer software"
 			;;
 			4)
@@ -6907,33 +6142,36 @@ EOF
 		esac
 
 		[[ $error_check != "printer" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install printer software"
 			exit 1
 		}
 
 		# Handles Audio Software Installation
-		echo -e "\nInstall Audio Software: \n1. Pulseaudio \n2. ALSA \n3. Pipewire \n4. Skip \n5. Exit\n"
+		printf '\nInstall Audio Software: \n1. Pulseaudio \n2. ALSA \n3. Pipewire \n4. Skip \n5. Exit\n\n'
 		read -rep "Select Audio: " audio_option
-		echo ""
+		printf '\n'
 		case "$audio_option" in
 			1)
-				print_warning "Installing Pulseaudio\n"
+				print_warning "Installing Pulseaudio"
+				printf '\n'
 				install_audio && pulse_audio && error_check="audio" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Pulseaudio"
 			;;
 			2)
-				print_warning "Installing ALSA\n"
+				print_warning "Installing ALSA"
+				printf '\n'
 				install_audio && alsa_utils && error_check="audio" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing ALSA"
 			;;
 			3)
-				print_warning "Installing Pipewire\n"
+				print_warning "Installing Pipewire"
+				printf '\n'
 				install_audio && pipe_wire && error_check="audio" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Pipewire"
 			;;
 			4)
@@ -6960,27 +6198,29 @@ EOF
 		esac
 
 		[[ $error_check != "audio" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install audio software"
 			exit 1
 		}
 
 		# Handles Terminal Software Installation
-		echo -e "\nInstall Terminal: \n1. Urxvt \n2. Kitty \n3. Skip \n4. Exit\n"
+		printf '\nInstall Terminal: \n1. Urxvt \n2. Kitty \n3. Skip \n4. Exit\n\n'
 		read -rep "Select Terminal: " term_option
-		echo ""
+		printf '\n'
 		case "$term_option" in
 			1)
-				print_warning "Installing Urxvt\n"
-				install_terminal && install_urxvt && error_check="terminal" &&
-				echo "" &&
+				print_warning "Installing Urxvt"
+				printf '\n'
+				install_terminal && install_urxvt "$@" && error_check="terminal" &&
+				printf '\n' &&
 				print_success "Finished installing Urxvt"
 			;;
 			2)
-				print_warning "Installing Kitty\n"
-				install_terminal && install_kitty && error_check="terminal" &&
-				echo "" &&
+				print_warning "Installing Kitty"
+				printf '\n'
+				install_terminal && install_kitty "$@" && error_check="terminal" &&
+				printf '\n' &&
 				print_success "Finished installing Kitty"
 			;;
 			3)
@@ -7007,21 +6247,22 @@ EOF
 		esac
 
 		[[ $error_check != "terminal" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install terminal"
 			exit 1
 		}
 
 		# Handles Extra Software Installation
-		echo -e "\nInstall Extra/Misc Software (krita, libreoffice, wine): \n1. Yes \n2. Skip \n3. Exit\n"
+		printf '\nInstall Extra/Misc Software (krita, libreoffice, wine): \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " extras_option
-		echo ""
+		printf '\n'
 		case "$extras_option" in
 			1)
-				print_warning "Installing Extra/Misc Software\n"
+				print_warning "Installing Extra/Misc Software"
+				printf '\n'
 				install_extras && error_check="extras" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Extra/Misc software"
 			;;
 			2)
@@ -7048,21 +6289,22 @@ EOF
 		esac
 
 		[[ $error_check != "extras" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install extra/misc software"
 			exit 1
 		}
 
 		# Handles Development Software Installation
-		echo -e "\nInstall Development Software (gcc, rust, cargo, vim): \n1. Yes \n2. Skip \n3. Exit\n"
+		printf '\nInstall Development Software (gcc, rust, cargo, vim): \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " dev_option
-		echo ""
+		printf '\n'
 		case "$dev_option" in
 			1)
-				print_warning "Installing Development Software\n"
+				print_warning "Installing Development Software"
+				printf '\n'
 				install_dev_software && error_check="development" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing development software"
 			;;
 			2)
@@ -7089,21 +6331,22 @@ EOF
 		esac
 
 		[[ $error_check != "development" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install development software"
 			exit 1
 		}
 
 		# Handles Dotfiles Installation
-		echo -e "\nInstall Dotfiles (bash, tmux, vim, urxvt): \n1. Yes \n2. Skip \n3. Exit\n"
+		printf '\nInstall Dotfiles (bash, tmux, vim, urxvt): \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " dotfiles_option
-		echo ""
+		printf '\n'
 		case "$dotfiles_option" in
 			1)
-				print_warning "Installing Dotfiles\n"
-				install_dotfiles && error_check="dotfiles" &&
-				echo "" &&
+				print_warning "Installing Dotfiles"
+				printf '\n'
+				install_dotfiles "$@" && error_check="dotfiles" &&
+				printf '\n' &&
 				print_success "Finished installing Dotfiles"
 			;;
 			2)
@@ -7130,27 +6373,29 @@ EOF
 		esac
 
 		[[ $error_check != "dotfiles" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install dotfiles"
 			exit 1
 		}
 
 		# Handles Browser Installation
-		echo -e "\nInstall Browser Software: \n1. Chromium \n2. Firefox \n3. Skip \n4. Exit\n"
+		printf '\nInstall Browser Software: \n1. Chromium \n2. Firefox \n3. Skip \n4. Exit\n\n'
 		read -rep "Select Browser: " browser_option
-		echo ""
+		printf '\n'
 		case "$browser_option" in
 			1)
-				print_warning "Installing Chromium\n"
+				print_warning "Installing Chromium"
+				printf '\n'
 				install_browser && chromium && error_check="browser" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Chromium"
 			;;
 			2)
-				print_warning "Installing Firefox\n"
+				print_warning "Installing Firefox"
+				printf '\n'
 				install_browser && firefox && error_check="browser" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Firefox"
 			;;
 			3)
@@ -7177,27 +6422,29 @@ EOF
 		esac
 
 		[[ $error_check != "browser" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install browser software"
 			exit 1
 		}
 
 		# Handles Media-Player Installation
-		echo -e "\nInstall Media-Player Software: \n1. VLC \n2. MPV \n3. Skip \n4. Exit\n"
+		printf'\nInstall Media-Player Software: \n1. VLC \n2. MPV \n3. Skip \n4. Exit\n\n'
 		read -rep "Select Media-Player: " media_player_option
-		echo ""
+		printf '\n'
 		case "$media_player_option" in
 			1)
-				print_warning "Installing VLC\n"
+				print_warning "Installing VLC"
+				printf '\n'
 				install_media_player && vlc && error_check="media_player" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing VLC"
 			;;
 			2)
-				print_warning "Installing MPV\n"
+				print_warning "Installing MPV"
+				printf '\n'
 				install_media_player && mpv && error_check="media_player" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing MPV"
 			;;
 			3)
@@ -7230,12 +6477,13 @@ EOF
 		}
 
 		# Handles Setting timezone
-		echo -e "\nChange Default Timezone: \n1. Yes \n2. Skip \n3. Exit\n"
+		printf '\nChange Default Timezone: \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " time_zone_option
-		echo ""
+		printf '\n'
 		case "$time_zone_option" in
 			1)
-				print_warning "Changing Timezone\n"
+				print_warning "Changing Timezone"
+				printf '\n'
 				change_timezone && error_check="timezone" &&
 				print_success "Finished Changing Timezone"
 			;;
@@ -7269,14 +6517,15 @@ EOF
 		}
 
 		# Handles Automatic Backlight Control
-		echo -e "\nInstall Automatic Backlight Control: \n1. Yes \n2. Skip \n3. Exit\n"
+		printf '\nInstall Automatic Backlight Control: \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " auto_backlight_option
-		echo ""
+		printf '\n'
 		case "$auto_backlight_option" in
 			1)
-				print_warning "Installing Automatic Backlight Control\n"
+				print_warning "Installing Automatic Backlight Control"
+				printf '\n'
 				install_backlight_control && error_check="auto_backlight" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished installing Automatic Backlight Control"
 			;;
 			2)
@@ -7303,31 +6552,33 @@ EOF
 		esac
 
 		[[ $error_check == "no_battery" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Battery not installed"
 			exit 1
 		}
 
 		[[ $error_check != "auto_backlight" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Unsupported init detected"
 			print_aligned "Couldn't install automatic backlight control"
 			exit 1
 		}
 
 		# Handles Networking Software Installation
-		echo -e "\nInstall Networking Software: \n1. Yes \n2. Skip \n3. Exit\n"
+		printf '\nInstall Networking Software: \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " network_option
-		echo ""
+		printf '\n'
 		case "$network_option" in
 			1)
-				print_warning "Installing Networking Software\n"
+				print_warning "Installing Networking Software"
+				printf '\n'
 				install_networking && error_check="network" &&
-				echo "" &&
+				printf '\n' &&
 				print_success "Finished setting up void linux"
 			;;
 			2)
-				print_warning "Skipping Networking Software Installation\n"
+				print_warning "Skipping Networking Software Installation"
+				printf '\n'
 				print_error "Nothing left to do, exiting"
 				error_check="network"
 				exit 1
@@ -7352,7 +6603,7 @@ EOF
 		esac
 
 		[[ $error_check != "network" ]] && {
-			echo ""
+			printf '\n'
 			print_error "Something went wrong"
 			print_aligned "Couldn't install networking software"
 			exit 1
@@ -7372,16 +6623,16 @@ EOF
 #--------------------------------------------------------------
 swapfile() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION] [FILESIZE] [FILENAME]\n"
-		echo -e "Examples: $SCRIPT_NAME --on 2048M ~/.local/share/swapfile0"
-		echo -e "          $SCRIPT_NAME --off ~/.local/share/swapfile0\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --on       Create and Enable swapfile"
-		echo -e "             --off      Disable and Delete swapfile"
-		echo -e "             --version  Show version information\n"
-		echo -e "Creates a swapfile with user specified parameters"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION] [FILESIZE] [FILENAME]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --on 2048M ~/.local/share/swapfile0\n' "$SCRIPT_NAME"
+		printf '          %s --off ~/.local/share/swapfile0\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --on       Create and Enable swapfile\n'
+		printf '             --off      Disable and Delete swapfile\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Creates a swapfile with user specified parameters\n'
 		exit 0
 	}
 
@@ -7424,14 +6675,6 @@ swapfile() {
 
 		[[ $(< /proc/swaps) != *${file_name}* || ! -s $file_name ]] && {
 			print_error "Cannot disable '$file_name': File is not a swapfile"
-			exit 1
-		}
-	}
-
-	multiple_instances() {
-		[[ $(pgrep -fc "swapfile --o" 2>/dev/null) -gt 2 ]] && {
-			print_error "Previous running instance of '$SCRIPT_NAME' detected"
-			print_aligned "Exiting"
 			exit 1
 		}
 	}
@@ -7502,8 +6745,9 @@ swapfile() {
 
 				exit_status=0
 				print_warning "Creating ${user_value}MB swapfile"
-				print_aligned "This may take a while\n"
-				dd if=/dev/zero of=$file_name bs=1M count="$user_value" &>/dev/null || exit_status=1
+				print_aligned "This may take a while"
+				printf '\n'
+				dd if=/dev/zero of="$file_name" bs=1M count="$user_value" &>/dev/null || exit_status=1
 				chown root:root "$file_name" 2>/dev/null &&
 				chmod 0600 "$file_name" 2>/dev/null &&
 				mkswap "$file_name" &>/dev/null &&
@@ -7529,8 +6773,9 @@ swapfile() {
 
 				exit_status=0
 				print_warning "Creating ${user_value}GB swapfile"
-				print_aligned "This may take a while\n"
-				dd if=/dev/zero of=$file_name bs=1G count="$user_value" &>/dev/null || exit_status=1
+				print_aligned "This may take a while"
+				printf '\n'
+				dd if=/dev/zero of="$file_name" bs=1G count="$user_value" &>/dev/null || exit_status=1
 				chown root:root "$file_name" 2>/dev/null &&
 				chmod 0600 "$file_name" 2>/dev/null &&
 				mkswap "$file_name" &>/dev/null &&
@@ -7567,7 +6812,8 @@ swapfile() {
 		file_name="$2"
 
 		print_warning "Disabling '$file_name' swapfile"
-		print_aligned "This may take a while\n"
+		print_aligned "This may take a while"
+		printf '\n'
 
 		swapoff "$file_name" 2>/dev/null &&
 		rm -r "$file_name" 2>/dev/null
@@ -7582,11 +6828,10 @@ swapfile() {
 					print_help
 				;;
 				--off)
+					check_dependencies "$@"
+
 					# Declare file name
 					file_name="$2"
-
-					# Check for multiple running instances
-					multiple_instances "$@"
 
 					# Check if file_name is valid
 					not_a_swapfile "$@"
@@ -7594,15 +6839,16 @@ swapfile() {
 					# Check used swap space for the specified file
 					used_swap="$(< /proc/swaps)"
 					used_swap="${used_swap//*"$file_name"}"
-					used_swap="$(echo ${used_swap//\/*} | awk '{print $3}')"
+					used_swap="$(printf '%s\n' "${used_swap//\/*}" | awk '{print $3}')"
 
 					# /proc/swaps stores values in KB
 					[[ $used_swap -gt 204796 ]] && {
-						print_warning "Swapfile is currently in use: Disabling it might cause problems\n"
+						print_warning "Swapfile is currently in use: Disabling it might cause problems"
+						printf '\n'
 						read -rep "Do you want to proceed (y/n) " user_option
 						case "$user_option" in
 							 Y | y)
-								echo ""
+								printf '\n'
 								delete_swapfile "$@"
 							;;
 							*)
@@ -7614,8 +6860,7 @@ swapfile() {
 					delete_swapfile "$@"
 				;;
 				--on)
-					# Check for multiple running instances
-					multiple_instances "$@"
+					check_dependencies "$@"
 
 					create_swapfile "$@"
 				;;
@@ -7647,7 +6892,6 @@ swapfile() {
 
 	trap 'remove_file_on_exit "$file_name"' 1 2 3 15
 	print_no_argument "$@"
-	check_dependencies "$@"
 	check_input_option "$@"
 	exit
 }
@@ -7658,14 +6902,14 @@ swapfile() {
 #--------------------------------------------------------------
 tfetch() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --help\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "System resource information tool"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s\n' "$SCRIPT_NAME"
+		printf '          %s --help\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'System resource information tool\n'
 		exit 0
 	}
 
@@ -7696,19 +6940,19 @@ tfetch() {
 
 	get_hostname() {
 		[[ $USER == "shell" || $EUID -eq 2000 ]] && {
-			echo -e " ${color_cyan}$HOSTNAME@$USER${no_color}"
-			color_blue=$color_cyan &&
+			color_blue=$color_cyan
+			printf '%b %s@%s %b\n' "${color_blue}" "$HOSTNAME" "$USER" "${no_color}"
 			return 0
 		}
 
 		[[ $USER == "root" || $EUID -eq 0 ]] && {
-			echo -e " ${color_magenta}$HOSTNAME@$USER${no_color}"
-			color_blue=$color_magenta &&
+			color_blue=$color_magenta
+			printf '%b %s@%s %b\n' "${color_blue}" "$HOSTNAME" "$USER" "${no_color}"
 			return 0
 		}
 
 		[[ $EUID -eq 1000 ]] || [[ $USER != root && $USER != shell ]] && {
-			echo -e " ${color_blue}$HOSTNAME@$USER${no_color}"
+			printf '%b %s@%s %b\n' "${color_blue}" "$HOSTNAME" "$USER" "${no_color}"
 			return 0
 		}
 	}
@@ -7727,18 +6971,18 @@ tfetch() {
 			device_name="${device_name} $(< /sys/devices/virtual/dmi/id/product_name)"
 		}
 
-		echo -e "$device_name\n"
+		printf '%s\n\n' "$device_name"
 	}
 
 	get_os_name() {
 		# Handles Android
 		[[ -d /system/app/ ]] && {
-			echo "Android $ANDROID_VERSION $HOSTTYPE"
+			printf 'Android %s %s\n' "$ANDROID_VERSION" "$HOSTTYPE"
 		}
 
 		# Handles non-Android OS
 		[[ ! -d /system/app/ ]] && {
-			echo "$PRETTY_NAME $HOSTTYPE"
+			printf '%s %s\n' "$PRETTY_NAME" "$HOSTTYPE"
 		}
 	}
 
@@ -7747,7 +6991,7 @@ tfetch() {
 		kernel_version="${kernel_version/\(*}"
 		kernel_version="${kernel_version/version\ }"
 
-		echo "$kernel_version"
+		printf '%s\n' "$kernel_version"
 	}
 
 	get_init() {
@@ -7757,12 +7001,12 @@ tfetch() {
 			init_program="${init_program/*Name:}"
 			init_program="${init_program/Umask:*}"
 			init_program="${init_program//[[:space:]]}"
-			echo -e "$init_program"
+			printf '%s\n' "$init_program"
 		}
 
 		# Handles android chroot
 		[[ -z $init_program && $PRETTY_NAME == *Linux* && -d /sys/class/power_supply/battery ]] && {
-			echo "init"
+			printf '%s\n' "init"
 		}
 	}
 
@@ -7773,7 +7017,7 @@ tfetch() {
 			for package_list in /var/db/xbps/.*; do
 				package_count="$((package_count + 1))"
 			done
-			echo "${package_count//[[:space:]]} xbps"
+			printf '%s xbps\n' "${package_count//[[:space:]]}"
 		}
 
 		# Handles Linux with apt
@@ -7782,7 +7026,7 @@ tfetch() {
 			for package_list in /var/lib/dpkg/info/*.md5sums; do
 				package_count="$((package_count + 1))"
 			done
-			echo "${package_count//[[:space:]]} apt"
+			printf '%s apt\n' "${package_count//[[:space:]]}"
 		}
 
 		# Handles Android
@@ -7793,24 +7037,24 @@ tfetch() {
 					package_count="$((package_count + 1))"
 				}
 			done
-			echo "${package_count//[[:space:]]} apks"
+			printf '%s apks\n' "${package_count//[[:space:]]}"
 		}
 	}
 
 	get_shell() {
-		[[ -n $BASH ]] && echo -e "${BASH##*/} ${BASH_VERSION/-*}"
-		[[ -z $BASH ]] && echo -e "${SHELL##*/}"
+		[[ -n $BASH ]] && printf '%s %s\n' "${BASH##*/}" "${BASH_VERSION/-*}"
+		[[ -z $BASH ]] && printf '%s\n' "${SHELL##*/}"
 	}
 
 	get_desktop() {
 		desktop_environment="${XDG_CURRENT_DESKTOP:=$DESKTOP_SESSION}"
 
 		[[ -n ${desktop_environment//[[:space:]]} && -z $XDG_SESSION_TYPE ]] && {
-			echo -e "${desktop_environment}"
+			printf '%s\n' "${desktop_environment}"
 		}
 
 		[[ -n ${desktop_environment//[[:space:]]} && -n $XDG_SESSION_TYPE ]] && {
-			echo -e "${desktop_environment} (${XDG_SESSION_TYPE})"
+			printf '%s (%s)\n' "${desktop_environment}" "${XDG_SESSION_TYPE}"
 		}
 	}
 
@@ -7859,22 +7103,12 @@ tfetch() {
 		cpu_clock_speed="$(< /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)"
 		cpu_clock_speed="$((cpu_clock_speed / 1000))"
 
-		# Handles Linux desktop
-		[[ $cpu_file == *AuthenticAMD* || -d /sys/class/power_supply/BAT0 ]] || [[ ! -d /sys/class/kgsl && ! -d /sys/class/power_supply/battery ]] || [[ ! -d /proc/gpufreq && ! -d /sys/class/power_supply/battery ]] && {
-			echo -e "${cpu_name} (${cpu_cores}) @ ${cpu_clock_speed}Mhz"
-		}
-
-		# Handles Android with Mediatek CPUs
-		[[ -d /sys/class/power_supply/battery && ! -d /sys/class/kgsl/kgsl-3d0 ]] && {
-			echo -e "${cpu_name} (${cpu_cores}) @ ${cpu_clock_speed}Mhz"
-		}
-
-		# Handles Android with Snapdragon CPUs
+		# Handles Android with Snapdragon CPUs 
 		[[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
 			cpu_clock_speed="$(< /sys/devices/system/cpu/cpu$((CPU_CORE_COUNT - 1))/cpufreq/scaling_cur_freq)"
 			cpu_clock_speed="$((cpu_clock_speed / 1000))"
-			echo -e "${cpu_name} (${cpu_cores}) @ ${cpu_clock_speed}Mhz"
 		}
+		printf '%s (%d) @ %dMhz\n' "${cpu_name}" "${cpu_cores}" "${cpu_clock_speed}"
 	}
 
 	get_cpu_clusters() {
@@ -7882,40 +7116,40 @@ tfetch() {
 
 		for cpu_cluster in /sys/devices/system/cpu/cpufreq/policy*; do
 			# Create Array containing clockspeed of each CPU cluster
-			cluster_clock_speed[$array_counter]="$(< $cpu_cluster/scaling_cur_freq)"
-			cluster_clock_speed[$array_counter]="$((cluster_clock_speed[array_counter] / 1000))"
+			cluster_clock_speed[array_counter]="$(< "$cpu_cluster"/scaling_cur_freq)"
+			cluster_clock_speed[array_counter]="$((cluster_clock_speed[array_counter] / 1000))"
 
 			# Create Array containing member cores of each CPU cluster
-			cluster_cpu_group[$array_counter]="$(< $cpu_cluster/affected_cpus)"
+			cluster_cpu_group[array_counter]="$(< "$cpu_cluster"/affected_cpus)"
 
 			array_counter=$((array_counter + 1))
 		done
 
 		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
 			# Create array for cpu clockspeeds i.e 2400Mhz
-			cpu_clock_speed[$array_checker]="${cluster_clock_speed[$array_checker]}Mhz"
+			cpu_clock_speed[array_checker]="${cluster_clock_speed[$array_checker]}Mhz"
 
 			# Create array for cpu group upper limit i.e 3 in 0 1 2 3
-			cpu_clock_group_high[$array_checker]="${cluster_cpu_group[$array_checker]/* }"
+			cpu_clock_group_high[array_checker]="${cluster_cpu_group[$array_checker]/* }"
 
 			# Create array for cpu group lower limit i.e 0 in 0 1 2 3
-			cpu_clock_group_low[$array_checker]="${cluster_cpu_group[$array_checker]/ *}"
+			cpu_clock_group_low[array_checker]="${cluster_cpu_group[$array_checker]/ *}"
 
 			# Create array for cpu group higher and lower limit i.e 0-3
-			cpu_clock_group[$array_checker]="${cpu_clock_group_low[$array_checker]}-${cpu_clock_group_high[$array_checker]}"
+			cpu_clock_group[array_checker]="${cpu_clock_group_low[$array_checker]}-${cpu_clock_group_high[$array_checker]}"
 
 			# Show only 0 in case cpu group contains only one core
 			[[ ${cpu_clock_group_low[$array_checker]} == "${cpu_clock_group_high[$array_checker]}" ]] && {
-				cpu_clock_group[$array_checker]="${cpu_clock_group_low[$array_checker]}"
+				cpu_clock_group[array_checker]="${cpu_clock_group_low[$array_checker]}"
 			}
 
 			# Create array for showing cpu group and clockspeed i.e 0-3 @ 2400Mhz
-			cpu_info[$array_checker]="${cpu_clock_group[$array_checker]} @ ${cpu_clock_speed[$array_checker]},"
+			cpu_info[array_checker]="${cpu_clock_group[$array_checker]} @ ${cpu_clock_speed[$array_checker]},"
 		done
 
 		# Clean up output
-		cpu_info="${cpu_info[@]}"
-		echo -e "${cpu_info%,*}"
+		cpu_total="${cpu_info[*]}"
+		printf '%s\n' "${cpu_total%,*}"
 	}
 
 	get_gpu() {
@@ -7926,7 +7160,7 @@ tfetch() {
 			gpu_name="${gpu_name/*: }"
 			gpu_clock_speed="$(< /proc/gpufreq/cur_freq)"
 			gpu_clock_speed="$((gpu_clock_speed / 1000))"
-			echo -e "${gpu_name} @ ${gpu_clock_speed}Mhz"
+			printf '%s @ %dMhz\n' "${gpu_name}" "${gpu_clock_speed}"
 		}
 
 		# Handles Snapdragron GPUs
@@ -7936,7 +7170,7 @@ tfetch() {
 			gpu_clock_speed="$((gpu_clock_speed / 1000000))"
 			gpu_utilization="$(< /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage)"
 			gpu_utilization="${gpu_utilization//[[:space:]]}"
-			echo -e "${gpu_name} @ ${gpu_clock_speed}Mhz - ($gpu_utilization Utilization)"
+			printf '%s @ %dMhz - (%d%% Utilization)\n' "${gpu_name}" "${gpu_clock_speed}" "$gpu_utilization"
 		}
 	}
 
@@ -7950,7 +7184,7 @@ tfetch() {
 				battery_full_design="$(< /sys/class/power_supply/BAT0/charge_full_design)"
 				battery_health="$((( battery_full * 100 ) / battery_full_design ))"
 				battery_health_decimal="$((( battery_full * 10000 ) / battery_full_design % 100 ))"
-				echo -e "${battery_status}, ${battery_capacity}% - (${battery_health}.${battery_health_decimal}% Health)"
+				printf '%s, %d%% - (%d.%d%% Health)\n' "${battery_status}" "${battery_capacity}" "${battery_health}" "${battery_health_decimal}"
 				return
 			}
 		}
@@ -7964,12 +7198,12 @@ tfetch() {
 				battery_full_design="$(< /sys/class/power_supply/battery/charge_full_design)"
 				battery_health="$((( battery_full * 100 ) / battery_full_design ))"
 				battery_health_decimal="$((( battery_full * 10000 ) / battery_full_design % 100 ))"
-				echo -e "${battery_status}, ${battery_capacity}% - (${battery_health}.${battery_health_decimal}% Health)"
+				printf '%s, %d%% - (%d.%d%% Health)\n' "${battery_status}" "${battery_capacity}" "${battery_health}" "${battery_health_decimal}"
 				return
 			}
 		}
 
-		echo -e "${battery_status}, ${battery_capacity}%"
+		printf '%s, %d%%\n' "${battery_status}" "${battery_capacity}"
 	}
 
 	get_cpu_temp() {
@@ -7988,7 +7222,7 @@ tfetch() {
 		}
 
 		usage_visualizer="$cpu_temp"
-		echo -e "$(print_usage_bar) ${cpu_temp}.${cpu_temp_decimal}°C"
+		printf '%s %d.%d°C\n' "$(print_usage_bar)" "${cpu_temp}" "${cpu_temp_decimal}"
 	}
 
 	get_gpu_temp() {
@@ -7999,7 +7233,7 @@ tfetch() {
 			gpu_temp_decimal="$((gpu_temp_decimal / 100))"
 			gpu_temp="$((gpu_temp / 1000))"
 			usage_visualizer="$gpu_temp"
-			echo -e "$(print_usage_bar) ${gpu_temp}.${gpu_temp_decimal}°C"
+			printf '%s %d.%d°C\n' "$(print_usage_bar)" "${gpu_temp}" "${gpu_temp_decimal}"
 		}
 	}
 
@@ -8007,9 +7241,9 @@ tfetch() {
 		battery_temp="$(< /sys/class/power_supply/battery/temp)"
 		battery_temp_decimal="$((battery_temp % 10))"
 		battery_temp="$((battery_temp / 10))"
-		usage_visualizer="$battery_temp"
 
-		echo -e "$(print_usage_bar) ${battery_temp}.${battery_temp_decimal}°C"
+		usage_visualizer="$battery_temp"
+		printf '%s %d.%d°C\n' "$(print_usage_bar)" "${battery_temp}" "${battery_temp_decimal}"
 	}
 
 	get_mem() {
@@ -8029,7 +7263,7 @@ tfetch() {
 		# Convert to percentage for print_usage_bar
 		usage_visualizer="$((( used_mem * 100 ) / total_mem ))"
 
-		echo -e "$(print_usage_bar) $used_mem / $total_mem MiB (${usage_visualizer}%)"
+		printf '%s %d / %d MiB (%d%%)\n' "$(print_usage_bar)" "$used_mem" "$total_mem" "${usage_visualizer}"
 	}
 
 	get_swap() {
@@ -8049,11 +7283,11 @@ tfetch() {
 
 		[[ $total_swap -gt 0 ]] && {
 			usage_visualizer="$(((used_swap * 100) / total_swap ))"
-			echo -e "$(print_usage_bar) $used_swap / $total_swap MiB (${usage_visualizer}%)"
+			printf '%s %d / %d MiB (%d%%)\n' "$(print_usage_bar)" "$used_swap" "$total_swap" "${usage_visualizer}"
 		}
 
 		[[ $total_swap -le 0 ]] && {
-			echo -e "$(print_usage_bar) $used_swap / $total_swap MiB"
+			printf '%s %d / %d MiB\n' "$(print_usage_bar)" "$used_swap" "$total_swap"
 		}
 	}
 
@@ -8077,97 +7311,96 @@ tfetch() {
 
 		system_uptime="${in_days} ${in_hours} ${in_minutes} ${in_seconds}"
 
-		echo -e "$system_uptime"
+		printf '%s\n' "$system_uptime"
 	}
 
 	tfetch_config() {
-		echo ""
+		printf '\n'
 		get_hostname "$@"
-		echo -e " -----------------"
+		printf '%s\n' " -----------------"
 		# Show only if device name is available
 		[[ -d /sys/devices/virtual/dmi/id || -f /sys/firmware/devicetree/base/model || -f /proc/device-tree/model ]] && {
-			echo -e "${color_blue} Device:   ${color_white}$(get_device_name)${no_color}"
+			printf '%b Device:   %b %s %b\n' "${color_blue}" "${color_white}" "$(get_device_name)" "${no_color}"
 		}
 
-		echo -e "${color_blue} OS:       ${color_white}$(get_os_name)${no_color}"
-		echo -e "${color_blue} Kernel:   ${color_white}$(get_kernel)${no_color}"
-		echo -e "${color_blue} Init:     ${color_white}$(get_init)${no_color}"
-		echo -e "${color_blue} Packages: ${color_white}$(get_pkgs)${no_color}"
-		echo -e "${color_blue} Shell:    ${color_white}$(get_shell)${no_color}"
+		printf '%b OS:       %b %s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
+		printf '%b Kernel:   %b %s %b\n' "${color_blue}" "${color_white}" "$(get_kernel)" "${no_color}"
+		printf '%b Init:     %b %s %b\n' "${color_blue}" "${color_white}" "$(get_init)" "${no_color}"
+		printf '%b Packages: %b %s %b\n' "${color_blue}" "${color_white}" "$(get_pkgs)" "${no_color}"
+		printf '%b Shell:    %b %s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
 
 		# Show on non-root Linux desktop
 		[[ -n ${XDG_CURRENT_DESKTOP:=$DESKTOP_SESSION} ]] && {
-			echo -e "${color_blue} Desktop:  ${color_white}$(get_desktop)${no_color}"
+			printf '%b Desktop:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_desktop)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU:      ${color_white}$(get_cpu)${no_color}"
+			printf '%b CPU:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
 		}
 
 		# Show only on Android or desktops with $CPU_CORE_COUNT <= 8
 		[[ -d /sys/class/power_supply/battery || $CPU_CORE_COUNT -le 8 ]] && {
-			echo -e "${color_blue} CPU_CLK:  ${color_white}$(get_cpu_clusters)${no_color}"
+			printf '%b CPU_CLK:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
 		}
 
 		# Show only on Android with Mediatek or Snapdragon SOC
 		[[ -f /proc/gpufreq/cur_freq || -f /sys/class/kgsl/kgsl-3d0/gpuclk ]] && {
-			echo -e "${color_blue} GPU:      ${color_white}$(get_gpu)${no_color}"
+			printf '%b GPU:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_gpu)" "${no_color}"
 		}
 
 		# Show only if battery is available
 		[[ -d /sys/class/power_supply/BAT0 || -d /sys/class/power_supply/battery ]] && {
-			echo -e "${color_blue} Battery:  ${color_white}$(get_battery_stats)${no_color}"
+			printf '%b Battery:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_battery_stats)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU Temp: ${color_white}$(get_cpu_temp)${no_color}"
+			printf '%b CPU Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
 		}
 
 		# Show only on Android with Snapdragon SOC
 		[[ -f /sys/class/kgsl/kgsl-3d0/temp ]] && {
-			echo -e "${color_blue} GPU Temp: ${color_white}$(get_gpu_temp)${no_color}"
+			printf '%b GPU Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_gpu_temp)" "${no_color}"
 		}
 
 		# Show only on Android
 		[[ -f /sys/class/power_supply/battery/temp ]] && {
-			echo -e "${color_blue} BAT Temp: ${color_white}$(get_battery_temp)${no_color}"
+			printf '%b BAT Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_battery_temp)" "${no_color}"
 		}
 
-		echo -e "${color_blue} RAM:      ${color_white}$(get_mem)${no_color}"
-		echo -e "${color_blue} Swap:     ${color_white}$(get_swap)${no_color}"
-		echo -e "${color_blue} Uptime:   ${color_white}$(get_uptime)${no_color}\n"
+		printf '%b RAM:      %b %b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
+		printf '%b Swap:     %b %b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
+		printf '%b Uptime:   %b %s %b\n\n' "${color_blue}" "${color_white}" "$(get_uptime)" "${no_color}"
 		exit 0
 	}
 	tfetch_config_noroot() {
-		echo ""
 		get_hostname "$@"
-		echo -e " -----------------"
+		printf '%s\n' " -----------------"
 
 		[[ -f /product/etc/build.prop ]] && {
-			echo -e "${color_blue} OS:       ${color_white}$(get_os_name)${no_color}"
+			printf '%b OS:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
 		}
 
-		echo -e "${color_blue} Shell:    ${color_white}$(get_shell)${no_color}"
+		printf '%b Shell    %b %s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU:      ${color_white}$(get_cpu)${no_color}"
+			printf '%b CPU:      %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
 		}
 
 		# Show only on Android or desktops with $CPU_CORE_COUNT <= 8
 		[[ -d /sys/class/power_supply/battery || $CPU_CORE_COUNT -le 8 ]] && {
-			echo -e "${color_blue} CPU_CLK:  ${color_white}$(get_cpu_clusters)${no_color}"
+			printf '%b CPU_CLK:  %b %s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			echo -e "${color_blue} CPU Temp: ${color_white}$(get_cpu_temp)${no_color}"
+			printf '%b CPU Temp: %b %b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
 		}
 
-		echo -e "${color_blue} RAM:      ${color_white}$(get_mem)${no_color}"
-		echo -e "${color_blue} Swap:     ${color_white}$(get_swap)${no_color}\n"
+		printf '%b RAM:      %b %b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
+		printf '%b Swap:     %b %b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
 		exit 0
 	}
 
@@ -8177,7 +7410,7 @@ tfetch() {
 
 	# Check if running as non-privileged user on Android
 	[[ $OSTYPE == *android* ]] && [[ $USER != "root" || $EUID -ne 0 ]] && [[ -n $EUID ]] && {
-		tfetch_config_noroot"$@"
+		tfetch_config_noroot "$@"
 	}
 
 	tfetch_config "$@"
@@ -8190,16 +7423,16 @@ tfetch() {
 #--------------------------------------------------------------
 touchzip() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION] [FILENAME] [FILE...]\n"
-		echo -e "Examples: $SCRIPT_NAME --encrypt newfile.7z file1 file2"
-		echo -e "          $SCRIPT_NAME --unencrypt newfile.7z file1 file2\n"
-		echo -e "Options: -en, --encrypt    Create an encrypted 7z archive"
-		echo -e "         -h,  --help       Print out this message"
-		echo -e "         -un, --unencrypt  Create an unencrypted 7z archive"
-		echo -e "              --version    Show version information\n"
-		echo -e "Create 7z archive"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION] [FILENAME] [FILE...]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --encrypt newfile.7z file1 file2\n' "$SCRIPT_NAME"
+		printf '          %s --unencrypt newfile.7z file1 file2\n\n' "$SCRIPT_NAME"
+		printf 'Options: -en, --encrypt    Create an encrypted 7z archive\n'
+		printf '         -h,  --help       Print out this message\n'
+		printf '         -un, --unencrypt  Create an unencrypted 7z archive\n'
+		printf '              --version    Show version information\n\n'
+		printf 'Create an encrypted/unencrypted 7z archive\n'
 		exit 0
 	}
 
@@ -8216,10 +7449,6 @@ touchzip() {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
-
-		[[ $# -lt 3 ]] && {
-			print_syntax_error
-		}
 
 		# Check destination directory for write permissions
 		touch "${archive_name}_${SCRIPT_NAME}" 2>/dev/null || print_file_write_error "${archive_name}.7z"
@@ -8248,7 +7477,8 @@ touchzip() {
 	}
 
 	encrypted_archive() {
-		print_warning "Creating an encrypted 7z archive\n"
+		print_warning "Creating an encrypted 7z archive"
+		printf '\n'
 
 		# Handles password creation
 		create_password "$@"
@@ -8261,7 +7491,8 @@ touchzip() {
 	}
 
 	unencrypted_archive() {
-		print_warning "Creating an unencrypted 7z archive\n"
+		print_warning "Creating an unencrypted 7z archive"
+		printf '\n'
 
 		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "${archive_name}.7z" "${@:3}" &>/dev/null &&
 		print_success "Created unencrypted 7z archive '${archive_name}.7z'" ||
@@ -8276,9 +7507,15 @@ touchzip() {
 					print_help
 				;;
 				-en | --encrypt)
+					[[ $# -lt 3 ]] && {
+						print_syntax_error
+					}
 					encrypted_archive "$@"
 				;;
 				-un | --unencrypt)
+					[[ $# -lt 3 ]] && {
+						print_syntax_error
+					}
 					unencrypted_archive "$@"
 				;;
 				--version)
@@ -8315,62 +7552,19 @@ touchzip() {
 }
 
 #--------------------------------------------------------------
-# Platform: Device Agnostic
-# Dependencies: vim
-#--------------------------------------------------------------
-viw() {
-	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]"
-		echo -e "          $SCRIPT_NAME [FOLDER]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --help"
-		echo -e "          $SCRIPT_NAME /usr/share \n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Open specified folder in vim netrw"
-		exit 0
-	}
-
-	check_input_argument() {
-		folder_name="$1"
-
-		# Check for required dependencies
-		[[ ! $(type -p vim) ]] && print_missing_dependencies "vim"
-
-		[[ $# -eq 0 ]] && vim . && exit 0
-
-		[[ $# -gt 1 ]] && print_syntax_error
-
-		[[ ! -d $1 ]] && {
-			print_error "Cannot stat '$folder_name': No such directory"
-			exit 1
-		}
-
-		[[ -d $1 ]] && vim "$folder_name"
-	}
-
-	trap 'run_on_exit' 1 2 3 15
-	input_option_type_one "$@"
-	check_input_argument "$@"
-	exit
-}
-
-#--------------------------------------------------------------
 # Platform: voidlinux chroot
 # Dependencies: mkdir, cp, ls, xbps
 #--------------------------------------------------------------
 void-backup() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME --cache\n"
-		echo -e "Options: -c, --cache    Backup xbps package cache"
-		echo -e "         -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Chroot package cache backup tool"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --cache\n\n' "$SCRIPT_NAME"
+		printf 'Options: -c, --cache    Backup xbps package cache\n'
+		printf '         -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Create backups of xbps package cache\n'
 		exit 0
 	}
 
@@ -8442,7 +7636,7 @@ void-backup() {
 				;;
 				-c | --cache)
 					check_dependencies "$@"
-					backup_cache
+					backup_cache "$@"
 				;;
 				--version)
 					print_version
@@ -8476,16 +7670,16 @@ void-backup() {
 #--------------------------------------------------------------
 void-deploy() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME --setup"
-		echo -e "          $SCRIPT_NAME --install\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -i, --install  Setup chroot after installation"
-		echo -e "         -s, --setup    Setup chroot after mounting"
-		echo -e "             --version  Show version information\n"
-		echo -e "Chroot post-install and post-mount setup tool"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --cache\n' "$SCRIPT_NAME"
+		printf '          %s --install\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '         -i, --install  Setup chroot after installation\n'
+		printf '         -s, --setup    Setup chroot after mounting\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Chroot post-install and post-mount setup tool\n'
 		exit 0
 	}
 
@@ -8540,7 +7734,8 @@ void-deploy() {
 		}
 
 		[[ $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
-			print_warning "Setting up voidlinux chroot\n"
+			print_warning "Setting up voidlinux chroot"
+			printf '\n'
 			sudo xbps-install -Syu xbps void-repo-nonfree
 			sudo xbps-install -Syu 7zip-unrar git rust cargo bc ldns man 7zip wget gcc bash-completion unzip bsdtar --cachedir "$cache_directory" || exit 1
 			sudo xbps-install -Syu --cachedir "$cache_directory" || exit 1
@@ -8567,9 +7762,10 @@ void-deploy() {
 			sudo ln -sf "/home/${user_name}/.vimrc" "/root" &&
 
 			mkdir -p "/home/${user_name}/.vim" &&
-			echo "" &&
+			printf '\n' &&
 			print_success "Finished setting up voidlinux chroot"
-			print_aligned "Run 'source /home/${user_name}/.bashrc' to reload shell\n"
+			print_aligned "Run 'source /home/${user_name}/.bashrc' to reload shell"
+			printf '\n'
 			exit 0
 		}
 
@@ -8577,8 +7773,8 @@ void-deploy() {
 	}
 
 	password_mismatch() {
-		echo ""
-		print_error "Failed to change '$@' user password"
+		printf '\n'
+		print_error "Failed to change '$*' user password"
 		print_aligned "Passwords do not match"
 		exit 1
 	}
@@ -8591,15 +7787,15 @@ void-deploy() {
 		for zone_files in /usr/share/zoneinfo/*; do
 			[[ -d $zone_files && ${zone_files##*/} != posix && ${zone_files##*/} != right ]] && {
 				printf '%s. %s  ' "${zone_count}" "${zone_files##*/}"
-				time_zone[$zone_count]="$zone_files"
+				time_zone[zone_count]="$zone_files"
 				zone_count=$((zone_count + 1))
 			}
 		done
 
-		echo -e "\n"
+		printf '\n\n'
 		# Read user input
 		read -rep "Select Timezone: " tz_option
-		echo ""
+		printf '\n'
 
 		# Handles invalid user input
 		[[ -z $tz_option ]] && {
@@ -8609,7 +7805,7 @@ void-deploy() {
 
 		case "$tz_option" in
 			-*)
-				echo ""
+				printf '\n'
 				[[ -z ${tz_option#*\-} || -z ${tz_option/\-\-*} ]] && {
 					print_error "Invalid option '${tz_option}'" &&
 					exit 1
@@ -8625,13 +7821,13 @@ void-deploy() {
 					zone_count=1
 					for sub_zone_files in "${time_zone[$tz_option]}"/*; do
 						printf '%s. %s  ' "${zone_count}" "${sub_zone_files##*/}"
-						sub_zone[$zone_count]="$sub_zone_files"
+						sub_zone[zone_count]="$sub_zone_files"
 						zone_count=$((zone_count + 1))
 					done
-					echo -e "\n"
+					printf '\n\n'
 					# Read user input
 					read -rep "Select Region: " tz_locale
-					echo ""
+					printf '\n'
 
 					# If location in user selection is defined
 					[[ -f ${sub_zone[$tz_locale]} && $tz_locale -ge 1 && $tz_locale -le $zone_count ]] && {
@@ -8645,13 +7841,13 @@ void-deploy() {
 						zone_count=1
 						for sub_region_files in "${sub_zone[$tz_locale]}"/*; do
 							printf '%s. %s  ' "${zone_count}" "${sub_region_files##*/}"
-							sub_region[$zone_count]="$sub_region_files"
+							sub_region[zone_count]="$sub_region_files"
 							zone_count=$((zone_count + 1))
 						done
-						echo -e "\n"
+						printf '\n\n'
 						# Read user input
 						read -rep "Select Location: " sub_locale
-						echo ""
+						printf '\n'
 
 						# If location in user selection is defined
 						[[ -f ${sub_region[$sub_locale]} && $sub_locale -ge 1 && $sub_locale -le $zone_count ]] && {
@@ -8702,25 +7898,27 @@ void-deploy() {
 
 		# Check if user account has been created before
 		[[ ! -f /etc/void-deploy.conf ]] || [[ $VOID_DEPLOY_SETUP != "true" ]] && {
-			print_warning "Changing default timezone\n"
+			print_warning "Changing default timezone"
+			printf '\n'
 
 			# Change default time zone
 			change_timezone "$@"
 
 			# Create new user account
-			print_warning "Creating new user account\n"
+			print_warning "Creating new user account"
+			printf '\n'
 
 			source "/etc/profile"
 			read -rep "Input new username: " user_name
 			read -rep "Confirm new username: " user_name2
 			[[ $user_name != "$user_name2" ]] && {
-				echo ""
+				printf '\n'
 				print_error "Username does not match"
 				exit 1
 			}
 
 			[[ -z $user_name || -z $user_name2 ]] && {
-				echo ""
+				printf '\n'
 				print_error "Username cannot be empty"
 				exit 1
 			}
@@ -8730,13 +7928,13 @@ void-deploy() {
 			chmod 755 /
 
 			# Change default locale
-			echo "LANG=en_US.UTF-8" > /etc/locale.conf
+			printf '%s\n' "LANG=en_US.UTF-8" > /etc/locale.conf
 			sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/default/libc-locales
 
 			# Add locale if it doesn't exist
 			locale_file="$(< /etc/default/libc-locales)"
 			[[ $locale_file != *en_US.UTF-8\ UTF-8* ]] && {
-			    echo "en_US.UTF-8 UTF-8" >> /etc/default/libc-locales
+			    printf '%s\n' "en_US.UTF-8 UTF-8" >> /etc/default/libc-locales
 			}
 
 			# Create network groups and add user
@@ -8749,34 +7947,37 @@ void-deploy() {
 			groupadd -g 3007 aid_net_bw_acct 2>/dev/null
 			groupadd -g 3008 aid_net_bt_stack 2>/dev/null
 			useradd -m -G wheel,floppy,dialout,audio,video,kvm,plugdev,3001,3002,3003,3004,3005,3006,3007,3008 "$user_name" 2>/dev/null
-			echo ""
+			printf '\n'
 
 			# Create new user password
-			print_warning "Set password for new user '$user_name'\n"
+			print_warning "Set password for new user '$user_name'"
+			printf '\n'
 			passwd "$user_name" || password_mismatch "$user_name"
-			echo ""
+			printf '\n'
 
 			# Change default root-user password
-			print_warning "Almost done, change the default 'root' user password\n"
+			print_warning "Almost done, change the default 'root' user password"
+			printf '\n'
 			passwd root || password_mismatch "root"
 
 			# Add new user to sudoers file
 			sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 			# Set hostname
-			echo "$user_name" > /etc/hostname && hostname "$user_name"
+			printf '%s\n' "$user_name" > /etc/hostname && hostname "$user_name"
 
 			# Set DNS server
-			echo "nameserver 127.0.0.1" > /etc/resolv.conf
+			printf '%s\n' "nameserver 127.0.0.1" > /etc/resolv.conf
 			chattr +i /etc/resolv.conf
 
 			# Create custom vim colorscheme
 			print_vim_color "$@"
 			chown "$user_name":"$user_name" /usr/share/vim/*/colors/tether.vim 2>/dev/null
-			echo ""
+			printf '\n'
 
 			print_success "Done, switching to new user '$user_name'"
-			print_aligned "Run 'tether $SCRIPT_NAME --install' to finish setting up chroot\n"
+			print_aligned "Run 'tether $SCRIPT_NAME --install' to finish setting up chroot"
+			printf '\n'
 
 			# Change permissions of mounted dnscrypt files
 			[[ -f "/mnt/module-dnscrypt/dnscrypt-proxy.toml" ]] && {
@@ -8784,7 +7985,7 @@ void-deploy() {
 			}
 
 			# Set config true status
-			echo -e "VOID_DEPLOY_SETUP=\"true\"" > /etc/void-deploy.conf
+			printf '%s\n' "VOID_DEPLOY_SETUP=\"true\"" > /etc/void-deploy.conf
 			su "$user_name" && source "/etc/profile"
 			exit 0
 		}
@@ -8845,14 +8046,13 @@ void-deploy() {
 #--------------------------------------------------------------
 void-install() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --help\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Chroot installation tool"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --cache\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Chroot installation tool\n'
 		exit 0
 	}
 
@@ -8934,7 +8134,8 @@ void-install() {
 	}
 
 	fetch_rootfs() {
-		print_warning "Downloading 'sha256sum.txt'\n"
+		print_warning "Downloading 'sha256sum.txt'"
+		printf '\n'
 		shasum_file="https://repo-default.voidlinux.org/live/current/sha256sum.txt"
 
 		# Download sha256sum.txt
@@ -8944,7 +8145,7 @@ void-install() {
 		download_fail_shasum "$@"
 
 		# Get latest aarch64 rootfs filename
-		rootfs_version="$(< $tmp_dir/sha256sum.txt)"
+		rootfs_version="$(< "$tmp_dir"/sha256sum.txt)"
 		rootfs_version=${rootfs_version//*void-aarch64-ROOTFS}
 		rootfs_version=${rootfs_version//\)*}
 		rootfs_version=${rootfs_version//[[:space:]]}
@@ -8955,14 +8156,16 @@ void-install() {
 		# Set downloaded file name
 		rootfs_file="${rootfs_version//*\/}"
 
-		print_warning "Downloading '$rootfs_file'\n"
+		print_warning "Downloading '$rootfs_file'"
+		printf '\n'
 
 		# Download latest voidlinux aarch64 glibc rootfs
 		busybox wget "$rootfs_version" -O "${tmp_dir}/${rootfs_file}" &>/dev/null ||
 
 		# Error handling on download failure
 		download_fail "$@"
-		print_warning "Comparing file checksums\n"
+		print_warning "Comparing file checksums"
+		printf '\n'
 
 		# Check downloaded file hashsum
 		check_file_hash "$@"
@@ -8972,7 +8175,7 @@ void-install() {
 		# Check if rootfs has already been downloaded
 		[[ -f ${tmp_dir}/sha256sum.txt ]] && {
 			# Get rootfs filename
-			rootfs_version="$(< $tmp_dir/sha256sum.txt)"
+			rootfs_version="$(< "$tmp_dir"/sha256sum.txt)"
 			rootfs_version=${rootfs_version//*void-aarch64-ROOTFS}
 			rootfs_version=${rootfs_version//\)*}
 			rootfs_version=${rootfs_version//[[:space:]]}
@@ -8980,7 +8183,8 @@ void-install() {
 
 			# Check file hash if rootfs exists
 			[[ -f ${tmp_dir}/${rootfs_file} ]] && {
-				print_warning "Comparing file checksums\n"
+				print_warning "Comparing file checksums"
+				printf '\n'
 				check_file_hash "$@"
 			}
 
@@ -9008,14 +8212,15 @@ void-install() {
 		}
 
 		# Set size of chroot image
-		print_warning "Preparing install location\n"
-		cd "/sdcard"
+		print_warning "Preparing install location"
+		printf '\n'
+		cd "/sdcard" || exit 1
 		rm -r "$chroot_image" 2>/dev/null
 		rm -r "$chroot_install_dir" 2>/dev/null
 
 		# Process user input
 		read -rep "Input desired size of chroot image: " input_size
-		echo ""
+		printf '\n'
 
 		# Process user input and seperate characters from integers
 		user_value="$input_size"
@@ -9050,7 +8255,8 @@ void-install() {
 					exit 1
 				}
 
-				print_warning "Creating ${user_value}MB image file\n"
+				print_warning "Creating ${user_value}MB image file"
+				printf '\n'
 				fallocate -l "${user_value}"M "$chroot_image"
 				size_suffix="MB"
 			;;
@@ -9061,7 +8267,8 @@ void-install() {
 					exit 1
 				}
 
-				print_warning "Creating ${user_value}GB image file\n"
+				print_warning "Creating ${user_value}GB image file"
+				printf '\n'
 				fallocate -l "${user_value}"G "$chroot_image"
 				size_suffix="GB"
 			;;
@@ -9083,8 +8290,9 @@ void-install() {
 			losetup "$block_device" "$chroot_image"
 			mount -t ext4 "$block_device" "$chroot_install_dir"
 			cp "$void_rootfs" "$chroot_install_dir"
-			cd "$chroot_install_dir"
-			print_warning "Extracting '$rootfs_file'\n"
+			cd "$chroot_install_dir" || exit 1
+			print_warning "Extracting '$rootfs_file'"
+			printf '\n'
 			busybox xz -d "${void_rootfs##*/}" &>/dev/null
 			busybox tar -xf "$extracted_file" &>/dev/null && rm "$extracted_file"
 			mount -t proc /proc "$chroot_install_dir/proc/"
@@ -9121,7 +8329,7 @@ void-install() {
 
 			# Clean up files on finish
 			rm -r "${tmp_dir:=/data/local/tmp}/${rootfs_file}" "${tmp_dir:=/data/local/tmp}/sha256sum.txt" 2>/dev/null
-			cd "$current_dir"
+			cd "$current_dir" || exit 1
 			exit 0
 		}
 
@@ -9146,14 +8354,13 @@ void-install() {
 #--------------------------------------------------------------
 void-mount() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --help\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "             --version  Show version information\n"
-		echo -e "Chroot initialization tool"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --cache\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Chroot initialization tool\n'
 		exit 0
 	}
 
@@ -9267,15 +8474,15 @@ void-mount() {
 #--------------------------------------------------------------
 void-umount() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME"
-		echo -e "          $SCRIPT_NAME --remove\n"
-		echo -e "Options: -h, --help     Print out this message"
-		echo -e "         -r, --remove   Unmount and delete chroot"
-		echo -e "             --version  Show version information\n"
-		echo -e "Chroot unmount tool"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s\n' "$SCRIPT_NAME"
+		printf '          %s --remove\n\n' "$SCRIPT_NAME"
+		printf 'Options: -h, --help     Print out this message\n'
+		printf '         -r, --remove   Unmount and delete chroot\n'
+		printf '             --version  Show version information\n\n'
+		printf 'Chroot unmount tool\n'
 		exit 0
 	}
 
@@ -9339,7 +8546,7 @@ void-umount() {
 	unmount_chroot() {
 		# Handles mounted chroot container with no running processes
 		[[ -f "$chroot_install_dir/bin/bash" ]] && {
-			cd "/sdcard"
+			cd "/sdcard" || exit 1
 			umount "$chroot_install_dir/proc"
 			umount "$chroot_install_dir/sys"
 			umount -lf "$chroot_install_dir/dev/pts"
@@ -9382,14 +8589,15 @@ void-umount() {
 	}
 
 	remove_chroot() {
-		print_warning "This action is irreversible\n"
+		print_warning "This action is irreversible"
+		printf '\n'
 		read -rep "Do you want to proceed (y/n) " option_args
 		case "$option_args" in
 			y | Y )
-				echo ""
+				printf '\n'
 				# Handles mounted chroot container with no running processes
 				[[ -f "$chroot_install_dir/bin/bash" ]] && {
-					cd "/sdcard"
+					cd "/sdcard" || exit 1
 					umount "$chroot_install_dir/proc"
 					umount "$chroot_install_dir/sys"
 					umount -lf "$chroot_install_dir/dev/pts"
@@ -9430,7 +8638,7 @@ void-umount() {
 				run_on_exit
 			;;
 			 *)
-				echo ""
+				printf '\n'
 				print_error "Invalid option '$option_args'"
 				exit 1
 			;;
@@ -9480,18 +8688,18 @@ void-umount() {
 #--------------------------------------------------------------
 whatsapp-backup() {
 	print_help() {
-		echo -e "$SCRIPT_NAME (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [OPTION]\n"
-		echo -e "Examples: $SCRIPT_NAME --encrypt"
-		echo -e "          $SCRIPT_NAME --restore\n"
-		echo -e "Options: -en, --encrypt    Create an encrypted backup"
-		echo -e "         -h,  --help       Print out this message"
-		echo -e "         -l,  --list       List all available backups"
-		echo -e "         -un, --unencrypt  Create an unencrypted backup"
-		echo -e "         -r,  --restore    Restore whatsapp from available backups"
-		echo -e "              --version    Show version information\n"
-		echo -e "Create and restore whatsapp backups"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --encrypt\n' "$SCRIPT_NAME"
+		printf '          %s --restore\n\n' "$SCRIPT_NAME"
+		printf 'Options: -en, --encrypt    Create an encrypted backup\n'
+		printf '         -h,  --help       Print out this message\n'
+		printf '         -l,  --list       List all available backups\n'
+		printf '         -un, --unencrypt  Create an unencrypted backup\n'
+		printf '         -r,  --restore    Restore whatsapp from available backups\n'
+		printf '              --version    Show version information\n\n'
+		printf 'Create and restore whatsapp backups\n'
 		exit 0
 	}
 
@@ -9571,23 +8779,24 @@ whatsapp-backup() {
 		rm -rf "$whatsapp_backup_dir/whatsapp-backup.${current_date}.7z" 2>/dev/null
 
 		# CD back to original directory
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 1
 	}
 
 	failed_to_extract() {
-		echo ""
+		printf '\n'
 		print_error "Failed to extract '${backup_list[$backup_option]}'"
 		exit 1
 	}
 
 	encrypted_backup_whatsapp() {
-		print_warning "Creating encrypted backup 'whatsapp-backup.${current_date}.7z'\n"
+		print_warning "Creating encrypted backup 'whatsapp-backup.${current_date}.7z'"
+		printf '\n'
 
 		# Handles password creation
 		create_password "$@"
 
-		cd "$whatsapp_dir"
+		cd "$whatsapp_dir" || exit 1
 		mkdir -p "$whatsapp_backup_dir" || print_write_error "$whatsapp_backup_dir"
 
 		# Compress and encrypt $whatsapp-dir contents
@@ -9598,14 +8807,15 @@ whatsapp-backup() {
 		print_aligned "Check '$whatsapp_backup_dir'"
 
 		# CD back to original directory
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 0
 	}
 
 	unencrypted_backup_whatsapp() {
-		print_warning "Creating unencrypted backup 'whatsapp-backup.${current_date}.7z'\n"
+		print_warning "Creating unencrypted backup 'whatsapp-backup.${current_date}.7z'"
+		printf '\n'
 
-		cd "$whatsapp_dir"
+		cd "$whatsapp_dir" || exit 1
 		mkdir -p "$whatsapp_backup_dir" || print_write_error "$whatsapp_backup_dir"
 
 		# Compress $whatsapp-dir contents
@@ -9615,7 +8825,7 @@ whatsapp-backup() {
 		print_aligned "Check '$whatsapp_backup_dir'"
 
 		# CD back to original directory
-		cd "$current_dir"
+		cd "$current_dir" || exit 1
 		exit 0
 	}
 
@@ -9623,8 +8833,8 @@ whatsapp-backup() {
 		# Set variables for available backups
 		array_counter=1
 
-		for avail_backup in $(ls -A "$whatsapp_backup_dir" 2>/dev/null); do
-			backup_list[$array_counter]="$avail_backup"
+		for avail_backup in "$whatsapp_backup_dir"/*; do
+			backup_list[array_counter]="${avail_backup//*\/}"
 			array_counter=$((array_counter + 1))
 		done
 
@@ -9636,15 +8846,16 @@ whatsapp-backup() {
 
 		# List available backups
 		print_banner
-		print_warning "Restoring whatsapp\n"
+		print_warning "Restoring whatsapp"
+		printf '\n'
 		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
-			echo -e "${array_checker}.${backup_list[$array_checker]}"
+			printf '%s.%s\n' "${array_checker}" "${backup_list[$array_checker]}"
 		done
-		echo ""
+		printf '\n'
 		read -rep "Select preferred backup: " backup_option
 		case "$backup_option" in
 			-*)
-				echo ""
+				printf '\n'
 				[[ -z ${backup_option#*\-} ]] && {
 					print_error "Invalid option '${backup_option}'" &&
 					exit 1
@@ -9654,14 +8865,14 @@ whatsapp-backup() {
 				exit 1
 			;;
 			*)
-				echo ""
+				printf '\n'
 				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
 					print_warning "Restoring whatsapp using '${backup_list[$backup_option]}'"
 					mkdir -p "$whatsapp_dir" || print_write_error "$whatsapp_dir"
 
 					# Extract selected backup file
-					7z x "${whatsapp_backup_dir}/${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y -o$whatsapp_dir 2>/dev/null || failed_to_extract "$@"
-					echo ""
+					7z x "${whatsapp_backup_dir}/${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y -o"$whatsapp_dir" 2>/dev/null || failed_to_extract "$@"
+					printf '\n'
 					print_success "Finished restoring '${backup_list[$backup_option]}'"
 					exit 0
 				}
@@ -9699,7 +8910,7 @@ whatsapp-backup() {
 						exit 1
 					}
 
-					echo -e "\033[1;97mAvailable backups:\033[00m"
+					printf '\033[1;97mAvailable backups:\033[00m\n'
 					ls -A "$whatsapp_backup_dir"
 					exit 0
 				;;
@@ -9776,7 +8987,7 @@ tether() {
 				function_space+="${function_spaced}, "
 			}
 		done
-		echo "${function_space%,*}"
+		printf '%s\n' "${function_space%,*}"
 	}
 
 	# Count declared applets/functions
@@ -9787,26 +8998,26 @@ tether() {
 				func_count=$(( func_count + 1 ))
 			}
 		done
-		echo "$func_count"
+		printf '%s\n' "$func_count"
 	}
 
 	print_help() {
-		echo -e "${SCRIPT_NAME} ${SCRIPT_VERSION} (C) 2023, Kolade Ayomide Olanrewaju (tether)"
-		echo -e "$SCRIPT_NAME is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n"
-		echo -e "Usage:    $SCRIPT_NAME [FUNCTION] [ARGUMENTS...]"
-		echo -e "          $SCRIPT_NAME [OPTION] [FOLDER]\n"
-		echo -e "Examples: $SCRIPT_NAME --install /usr/bin"
-		echo -e "          $SCRIPT_NAME touchzip --encrypt dotfiles.7z .bashrc"
-		echo -e "          $SCRIPT_NAME extract dotfiles.7z\n"
-		echo -e "Options:     --banner   Show program banner"
-		echo -e "         -h, --help     Print out this message"
-		echo -e "         -i, --install  Create symbolic links in the specified folder"
-		echo -e "         -l, --list     List all available functions"
-		echo -e "         -s, --silent   '-i/--install' with hidden output"
-		echo -e "             --version  Show version information\n"
-		echo -e "\033[1;97m$SCRIPT_NAME\033[00m is a multi-call shell script that combines many applets into a single executable."
-		echo -e "Create symbolic links to \033[1;97m$SCRIPT_NAME\033[00m for each function and \033[1;97m$SCRIPT_NAME\033[00m will act like whatever it was invoked as\n"
-		echo -e "\033[1;97mCurrently defined functions ($(req_func)):\033[00m"
+		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
+		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
+		printf 'Usage:    %s [FUNCTION] [ARGUMENTS...]\n' "$SCRIPT_NAME"
+		printf '          %s [OPTION] [FOLDER]\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --install /usr/bin\n' "$SCRIPT_NAME"
+		printf '          %s touchzip --encrypt dotfiles.7z .bashrc\n' "$SCRIPT_NAME"
+		printf '          %s extract dotfiles.7z\n\n' "$SCRIPT_NAME"
+		printf 'Options:     --banner   Show program banner\n'
+		printf '         -h, --help     Print out this message\n'
+		printf '         -i, --install  Create symbolic links in the specified folder\n'
+		printf '         -l, --list     List all available functionsi\n'
+		printf '         -s, --silent   Create symbolic links without printing to stdout\n'
+		printf '             --version  Show version information\n\n'
+		printf '\033[1;97m%s\033[00m is a multi-call shell script that combines many applets into a single executable.\n' "$SCRIPT_NAME"
+		printf 'Create symbolic links to \033[1;97m%s\033[00m for each function and \033[1;97m%s\033[00m will act like whatever it was invoked as\n\n' "$SCRIPT_NAME" "$SCRIPT_NAME"
+		printf '\033[1;97mCurrently defined functions (%s):\033[00m\n' "$(req_func)"
 		print_function_names
 		exit 0
 	}
@@ -9853,7 +9064,7 @@ tether() {
 					exit 0
 				;;
 				-l | --list)
-					echo -e "\033[1;97mCurrently defined functions ($(req_func)):\033[00m"
+					printf '\033[1;97mCurrently defined functions (%s):\033[00m\n' "$(req_func)"
 					print_function_names
 					exit 0
 				;;
@@ -9901,7 +9112,7 @@ tether() {
 					print_notification
 				;;
 				*)
-					[[ $(echo "$applet_name" | grep -x "$1" 2>/dev/null) ]] && {
+					[[ $(printf '%s\n' "$applet_name" | grep -x "$1" 2>/dev/null) ]] && {
 						# Makes $SCRIPT_NAME the name of the executed function
 						SCRIPT_NAME="${1}"
 						# Handles main script
@@ -9911,7 +9122,7 @@ tether() {
 					}
 
 					# Handles renamed main program
-					[[ ! $(echo "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
+					[[ ! $(printf '%s\n' "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
 						SCRIPT_NAME="tether"
 						print_error "$SCRIPT_NAME: '$0' applet not found"
 						exit 1
@@ -9930,16 +9141,17 @@ tether() {
 	trap 'run_on_exit' 1 2 3 15
 
 	# Set $applet_name to only desired functions i.e remove print_error...
-	applet_name="$(echo "$applet_name" | sed 's/.*_.*//' 2>/dev/null)"
+	applet_name="$(printf '%s\n' "$applet_name" | sed 's/.*_.*//' 2>/dev/null)"
+
 
 	# Handles symlinked applets
 	# Example: mkcp newfolder file
-	[[ $(echo "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) && $SCRIPT_NAME != "tether" ]] && {
+	[[ $(printf '%s\n' "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) && $SCRIPT_NAME != "tether" ]] && {
 		"$SCRIPT_NAME" "${@:1}" && exit 0
 	}
 
 	# Handles symlinked applets that don't exist
-	[[ ! $(echo "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
+	[[ ! $(printf '%s\n' "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
 		SCRIPT_NAME="tether"
 		print_error "$SCRIPT_NAME: '${0##*/}' applet not found"
 		exit 1

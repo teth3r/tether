@@ -1,8 +1,6 @@
 #!/bin/env bash
 
 # shellcheck disable=SC2317   # Notice about unreachable commands
-# shellcheck disable=SC2015   # A && B || C notice
-# shellcheck disable=SC2143   # Style notice about grep -q
 
 # Copyright (C) 2023, Kolade Ayomide Olanrewaju (tether)
 #
@@ -43,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.19.1937"
+SCRIPT_VERSION="2024.01.20.1126"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -75,7 +73,7 @@ SCRIPT_VERSION="2024.01.19.1937"
 	TERMUX_DIRECTORY="/data/data/com.termux/files"
 
 	# Set internal storage
-	phone_storage="/mnt/sdcard"
+	PHONE_STORAGE="/mnt/sdcard"
 
 	# Set Android version for non-root user
 	[[ $USER != "root" || $EUID -ne 0 ]] && [[ -n $EUID ]] && {
@@ -425,7 +423,6 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias vi='vim'
 alias void='ping -c4 voidlinux.org'
-alias google='ping -c4 google.com'
 
 # Use vi/vim keybindings
 set -o vi
@@ -462,15 +459,15 @@ none="\[\e[00m\]"
 	}
 
 	# Set internal storage
-	export phone_storage="/mnt/sdcard"
+	export PHONE_STORAGE="/mnt/sdcard"
 
-	export HOME="$phone_storage"
+	export HOME="$PHONE_STORAGE"
 	export TERM="xterm-256color"
 	export SHELL="$0"
 	export PATH=/system/bin:/system/xbin:/sbin
 
 	# Expand path for devices with termux installed
-	[[ -n $(pm -l 2>/dev/null | grep "com.termux$") ]] && {
+	[[ $(pm list packages "com.termux" 2>/dev/null) ]] && {
 		export PATH=/data/data/com.termux/files/usr/bin:/system/bin:/system/xbin:/sbin
 	}
 
@@ -482,7 +479,7 @@ none="\[\e[00m\]"
 	}
 
 	alias external='cd $EXTERNAL_STORAGE'
-	alias sdcard='cd $phone_storage'
+	alias sdcard='cd $PHONE_STORAGE'
 	alias termux='cd /data/data/com.termux/files'
 
 	alias vi='busybox vi'
@@ -524,10 +521,10 @@ none="\[\e[00m\]"
 	unset ANDROID_DATA
 
 	export EXTERNAL_STORAGE="/media"
-	export phone_storage="/mnt/sdcard"
+	export PHONE_STORAGE="/mnt/sdcard"
 
 	alias external='cd $EXTERNAL_STORAGE'
-	alias sdcard='cd $phone_storage'
+	alias sdcard='cd $PHONE_STORAGE'
 
 	module_dns="/mnt/module-dnscrypt"
 
@@ -634,9 +631,9 @@ for available_storage in /storage/*-*; do
 done
 
 # Set internal storage
-export phone_storage="/mnt/sdcard"
+export PHONE_STORAGE="/mnt/sdcard"
 
-export HOME="$phone_storage"
+export HOME="$PHONE_STORAGE"
 export HOSTNAME=$(hostname)
 export USER=$(id -un)
 export PWD=$(pwd)
@@ -646,7 +643,7 @@ export PATH=/system/bin:/system/xbin:/sbin
 export TMPDIR="/data/local/tmp"
 
 alias external='cd $EXTERNAL_STORAGE'
-alias sdcard='cd $phone_storage'
+alias sdcard='cd $PHONE_STORAGE'
 alias termux='cd /data/data/com.termux/files'
 
 alias vi='busybox vi'
@@ -655,7 +652,6 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 
 alias void='ping -c4 voidlinux.org'
-alias google='ping -c4 google.com'
 
 MODULE_DIRECTORY=/data/adb/modules/tether
 alias bash='bash --rcfile $MODULE_DIRECTORY/system/etc/bash/.bashrc'
@@ -2939,25 +2935,42 @@ dotfiles() {
 			case "$primary_options" in
 				-b | --bashrc)
 					[[ -d /system/app/ && -f /system/build.prop ]] && {
+						unset exit_status
+
 						print_not_root_user "$@"
-						print_bashrc "$@" &&
-						print_success "Finished updating '$MODULE_DIRECTORY/system/etc/bash/.bashrc'" ||
+						print_bashrc "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$MODULE_DIRECTORY/system/etc/bash/.bashrc'"
+							exit 0
+						}
+
 						print_error "Failed to update '$MODULE_DIRECTORY/system/etc/bash/.bashrc'"
+						exit 1
+					}
+
+					print_bashrc "$@" && exit_status=0
+
+					[[ $exit_status -eq 0 ]] && {
+						print_success "Finished updating '/home/${SUDO_USER:=$USER}/.bashrc'"
 						exit 0
 					}
 
-					print_bashrc "$@" &&
-					print_success "Finished updating '/home/${SUDO_USER:=$USER}/.bashrc'" ||
 					print_error "Failed to update '/home/${SUDO_USER:=$USER}/.bashrc'"
-					# Exit status is gotten from 'print_bashrc'
-					exit
+					exit 1
 				;;
 				-fi | --firefox)
-					[[ $(type -p firefox) || $(pm -l 2>/dev/null | grep "org.mozilla.fennec_fdroid") ]] && {
-						print_firefox "$@" &&
-						print_success "Finished updating '$user_js'" ||
+					[[ $(type -p firefox) || $(pm list packages "org.mozilla.fennec_fdroid" 2>/dev/null) ]] && {
+						unset exit_status
+						print_firefox "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$user_js'"
+							exit 0
+						}
+
 						print_error "Failed to update '$user_js'"
-						exit 0
+						exit 1
 					}
 
 					print_missing_dependencies "Firefox"
@@ -2968,10 +2981,16 @@ dotfiles() {
 				;;
 				-k | --kitty)
 					[[ $(type -p kitty) ]] && {
-						print_kitty "$@" &&
-						print_success "Finished updating '~/.config/kitty/kitty.conf'" ||
+						unset exit_status
+						print_kitty "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '~/.config/kitty/kitty.conf'"
+							exit 0
+						}
+
 						print_error "Failed to update '~/.config/kitty/kitty.conf'"
-						exit 0
+						exit 1
 					}
 
 					print_missing_dependencies "Kitty"
@@ -2979,11 +2998,17 @@ dotfiles() {
 				;;
 				-m | --mkshrc)
 					[[ -d /system/app/ && -f /system/build.prop ]] && {
+						unset exit_status
 						print_not_root_user "$@"
-						print_mkshrc_android "$@" &&
-						print_success "Finished updating '$MODULE_DIRECTORY/system/etc/mkshrc'" ||
+						print_mkshrc_android "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$MODULE_DIRECTORY/system/etc/mkshrc'"
+							exit 0
+						}
+
 						print_error "Failed to update '$MODULE_DIRECTORY/system/etc/mkshrc'"
-						exit 0
+						exit 1
 					}
 
 					print_os_error
@@ -2994,36 +3019,63 @@ dotfiles() {
 						print_os_error
 					}
 
-					[[ -n $(pm -l 2>/dev/null | grep "com.termux$") && -d $TERMUX_DIRECTORY ]] && {
+					[[ $(pm list packages "com.termux" 2>/dev/null) && -d $TERMUX_DIRECTORY ]] && {
 						print_not_root_user "$@"
 
+						unset exit_status
 						# Update termux.properties
-						print_termux_config "$@" &&
-						print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/termux.properties'" ||
-						print_error "Failed to update '$TERMUX_DIRECTORY/home/.termux/termux.properties'"
+						print_termux_config "$@" && exit_status=0
 
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/termux.properties'"
+						}
+
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '$TERMUX_DIRECTORY/home/.termux/termux.properties'"
+						}
+
+						unset exit_status
 						# Update etc/profile
 						print_termux_profile "$@" &&
-						print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/profile'" ||
-						print_error "Failed to update '$TERMUX_DIRECTORY/usr/etc/profile'"
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/profile'"
+						}
 
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '$TERMUX_DIRECTORY/usr/etc/profile'"
+						}
+
+						unset exit_status
 						# Update colors.properties
-						print_termux_color "$@" &&
-						print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/colors.properties'" ||
-						print_error "Failed to update '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
+						print_termux_color "$@" && exit_status=0
 
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
+						}
+
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
+						}
+
+						unset exit_status
 						# Update usr/etc/.bashrc
 						MODULE_DIRECTORY="${MODULE_DIRECTORY:=/data/local/tmp}"
 						print_bashrc "$@" &&
 						cp -f "$MODULE_DIRECTORY/system/etc/bash/.bashrc" "$TERMUX_DIRECTORY/usr/etc" &&
-						print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/.bashrc'" ||
+						exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/.bashrc'"
+							rm -rf "$TERMUX_DIRECTORY/usr/etc/bash.bashrc" 2>/dev/null
+							rm -rf "$TERMUX_DIRECTORY"/usr/etc/motd* 2>/dev/null
+							exit 0
+						}
+
 						print_error "Failed to update '$TERMUX_DIRECTORY/usr/etc/.bashrc'"
-						rm -rf "$TERMUX_DIRECTORY/usr/etc/bash.bashrc" 2>/dev/null
-						rm -rf "$TERMUX_DIRECTORY"/usr/etc/motd* 2>/dev/null
-						exit 0
+						exit 1
 					}
 
-					[[ -n $(pm -l 2>/dev/null | grep "com.termux$") && ! -d $TERMUX_DIRECTORY ]] && {
+					[[ $(pm list packages "com.termux" 2>/dev/null) && ! -d $TERMUX_DIRECTORY ]] && {
 						print_error "Cannot stat '$TERMUX_DIRECTORY': No such file or directory"
 						print_aligned "Try running 'Termux' at least once"
 						exit 1
@@ -3034,10 +3086,16 @@ dotfiles() {
 				;;
 				-tm | --tmux)
 					[[ $(type -p tmux) ]] && {
-						print_tmux_conf "$@" &&
-						print_success "Finished updating '~/.tmux.conf'" ||
+						unset exit_status
+						print_tmux_conf "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '~/.tmux.conf'"
+							exit 0
+						}
+
 						print_error "Failed to update '~/.tmux.conf'"
-						exit 0
+						exit 1
 					}
 
 					print_missing_dependencies "tmux"
@@ -3045,10 +3103,16 @@ dotfiles() {
 				;;
 				-u | --urxvt)
 					[[ $(type -p urxvt) ]] && {
-						print_xresources "$@" &&
-						print_success "Finished updating '~/.Xresources'" ||
+						unset exit_status
+						print_xresources "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '~/.Xresources'"
+							exit 0
+						}
+
 						print_error "Failed to update '~/.Xresources'"
-						exit 0
+						exit 1
 					}
 
 					print_missing_dependencies "rxvt-unicode"
@@ -3059,16 +3123,31 @@ dotfiles() {
 						chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /usr/share/vim/*/colors/tether.vim 2>/dev/null ||
 						print_not_root_user
 
+						unset exit_status
 						# Update .vimrc
-						print_vimrc "$@" &&
-						print_success "Finished updating '~/.vimrc'" ||
-						print_error "Failed to update '~/.vimrc'"
+						print_vimrc "$@" && exit_status=0
 
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '~/.vimrc'"
+						}
+
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '~/.vimrc'"
+						}
+
+						unset exit_status
 						# Update /usr/share/vim/*/colors/tether.vim
-						print_vim_color "$@" &&
-						print_success "Finished updating '$vim_dir/tether.vim'" ||
-						print_error "Failed to update '$vim_dir/tether.vim'"
-						exit 0
+						print_vim_color "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$vim_dir/tether.vim'"
+							exit 0
+						}
+
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '$vim_dir/tether.vim'"
+							exit 1
+						}
 					}
 
 					print_missing_dependencies "vim"
@@ -3604,10 +3683,12 @@ lyrics() {
 					# Check if source file exists
 					[[ ! -e $file_name ]] && {
 						print_error "Cannot stat '$file_name': No such file or directory"
+						printf '\n'
+						exit_status=1
 					}
 
 					while read -r sec_file_name; do
-						[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
+						[[ -e $sec_file_name ]] && {
 							unset exit_status
 							unset missing_lyrics
 							unset captcha_response
@@ -3652,11 +3733,13 @@ lyrics() {
 								# Handles missing lyrics on all parsed websites
 								[[ $missing_lyrics == "true" ]] && {
 									print_error "No lyrics found for '$parsed_file'"
+									exit_status=1
 									printf '\n'
 								}
  
 								[[ $exit_status != 0 && $skip != "true" ]] || [[ $failed_fetch == "true" ]] && {
 									print_error "Failed to fetch lyrics for '$sec_file_name'"
+									exit_status=1
 									printf '\n'
 								}
  
@@ -3670,6 +3753,13 @@ lyrics() {
 
 					# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
 					done <<< "$(find "$file_name" 2>/dev/null)"
+
+					# $exit_status will be empty because of a failed file read
+					[[ -z ${exit_status} ]] && {
+						print_error "Cannot read '$file_name' file: Permission denied"
+						printf '\n'
+					}
+
 				;;
 			esac
 		done
@@ -3728,6 +3818,7 @@ mkcp() {
 			print_notification
 		}
 	}
+
 	check_input_argument() {
 		for file_name in "${@:2}"; do
 			case "$file_name" in
@@ -3735,6 +3826,7 @@ mkcp() {
 					# Check if source file exists
 					[[ ! -e $file_name ]] && {
 						print_error "Cannot stat '$file_name': No such file or directory"
+						exit_status=1
 					}
 
 					# Check if source file and destination directory are the same
@@ -3750,11 +3842,14 @@ mkcp() {
 					# Handles special files, stuff normally not caught by -f
 					[[ -e $file_name && ! -d $file_name ]] && {
 						unset exit_status
-						# Allow copying symbolic links as-is on filesystems that support it
-						cp -rf "$file_name" "$folder_name" 2>/dev/null && exit_status=0 ||
-						cp -f "$file_name" "$folder_name" 2>/dev/null && exit_status=0
 
-						[[ -z $exit_status ]] && {
+						# Allow copying symbolic links as-is on filesystems that support it
+						cp -rf "$file_name" "$folder_name" 2>/dev/null ||
+						cp -f "$file_name" "$folder_name" 2>/dev/null
+
+						exit_status="$?"
+
+						[[ $exit_status -gt 0 ]] && {
 							print_error "Cannot create file '${folder_name}/${file_name##*\/}': Permission denied"
 						}
 					}
@@ -3772,6 +3867,7 @@ mkcp() {
 								# Gets filename from user prompt and removes the directory path
 								# file_name --> /home/username/folder -> folder
 								new_file_name=${file_name##*\/}
+
 								[[ -z $new_file_name ]] && {
 									# /home/username/file/*  -> /home/username/file/
 									new_file_name=${file_name%\*}
@@ -3783,12 +3879,14 @@ mkcp() {
 									new_file_name=${new_file_name##*\/}
 								}
 
+								# sec_file_name --> /home/username/folder/folder1/name/ -> folder1/name/
+								sec_file_name="${sec_file_name//*"$new_file_name"}"
+
 								# Creates folder in destination directory using $new_file_name as base directory
-								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
-								mkdir -p "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
+								mkdir -p "${sec_folder_name}/${new_file_name}${sec_file_name}" 2>/dev/null && exit_status=0
 
 								[[ -z $exit_status ]] && {
-									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
+									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}${sec_file_name}': Permission denied"
 								}
 
 								# Remove destination folder duplicate --- consequence of using find, first result is the input file path
@@ -3801,6 +3899,9 @@ mkcp() {
 								dup_file_name="${dup_file_name%%\/*}"
 
 								rm -r "${sec_folder_name}/${new_file_name:=?}/${dup_file_name:=?}" 2>/dev/null
+
+								# Unset exit_status ---- using here_string will kill subshell on error
+								unset exit_status
 							}
 
 							[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
@@ -3824,15 +3925,19 @@ mkcp() {
 								# Copies file into created destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
 								# Allow copying symbolic links as-is on filesystems that support it
-								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0 ||
-								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
+								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null ||
+								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null
 
-								[[ -z $exit_status ]] && {
-									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
-								}
+								exit_status="$?"
+
 							}
 						# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
-						done <<< "$(find "$file_name")"
+						done <<< "$(find "$file_name" 2>/dev/null)"
+					}
+
+					# $exit_status will be empty because of a failed file read
+					[[ -z ${exit_status} ]] && {
+						print_error "Cannot read '$file_name' file: Permission denied"
 					}
 
 					# Print program run status
@@ -3882,7 +3987,7 @@ mkmv() {
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in mkdir cp ls find rm; do
+		for mis_dep in mkdir cp ls find; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -3911,6 +4016,7 @@ mkmv() {
 					# Check if source file exists
 					[[ ! -e $file_name ]] && {
 						print_error "Cannot stat '$file_name': No such file or directory"
+						exit_status=1
 					}
 
 					# Check if source file and destination directory are the same
@@ -3928,10 +4034,12 @@ mkmv() {
 						unset exit_status
 
 						# Allow copying symbolic links as-is on filesystems that support it
-						cp -rf "$file_name" "$folder_name" 2>/dev/null && exit_status=0 ||
-						cp -f "$file_name" "$folder_name" 2>/dev/null && exit_status=0
+						cp -rf "$file_name" "$folder_name" 2>/dev/null ||
+						cp -f "$file_name" "$folder_name" 2>/dev/null
 
-						[[ -z $exit_status ]] && {
+						exit_status="$?"
+
+						[[ $exit_status -gt 0 ]] && {
 							print_error "Cannot create file '${folder_name}/${file_name##*\/}': Permission denied"
 						}
 					}
@@ -3961,12 +4069,14 @@ mkmv() {
 									new_file_name=${new_file_name##*\/}
 								}
 
+								# sec_file_name --> /home/username/folder/folder1/name/ -> folder1/name/
+								sec_file_name="${sec_file_name//*"$new_file_name"}"
+
 								# Creates folder in destination directory using $new_file_name as base directory
-								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
-								mkdir -p "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
+								mkdir -p "${sec_folder_name}/${new_file_name}${sec_file_name}" 2>/dev/null && exit_status=0
 
 								[[ -z $exit_status ]] && {
-									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
+									print_error "Cannot create directory '${sec_folder_name}/${new_file_name}${sec_file_name}': Permission denied"
 								}
 
 								# Remove destination folder duplicate --- consequence of using find, first result is the input file path
@@ -3979,6 +4089,9 @@ mkmv() {
 								dup_file_name="${dup_file_name%%\/*}"
 
 								rm -r "${sec_folder_name}/${new_file_name:=?}/${dup_file_name:=?}" 2>/dev/null
+
+								# Unset exit_status ---- using here_string will kill subshell on error
+								unset exit_status
 							}
 
 							[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
@@ -4002,15 +4115,19 @@ mkmv() {
 								# Copies file into created destination directory using $new_file_name as base directory
 								# sec_file_name --> /home/username/folder/folder1/name -> folder1/name
 								# Allow copying symbolic links as-is on filesystems that support it
-								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0 ||
-								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null && exit_status=0
+								cp -rf "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null ||
+								cp -f "$sec_file_name" "${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}" 2>/dev/null
 
-								[[ -z $exit_status ]] && {
-									print_error "Cannot create file '${sec_folder_name}/${new_file_name}/${sec_file_name//*"$new_file_name"\/}': Permission denied"
-								}
+								exit_status="$?"
+
 							}
 						# Feed while loop data using here string ----> so exit_status is not empty on subshell exit
-						done <<< "$(find "$file_name")"
+						done <<< "$(find "$file_name" 2>/dev/null)"
+					}
+
+					# $exit_status will be empty because of a failed file read
+					[[ -z ${exit_status} ]] && {
+						print_error "Cannot read '$file_name' file: Permission denied"
 					}
 
 					# Print program run status
@@ -4093,6 +4210,8 @@ mktouch() {
 			unset exit_status
 			case "$file_name" in
 				*)
+					unset exit_status
+
 					# Check if a file exist with $file_name
 					[[ -e "${folder_name}/${file_name}" ]] && {
 						print_error "Cannot create file '$file_name': File exists"
@@ -4102,10 +4221,17 @@ mktouch() {
 					# Create destination directory
 					mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
-					printf 2>/dev/null '\n' > "${folder_name}"/"${file_name:=?]}" &&
-					print_success "Created '$file_name' in '$folder_name'" ||
-					failed_to_create "$@" &&
-					exit_status=0
+					printf 2>/dev/null '\n' > "${folder_name}"/"${file_name:=?}"
+
+					exit_status="$?"
+
+					[[ $exit_status -eq 0 ]] && {
+						print_success "Created '$file_name' in '$folder_name'"
+					}
+
+					[[ $exit_status -gt 0 ]] && {
+						failed_to_create "$@"
+					}
 				;;
 			esac
 		done
@@ -4130,7 +4256,7 @@ mktouch() {
 
 #--------------------------------------------------------------
 # Platform: Android
-# Dependencies: 7zip, ls, pm, date, mkdir
+# Dependencies: ls, pm, date, mkdir
 #--------------------------------------------------------------
 omaps-backup() {
 	print_help() {
@@ -4139,15 +4265,15 @@ omaps-backup() {
 		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
 		printf 'Examples: %s --encrypt\n' "$SCRIPT_NAME"
 		printf '          %s --restore\n\n' "$SCRIPT_NAME"
-		printf 'Options: -en, --encrypt    Create an encrypted backup\n'
+		printf 'Options: -b,  --backup     Create a backup of map files\n'
 		printf '         -h,  --help       Print out this message\n'
 		printf '         -l,  --list       List all available backups\n'
-		printf '         -un, --unencrypt  Create an unencrypted backup\n'
 		printf '         -r,  --restore    Restore maps files from available backups\n'
 		printf '              --version    Show version information\n\n'
 		printf 'Create and restore backups of organic maps .mwm files\n'
 		exit 0
 	}
+
 	check_dependencies() {
 		# Only run on Android
 		[[ ! -d /system/app/ || ! -f /system/build.prop ]] && {
@@ -4155,34 +4281,33 @@ omaps-backup() {
 		}
 
 		# Check for required dependencies
-		for mis_dep in ls 7z pm date mkdir; do
+		for mis_dep in ls pm date mkdir; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
 
-		# Only run as root user
+		# Only run as root
+		# Non root user cannot access /sdcard/Android/data/
 		print_not_root_user
 
 		# Handles no organic maps install
-		[[ -z $(pm -l | grep "app.organicmaps$" 2>/dev/null) ]] && {
+		[[ $(pm list packages "app.organicmaps" 2>/dev/null) ]] && {
 			print_error "Organic Maps is not installed"
 			print_notification
 			exit 1
 		}
 
 		# Set organic maps content directories
-		omaps_internal="/sdcard/Android/data/app.organicmaps"
+		omaps_internal="$PHONE_STORAGE/Android/data/app.organicmaps"
 		[[ -n $EXTERNAL_STORAGE ]] && {
 			omaps_external="$EXTERNAL_STORAGE/Android/data/app.organicmaps"
 		}
-		omaps_private_internal="/data/data/app.organicmaps"
 
 		# Array of content directories
 		omaps_backup_candidates=(
 			"$omaps_internal"
 			"$omaps_external"
-			"$omaps_private_internal"
 		)
 
 		# Handles missing organic maps folders
@@ -4196,108 +4321,51 @@ omaps-backup() {
 		done
 
 		# Set organic maps backup directory
-		omaps_backup_dir="$phone_storage/Misc/omaps-backup"
+		omaps_backup_dir="$PHONE_STORAGE/Misc/omaps-backup"
 
 		# Use external storage if available
 		[[ -n $(ls -A "$EXTERNAL_STORAGE" 2>/dev/null) ]] && {
 			omaps_backup_dir="$EXTERNAL_STORAGE/Misc/omaps-backup"
 		}
 
-		# Set current current directory
-		current_dir="$PWD"
-
-		# Get date and time in YY.MM.DD.HH.MM format
+		# Get date and time in YYYY.MM.DD.HH.MM format
 		current_date="$(date +%Y.%m.%d.%H%M)"
 	}
 
 	failed_to_create() {
 		print_error "Something went wrong"
-		print_aligned "Failed to create 'omaps-backup.${current_date}.7z'"
-		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
-		rm -rf "${omaps_backup_dir}/omaps-backup.${current_date}.7z" 2>/dev/null
-		# CD back to original directory
-		cd "$current_dir" || exit 1
+		print_aligned "Failed to create 'omaps-backup/omaps-backup.${current_date}'"
+		rm -rf "${omaps_backup_dir}/omaps-backup.${current_date:=?}" 2>/dev/null
 		exit 1
 	}
 
-	failed_to_extract() {
+	failed_to_restore() {
 		printf '\n'
-		print_error "Failed to extract '${backup_list[$backup_option]}'"
-		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
-		# CD back to original directory
-		cd "$current_dir" || exit 1
+		print_error "Failed to restore '${backup_list[$backup_option]}'"
 		exit 1
 	}
 
-	encrypted_backup_omaps() {
-		print_warning "Creating encrypted backup 'omaps-backup.${current_date}.7z'"
+	backup_omaps() {
+		print_warning "Creating organic maps backup 'omaps-backup.${current_date}'"
 		printf '\n'
-
-		# Handles password creation
-		create_password "$@"
-
-		mkdir -p "${omaps_backup_dir}/current"
 
 		unset avail_dir
 
-		# Create archives of each omaps content folder
+		# Create backups of each omaps content folder
 		for avail_dir in "${omaps_backup_candidates[@]}"; do
 			[[ -d $avail_dir ]] && {
 				file_name="${avail_dir#\/}"
 				file_name="${file_name%%\/*}"
-				cd "${avail_dir%"files"}" || exit 1
-				# Compress $avail_dir contents
-				7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "omaps-${file_name}.7z" "files/" &>/dev/null &&
-				mv "omaps-${file_name}.7z" "${omaps_backup_dir}/current" 2>/dev/null
+				# Copy $avail_dir contents
+				mkdir -p "${omaps_backup_dir}/omaps-backup.${current_date}/${file_name}" 2>/dev/null || print_write_error "${omaps_backup_dir}/omaps-backup.${current_date}"
+				cp -rf "${avail_dir}/files" "${omaps_backup_dir}/omaps-backup.${current_date}/${file_name}" 2>/dev/null ||
+				failed_to_create "$@"
 			}
 		done
 
-		# Make main archive
-		cd "${omaps_backup_dir}/current" || exit 1
-		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$CPU_CORE_COUNT" -mhe=on "omaps-backup.${current_date}.7z" "*" &>/dev/null &&
-		unset file_password file_password2 &&
-		mv "omaps-backup.${current_date}.7z" .. 2>/dev/null ||
-		failed_to_create "$@"
-		print_success "Finished encrypting 'omaps-backup.${current_date}.7z'"
+		print_success "Finished creating 'omaps-backup.${current_date}'"
 		print_aligned "Check '$omaps_backup_dir'"
 
-		# CD back to original directory
-		cd "$current_dir" || exit 1
-		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
-		exit 0
-	}
-
-	unencrypted_backup_omaps() {
-		print_warning "Creating unencrypted backup 'omaps-backup.${current_date}.7z'"
-		printf '\n'
-
-		mkdir -p "${omaps_backup_dir}/current"
-
-		unset avail_dir
-
-		# Create archives of each omaps content folder
-		for avail_dir in "${omaps_backup_candidates[@]}"; do
-			[[ -d $avail_dir ]] && {
-				file_name="${avail_dir#\/}"
-				file_name="${file_name%%\/*}"
-				cd "${avail_dir%"files"}" || exit 1
-				# Compress $avail_dir contents
-				7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "omaps-${file_name}.7z" "files/" &>/dev/null &&
-				mv "omaps-${file_name}.7z" "${omaps_backup_dir}/current" 2>/dev/null
-			}
-		done
-
-		# Make main archive
-		cd "${omaps_backup_dir}/current" || exit 1
-		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "omaps-backup.${current_date}.7z" "*" &>/dev/null &&
-		mv "omaps-backup.${current_date}.7z" .. 2>/dev/null ||
-		failed_to_create "$@"
-		print_success "Finished creating 'omaps-backup.${current_date}.7z'"
-		print_aligned "Check '$omaps_backup_dir'"
-
-		# CD back to original directory
-		cd "$current_dir" || exit 1
-		rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 		exit 0
 	}
 
@@ -4306,8 +4374,10 @@ omaps-backup() {
 		array_counter=1
 
 		for avail_backup in "$omaps_backup_dir"/*; do
-			backup_list[array_counter]="${avail_backup//*\/}"
-			array_counter=$((array_counter + 1))
+			[[ -e $avail_backup ]] && {
+				backup_list[array_counter]="${avail_backup//*\/}"
+				array_counter=$((array_counter + 1))
+			}
 		done
 
 		# Handles no available backups
@@ -4341,33 +4411,20 @@ omaps-backup() {
 				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
 					print_warning "Restoring organic maps using '${backup_list[$backup_option]}'"
 
-					rm -rf "${omaps_backup_dir}/current" 2>/dev/null
-					mkdir -p "${omaps_backup_dir}/current"
-
-					# Copy selected backup file to $omaps_backup_dir/current
-					cp -rf "$omaps_backup_dir"/"${backup_list[$backup_option]}" "${omaps_backup_dir}/current" 2>/dev/null &&
-
-					cd "${omaps_backup_dir}/current" || exit 1
-
-					# Extract selected backup file
-					7z x "${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y 2>/dev/null || failed_to_extract
-
-					# Get names of extracted files
 					for avail_dir in "${omaps_backup_candidates[@]}"; do
 						file_name="${avail_dir#\/}"
 						file_name="${file_name%%\/*}"
-						[[ -f omaps-${file_name}.7z ]] && {
-							# Extract compressed files in omaps content directories
-							7z x "omaps-${file_name}.7z" -mmt"$CPU_CORE_COUNT" -y -o"${avail_dir}" 2>/dev/null || failed_to_extract
+						[[ -d ${omaps_backup_dir}/${backup_list[$backup_option]}/${file_name} ]] && {
+							# Copy backup folder contents
+							mkdir -p "${avail_dir}" 2>/dev/null || print_write_error "${avail_dir}"
+							cp -rf "${omaps_backup_dir}/${backup_list[$backup_option]}/${file_name}/files" "${avail_dir}" 2>/dev/null ||
+							failed_to_restore "$@"
 						}
 					done
 
 					printf '\n' &&
 					print_success "Finished restoring '${backup_list[$backup_option]}'"
 
-					# CD back to original directory
-					cd "$current_dir" || exit 1
-					rm -rf "${omaps_backup_dir}/current" 2>/dev/null
 					exit 0
 				}
 
@@ -4380,7 +4437,7 @@ omaps-backup() {
 	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
-				-en | --encrypt)
+				-b | --backup)
 					check_dependencies "$@"
 
 					# Handles if $omaps_backup exists and is empty
@@ -4390,7 +4447,7 @@ omaps-backup() {
 						exit 1
 					}
 
-					encrypted_backup_omaps "$@"
+					backup_omaps "$@"
 				;;
 				-h | --help)
 					print_help
@@ -4407,18 +4464,6 @@ omaps-backup() {
 					printf '\033[1;97mAvailable backups:\033[00m\n'
 					ls -A "$omaps_backup_dir"
 					exit 0
-				;;
-				-un | --unencrypt)
-					check_dependencies "$@"
-
-					# Handles if $omaps_backup exists and is empty
-					[[ -z $(ls -A "$omaps_internal" 2>/dev/null) || ! -d $omaps_internal || $backup_checker -eq 0 ]] && {
-						print_error "There is nothing to backup"
-						print_aligned "Try running 'Organic Maps' at least once"
-						exit 1
-					}
-
-					unencrypted_backup_omaps "$@"
 				;;
 				-r | --restore)
 					check_dependencies "$@"
@@ -4450,7 +4495,7 @@ omaps-backup() {
 		done
 	}
 
-	trap 'remove_file_on_exit "${omaps_backup_dir}/current" "${omaps_backup_dir}/omaps-backup.${current_date}.7z"' 1 2 3 15
+	trap 'remove_file_on_exit "${omaps_backup_dir}/omaps-backup.${current_date:=?}"' 1 2 3 15
 	print_no_argument "$@"
 	check_input_option "$@"
 	exit
@@ -4494,6 +4539,7 @@ package() {
 
 		# Remove directory incase it already exists
 		rm -r "$package_tmp_dir" 2>/dev/null
+		rm -r "$tmp_dir/tether" 2>/dev/null
 
 		# Dnscrypt version
 		dnscrypt_version="2.1.5"
@@ -4507,7 +4553,7 @@ package() {
 		# Get current directory
 		current_dir="$PWD"
 
-		# Get date and time in YY.MM.DD.HH.MM format
+		# Get date and time in YYYY.MM.DD.HH.MM format
 		current_date="$(date +%Y.%m.%d.%H%M)"
 
 		# Declare module backup directory
@@ -5156,9 +5202,9 @@ EOF
 			exit 0
 		}
 
-		cp -rf "$tmp_dir/tether/tether.$current_date.zip" /sdcard 2>/dev/null || print_file_write_error "/sdcard/tether.$current_date.zip"
+		cp -rf "$tmp_dir/tether/tether.$current_date.zip" "$PHONE_STORAGE" 2>/dev/null || print_file_write_error "$PHONE_STORAGE/tether.$current_date.zip"
 		print_success "Finished creating 'tether.$current_date.zip'"
-		print_aligned "Check '/sdcard'"
+		print_aligned "Check '${PHONE_STORAGE}'"
 		rm -r "$package_tmp_dir" "$tmp_dir/tether" 2>/dev/null
 		cd "$current_dir" || exit 1
 		exit 0
@@ -5931,7 +5977,9 @@ EOF
 
 		[[ ! -d /var/service/dnscrypt-proxy ]] && {
 			ln -sf /etc/sv/dnscrypt-proxy /var/service/
-		} || sv up dnscrypt-proxy
+		}
+
+		sv up dnscrypt-proxy
 	}
 
 	get_user_options() {
@@ -6619,7 +6667,7 @@ EOF
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: mkswap, swapon, swapoff, dd, df, awk, pgrep
+# Dependencies: mkswap, swapon, swapoff, dd, df, awk
 #--------------------------------------------------------------
 swapfile() {
 	print_help() {
@@ -6641,11 +6689,19 @@ swapfile() {
 		print_not_root_user
 
 		# Check for required dependencies
-		for mis_dep in mkswap swapon swapoff dd df awk pgrep; do
+		for mis_dep in mkswap swapon swapoff dd df awk; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
 		done
+	}
+
+	multiple_instances() {
+		[[ -f ${HOME:=/mnt}/.swap_running ]] && {
+			print_error "Previous running instance of '$SCRIPT_NAME' detected"
+			print_aligned "Exiting"
+			exit 1
+		}
 	}
 
 	check_free_storage() {
@@ -6744,6 +6800,9 @@ swapfile() {
 				}
 
 				exit_status=0
+
+				touch "${HOME:=/mnt}/.swap_running" 2>/dev/null
+
 				print_warning "Creating ${user_value}MB swapfile"
 				print_aligned "This may take a while"
 				printf '\n'
@@ -6753,6 +6812,8 @@ swapfile() {
 				mkswap "$file_name" &>/dev/null &&
 				swapon "$file_name" &>/dev/null || exit_status=1
 				size_suffix="MB"
+
+				rm "${HOME:=/mnt}/.swap_running" 2>/dev/null
 
 				[[ $exit_status -eq 0 ]] && {
 					print_success "Finished creating ${user_value}${size_suffix} swapfile"
@@ -6772,6 +6833,9 @@ swapfile() {
 				}
 
 				exit_status=0
+
+				touch "${HOME:=/mnt}/.swap_running" 2>/dev/null
+
 				print_warning "Creating ${user_value}GB swapfile"
 				print_aligned "This may take a while"
 				printf '\n'
@@ -6781,6 +6845,8 @@ swapfile() {
 				mkswap "$file_name" &>/dev/null &&
 				swapon "$file_name" &>/dev/null || exit_status=1
 				size_suffix="GB"
+
+				rm "${HOME:=/mnt}/.swap_running" 2>/dev/null
 
 				[[ $exit_status -eq 0 ]] && {
 					print_success "Finished creating ${user_value}${size_suffix} swapfile"
@@ -6811,6 +6877,8 @@ swapfile() {
 		# Declare user specified file name
 		file_name="$2"
 
+		touch "${HOME:=/mnt}/.swap_running" 2>/dev/null
+
 		print_warning "Disabling '$file_name' swapfile"
 		print_aligned "This may take a while"
 		printf '\n'
@@ -6818,6 +6886,7 @@ swapfile() {
 		swapoff "$file_name" 2>/dev/null &&
 		rm -r "$file_name" 2>/dev/null
 		print_success "Finished disabling '$file_name' swapfile"
+		rm "${HOME:=/mnt}/.swap_running" 2>/dev/null
 		exit 0
 	}
 
@@ -6828,6 +6897,9 @@ swapfile() {
 					print_help
 				;;
 				--off)
+					# Check for multiple instances
+					multiple_instances "$@"
+					
 					check_dependencies "$@"
 
 					# Declare file name
@@ -6860,6 +6932,9 @@ swapfile() {
 					delete_swapfile "$@"
 				;;
 				--on)
+					# Check for multiple instances
+					multiple_instances "$@"
+
 					check_dependencies "$@"
 
 					create_swapfile "$@"
@@ -6890,7 +6965,7 @@ swapfile() {
 		done
 	}
 
-	trap 'remove_file_on_exit "$file_name"' 1 2 3 15
+	trap 'remove_file_on_exit "$file_name" "${HOME:=/mnt}/.swap_running"' 1 2 3 15
 	print_no_argument "$@"
 	check_input_option "$@"
 	exit
@@ -7375,6 +7450,7 @@ tfetch() {
 		exit 0
 	}
 	tfetch_config_noroot() {
+		printf '\n'
 		get_hostname "$@"
 		printf '%s\n' " -----------------"
 
@@ -7400,7 +7476,7 @@ tfetch() {
 		}
 
 		printf '%b RAM:      %b%b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
-		printf '%b Swap:     %b%b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
+		printf '%b Swap:     %b%b %b\n\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
 		exit 0
 	}
 
@@ -7473,6 +7549,7 @@ touchzip() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 7z archive '${archive_name}.7z'"
 		rm "${archive_name}.7z" 2>/dev/null
+		unset file_password file_password2
 		exit 1
 	}
 
@@ -7483,21 +7560,30 @@ touchzip() {
 		# Handles password creation
 		create_password "$@"
 
-		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$CPU_CORE_COUNT" -mhe=on "${archive_name}.7z" "${@:3}" &>/dev/null &&
-		print_success "Created encrypted 7z archive '${archive_name}.7z'" ||
+		unset exit_status
+		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$CPU_CORE_COUNT" -mhe=on "${archive_name}.7z" "${@:3}" &>/dev/null && exit_status=0
+
+		[[ $exit_status -eq 0 ]] && {
+			print_success "Created encrypted 7z archive '${archive_name}.7z'"
+			unset file_password file_password2
+			exit 0
+		}
+
 		failed_to_create "$@"
-		unset file_password file_password2
-		exit 0
 	}
 
 	unencrypted_archive() {
 		print_warning "Creating an unencrypted 7z archive"
 		printf '\n'
 
-		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "${archive_name}.7z" "${@:3}" &>/dev/null &&
-		print_success "Created unencrypted 7z archive '${archive_name}.7z'" ||
+		unset exit_status
+		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "${archive_name}.7z" "${@:3}" &>/dev/null && exit_status=0
+		[[ $exit_status -eq 0 ]] && {
+			print_success "Created unencrypted 7z archive '${archive_name}.7z'"
+			exit 0
+		}
+
 		failed_to_create "$@"
-		exit 0
 	}
 
 	check_input_option() {
@@ -7620,10 +7706,15 @@ void-backup() {
 
 		mkdir -p "$cache_backup_directory" 2>/dev/null || print_write_error "$cache_backup_directory"
 
-		cp -f "${cache_source_directory}"/* "$cache_backup_directory" 2>/dev/null &&
-		print_success "Finished backing up xbps package cache" ||
+		unset exit_status
+		cp -f "${cache_source_directory}"/* "$cache_backup_directory" 2>/dev/null && exit_status=0
+
+		[[ $exit_status -eq 0 ]] && {
+			print_success "Finished backing up xbps package cache"
+			exit 0
+		}
+
 		failed_copy "$@"
-		exit 0
 	}
 
 	check_input_option() {
@@ -7751,8 +7842,8 @@ void-deploy() {
 			# Create custom bashrc
 			print_bashrc "$@"
 
-			# Create custom vimrc
-			print_vimrc "$@"
+			# Create custom vim colorscheme
+			sudo /bin/tether dotfiles --vim &>/dev/null
 
 			# Create custom tmux.conf
 			print_tmux_conf "$@"
@@ -7970,13 +8061,9 @@ void-deploy() {
 			printf '%s\n' "nameserver 127.0.0.1" > /etc/resolv.conf
 			chattr +i /etc/resolv.conf
 
-			# Create custom vim colorscheme
-			print_vim_color "$@"
-			chown "$user_name":"$user_name" /usr/share/vim/*/colors/tether.vim 2>/dev/null
 			printf '\n'
-
 			print_success "Done, switching to new user '$user_name'"
-			print_aligned "Run 'tether $SCRIPT_NAME --install' to finish setting up chroot"
+			print_aligned "Run '$SCRIPT_NAME --install' to finish setting up chroot"
 			printf '\n'
 
 			# Change permissions of mounted dnscrypt files
@@ -7986,6 +8073,8 @@ void-deploy() {
 
 			# Set config true status
 			printf '%s\n' "VOID_DEPLOY_SETUP=\"true\"" > /etc/void-deploy.conf
+
+			# Switch to new_user
 			su "$user_name" && source "/etc/profile"
 			exit 0
 		}
@@ -7996,6 +8085,8 @@ void-deploy() {
 
 		user_name="$(< /etc/hostname)"
 		hostname "$user_name"
+
+		# Switch to new_user
 		su "$user_name" && source "/etc/profile"
 		exit 0
 	}
@@ -8083,6 +8174,8 @@ void-install() {
 		tmp_dir="/data/local/tmp"
 		module_dns="$MODULE_DIRECTORY/system/etc/dnscrypt-proxy"
 		current_dir="$PWD"
+
+		mkdir -p "$tmp_dir" 2>/dev/null || print_write_error "$tmp_dir"
 
 		[[ -f "$chroot_install_dir/bin/bash" || -f $chroot_image || $(lsof "$chroot_install_dir" 2>/dev/null) ]] && {
 			print_error "Chroot is already installed"
@@ -8214,7 +8307,7 @@ void-install() {
 		# Set size of chroot image
 		print_warning "Preparing install location"
 		printf '\n'
-		cd "/sdcard" || exit 1
+		cd "$PHONE_STORAGE" || exit 1
 		rm -r "$chroot_image" 2>/dev/null
 		rm -r "$chroot_install_dir" 2>/dev/null
 
@@ -8300,7 +8393,7 @@ void-install() {
 			mount -o bind /dev "$chroot_install_dir/dev/"
 			mount -o bind /dev/pts "$chroot_install_dir/dev/pts/"
 			mkdir -p "$chroot_install_dir/mnt/sdcard"
-			mount "$phone_storage" "$chroot_install_dir/mnt/sdcard"
+			mount "$PHONE_STORAGE" "$chroot_install_dir/mnt/sdcard"
 
 			# Incase there are no dnscrypt-proxy files
 			[[ -n $(ls -A "$module_dns" 2>/dev/null) ]] && {
@@ -8317,11 +8410,13 @@ void-install() {
 			# Handles ./${SCRIPT_NAME}
 			[[ -f ${0#\.\/} ]] && {
 				cp -f "${0#\.\/}" "$chroot_install_dir/bin/tether"
+				cp -f "${0#\.\/}" "$chroot_install_dir/bin/void-deploy"
 			}
 
 			# Handles ./<dirname>/${SCRIPT_NAME}
 			[[ -f ${0#\.} ]] && {
 				cp -f "${0#\.}" "$chroot_install_dir/bin/tether"
+				cp -f "${0#\.}" "$chroot_install_dir/bin/void-deploy"
 			}
 
 			print_success "Finished installing ${user_value}${size_suffix} voidlinux chroot"
@@ -8357,7 +8452,7 @@ void-mount() {
 		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
 		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
 		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --cache\n\n' "$SCRIPT_NAME"
+		printf 'Examples: %s\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
 		printf '             --version  Show version information\n\n'
 		printf 'Chroot initialization tool\n'
@@ -8406,7 +8501,7 @@ void-mount() {
 		mount -o bind /dev "$chroot_install_dir/dev/"
 		mount -o bind /dev/pts "$chroot_install_dir/dev/pts/"
 		mkdir -p "$chroot_install_dir/mnt/sdcard"
-		mount "$phone_storage" "$chroot_install_dir/mnt/sdcard"
+		mount "$PHONE_STORAGE" "$chroot_install_dir/mnt/sdcard"
 
 		# Incase there are no dnscrypt-proxy files
 		[[ -n $(ls -A "$module_dns" 2>/dev/null) ]] && {
@@ -8423,14 +8518,16 @@ void-mount() {
 		# Handles ./${SCRIPT_NAME}
 		[[ -f ${0#\.\/} ]] && {
 			cp -f "${0#\.\/}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.\/}" "$chroot_install_dir/bin/void-deploy"
 		}
 
 		# Handles ./<dirname>/${SCRIPT_NAME}
 		[[ -f ${0#\.} ]] && {
 			cp -f "${0#\.}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.}" "$chroot_install_dir/bin/void-deploy"
 		}
 
-		chroot "$chroot_install_dir" tether void-deploy --setup
+		chroot "$chroot_install_dir" void-deploy --setup
 		exit 0
 	}
 
@@ -8450,14 +8547,16 @@ void-mount() {
 		# Handles ./${SCRIPT_NAME}
 		[[ -f ${0#\.\/} ]] && {
 			cp -f "${0#\.\/}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.\/}" "$chroot_install_dir/bin/void-deploy"
 		}
 
 		# Handles ./<dirname>/${SCRIPT_NAME}
 		[[ -f ${0#\.} ]] && {
 			cp -f "${0#\.}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.}" "$chroot_install_dir/bin/void-deploy"
 		}
 
-		chroot "$chroot_install_dir" tether void-deploy --setup
+		chroot "$chroot_install_dir" void-deploy --setup
 		exit 0
 	}
 
@@ -8546,7 +8645,7 @@ void-umount() {
 	unmount_chroot() {
 		# Handles mounted chroot container with no running processes
 		[[ -f "$chroot_install_dir/bin/bash" ]] && {
-			cd "/sdcard" || exit 1
+			cd "$PHONE_STORAGE" || exit 1
 			umount "$chroot_install_dir/proc"
 			umount "$chroot_install_dir/sys"
 			umount -lf "$chroot_install_dir/dev/pts"
@@ -8597,7 +8696,7 @@ void-umount() {
 				printf '\n'
 				# Handles mounted chroot container with no running processes
 				[[ -f "$chroot_install_dir/bin/bash" ]] && {
-					cd "/sdcard" || exit 1
+					cd "$PHONE_STORAGE" || exit 1
 					umount "$chroot_install_dir/proc"
 					umount "$chroot_install_dir/sys"
 					umount -lf "$chroot_install_dir/dev/pts"
@@ -8628,11 +8727,17 @@ void-umount() {
 					}
 				}
 
+				unset exit_status
 				rm -r "${chroot_image%/*}" &&
 				rm -r "$chroot_install_dir" &&
-				print_success "Removed chroot" ||
+				exit_status=0
+
+				[[ $exit_status -eq 0 ]]  && {
+					print_success "Removed chroot"
+					exit 0
+				}
+
 				failed_delete "$@"
-				exit 0
 			;;
 			n | N )
 				run_on_exit
@@ -8723,8 +8828,8 @@ whatsapp-backup() {
 		[[ $ANDROID_VERSION -lt 11 ]] && print_os_error
 
 		# Declare whatsapp versions
-		whatsapp_classic="/sdcard/Android/media/com.whatsapp"
-		whatsapp_business="/sdcard/Android/media/com.whatsapp.w4b"
+		whatsapp_classic="$PHONE_STORAGE/Android/media/com.whatsapp"
+		whatsapp_business="$PHONE_STORAGE/Android/media/com.whatsapp.w4b"
 
 		# Reset whatsapp directory
 		unset whatsapp_dir
@@ -8739,27 +8844,27 @@ whatsapp-backup() {
 			whatsapp_dir="$whatsapp_business"
 		}
 
-		# Handles both whatsapp business && whatsapp installed
+		# Priotize whatsapp business if both whatsapp versions are installed
 		[[ -d $whatsapp_business && -d $whatsapp_classic ]] && {
 			whatsapp_dir="$whatsapp_business"
 		}
 
 		# Handles no whatsapp install
-		[[ -z $(pm -l 2>/dev/null | grep -i whatsapp) ]] && {
+		[[ $(pm list packages "com.whatsapp" 2>/dev/null) ]] && {
 			print_error "Whatsapp is not installed"
 			print_notification
 			exit 1
 		}
 
 		# Handles missing $whatsapp_dir
-		[[ -n $(pm -l 2>/dev/null | grep -i whatsapp) && ! -d $whatsapp_dir ]] && {
+		[[ $(pm list packages "com.whatsapp" 2>/dev/null) && ! -d $whatsapp_dir ]] && {
 			print_error "Cannot stat '${whatsapp_dir:=com.whatsapp}': No such file or directory"
 			print_aligned "Try running 'Whatsapp' at least once"
 			exit 1
 		}
 
 		# Set whatsapp backup directory
-		whatsapp_backup_dir="$phone_storage/Misc/whatsapp-backup"
+		whatsapp_backup_dir="$PHONE_STORAGE/Misc/whatsapp-backup"
 
 		# Use external storage if available
 		[[ -n $(ls -A "$EXTERNAL_STORAGE" 2>/dev/null) ]] && {
@@ -8769,7 +8874,7 @@ whatsapp-backup() {
 		# Set current current directory
 		current_dir="$PWD"
 
-		# Get date and time in YY.MM.DD.HH.MM format
+		# Get date and time in YYYY.MM.DD.HH.MM format
 		current_date="$(date +%Y.%m.%d.%H%M)"
 	}
 
@@ -8834,8 +8939,10 @@ whatsapp-backup() {
 		array_counter=1
 
 		for avail_backup in "$whatsapp_backup_dir"/*; do
-			backup_list[array_counter]="${avail_backup//*\/}"
-			array_counter=$((array_counter + 1))
+			[[ -e $avail_backup ]] && {
+				backup_list[array_counter]="${avail_backup//*\/}"
+				array_counter=$((array_counter + 1))
+			}
 		done
 
 		# Handles no available backups
@@ -9012,7 +9119,7 @@ tether() {
 		printf 'Options:     --banner   Show program banner\n'
 		printf '         -h, --help     Print out this message\n'
 		printf '         -i, --install  Create symbolic links in the specified folder\n'
-		printf '         -l, --list     List all available functionsi\n'
+		printf '         -l, --list     List all available functions\n'
 		printf '         -s, --silent   Create symbolic links without printing to stdout\n'
 		printf '             --version  Show version information\n\n'
 		printf '\033[1;97m%s\033[00m is a multi-call shell script that combines many applets into a single executable.\n' "$SCRIPT_NAME"

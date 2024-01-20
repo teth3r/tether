@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.20.1126"
+SCRIPT_VERSION="2024.01.20.1156"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3036,7 +3036,8 @@ dotfiles() {
 
 						unset exit_status
 						# Update etc/profile
-						print_termux_profile "$@" &&
+						print_termux_profile "$@" && exit_status=0
+
 						[[ $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/profile'"
 						}
@@ -4292,7 +4293,7 @@ omaps-backup() {
 		print_not_root_user
 
 		# Handles no organic maps install
-		[[ $(pm list packages "app.organicmaps" 2>/dev/null) ]] && {
+		[[ ! $(pm list packages "app.organicmaps" 2>/dev/null) ]] && {
 			print_error "Organic Maps is not installed"
 			print_notification
 			exit 1
@@ -8850,14 +8851,14 @@ whatsapp-backup() {
 		}
 
 		# Handles no whatsapp install
-		[[ $(pm list packages "com.whatsapp" 2>/dev/null) ]] && {
+		[[ ! $(pm list packages "com.whatsapp" 2>/dev/null) ]] && {
 			print_error "Whatsapp is not installed"
 			print_notification
 			exit 1
 		}
 
 		# Handles missing $whatsapp_dir
-		[[ $(pm list packages "com.whatsapp" 2>/dev/null) && ! -d $whatsapp_dir ]] && {
+		[[ ! $(pm list packages "com.whatsapp" 2>/dev/null) && ! -d $whatsapp_dir ]] && {
 			print_error "Cannot stat '${whatsapp_dir:=com.whatsapp}': No such file or directory"
 			print_aligned "Try running 'Whatsapp' at least once"
 			exit 1

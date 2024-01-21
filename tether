@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.21.1345"
+SCRIPT_VERSION="2024.01.21.1828"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5336,10 +5336,15 @@ setup() {
 		source "/etc/os-release" 2>/dev/null
 		[[ $PRETTY_NAME != "Void Linux" ]] && print_os_error
 
-		[[ ! $(type -p xbps-install) ]] && print_missing_dependencies "xbps"
-
 		# Only run as root-user
 		print_not_root_user
+
+		# Check for required dependencies
+		for mis_dep in xbps-install ping; do
+			[[ ! $(type -p "$mis_dep") ]] && {
+				print_missing_dependencies "$mis_dep"
+			}
+		done
 
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
 			print_error "Failed to detect an internet connection"
@@ -7773,7 +7778,7 @@ void-backup() {
 
 #--------------------------------------------------------------
 # Platform: voidlinux chroot
-# Dependencies: mkdir, cp, ls, xbps
+# Dependencies: mkdir, cp, xbps
 #--------------------------------------------------------------
 void-deploy() {
 	print_help() {
@@ -7807,7 +7812,7 @@ void-deploy() {
 		[[ $PRETTY_NAME != "Void Linux" ]] && print_os_error
 
 		# Check for required dependencies
-		for mis_dep in mkdir cp ls; do
+		for mis_dep in mkdir cp; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}

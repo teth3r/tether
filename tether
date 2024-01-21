@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.20.1156"
+SCRIPT_VERSION="2024.01.21.1345"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3274,7 +3274,8 @@ extract() {
 
 						7zip-unrar x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name"  || failed_to_extract
 
-						[[ -n $(ls -A "$folder_name" 2>/dev/null) ]] && {
+						# Alternative to `ls -A "$folder_name"`
+						[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
 							printf '\n'
 							print_success "Extracted '$archive_file' to '$folder_name'"
 							exit_status=0
@@ -3290,7 +3291,8 @@ extract() {
 
 						7z x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name" 2>/dev/null || failed_to_extract
 
-						[[ -n $(ls -A "$folder_name" 2>/dev/null) ]] && {
+						# Alternative to `ls -A "$folder_name"`
+						[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
 							printf '\n'
 							print_success "Extracted '$archive_file' to '$folder_name'"
 							exit_status=0
@@ -3306,7 +3308,8 @@ extract() {
 
 						bsdtar -xf "$archive_file" -C "$folder_name" 2>/dev/null || failed_to_extract
 
-						[[ -n $(ls -A "$folder_name" 2>/dev/null) ]] && {
+						# Alternative to `ls -A "$folder_name"`
+						[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
 							printf '\n'
 							print_success "Extracted '$archive_file' to '$folder_name'"
 							exit_status=0
@@ -3779,7 +3782,7 @@ lyrics() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: mkdir, cp, ls, find
+# Dependencies: mkdir, cp, find
 #--------------------------------------------------------------
 mkcp() {
 	print_help() {
@@ -3798,7 +3801,7 @@ mkcp() {
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in mkdir cp ls find; do
+		for mis_dep in mkdir cp find; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -3950,7 +3953,8 @@ mkcp() {
 		done
 
 		# Handles specified files not existing
-		[[ -z $(ls -A "$folder_name" 2>/dev/null) ]] && {
+		# Alternative to `ls -A "$folder_name"`
+		[[ $(printf '%s\n' "$folder_name/"*) == "$folder_name/*" && $(printf '%s\n' "$folder_name/".*) == "$folder_name/.*" ]] && {
 			rm -r "$folder_name" 2>/dev/null
 			exit 1
 		}
@@ -3969,7 +3973,7 @@ mkcp() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: mkdir, cp, ls, find, rm
+# Dependencies: mkdir, cp, find, rm
 #--------------------------------------------------------------
 mkmv() {
 	print_help() {
@@ -3988,7 +3992,7 @@ mkmv() {
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in mkdir cp ls find; do
+		for mis_dep in mkdir cp find; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -4142,7 +4146,8 @@ mkmv() {
 		done
 
 		# Handles specified files not existing
-		[[ -z $(ls -A "$folder_name" 2>/dev/null) ]] && {
+		# Alternative to `ls -A "$folder_name"`
+		[[ $(printf '%s\n' "$folder_name/"*) == "$folder_name/*" && $(printf '%s\n' "$folder_name/".*) == "$folder_name/.*" ]] && {
 			rm -r "$folder_name" 2>/dev/null
 			exit 1
 		}
@@ -4161,7 +4166,7 @@ mkmv() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: mkdir, ls
+# Dependencies: mkdir, touch
 #--------------------------------------------------------------
 mktouch() {
 	print_help() {
@@ -4179,7 +4184,7 @@ mktouch() {
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in mkdir ls; do
+		for mis_dep in mkdir touch; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -4238,7 +4243,8 @@ mktouch() {
 		done
 
 		# Handles specified files not existing
-		[[ -z $(ls -A "$folder_name" 2>/dev/null) ]] && {
+		# Alternative to `ls -A "$folder_name"`
+		[[ $(printf '%s\n' "$folder_name/"*) == "$folder_name/*" && $(printf '%s\n' "$folder_name/".*) == "$folder_name/.*" ]] && {
 			rm -r "$folder_name" 2>/dev/null
 			exit 1
 		}
@@ -4257,7 +4263,7 @@ mktouch() {
 
 #--------------------------------------------------------------
 # Platform: Android
-# Dependencies: ls, pm, date, mkdir
+# Dependencies: cp, mkdir, pm
 #--------------------------------------------------------------
 omaps-backup() {
 	print_help() {
@@ -4282,7 +4288,7 @@ omaps-backup() {
 		}
 
 		# Check for required dependencies
-		for mis_dep in ls pm date mkdir; do
+		for mis_dep in cp mkdir pm; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -4325,12 +4331,12 @@ omaps-backup() {
 		omaps_backup_dir="$PHONE_STORAGE/Misc/omaps-backup"
 
 		# Use external storage if available
-		[[ -n $(ls -A "$EXTERNAL_STORAGE" 2>/dev/null) ]] && {
+		[[ -d "$EXTERNAL_STORAGE" ]] && {
 			omaps_backup_dir="$EXTERNAL_STORAGE/Misc/omaps-backup"
 		}
 
 		# Get date and time in YYYY.MM.DD.HH.MM format
-		current_date="$(date +%Y.%m.%d.%H%M)"
+		current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
 	}
 
 	failed_to_create() {
@@ -4442,7 +4448,7 @@ omaps-backup() {
 					check_dependencies "$@"
 
 					# Handles if $omaps_backup exists and is empty
-					[[ -z $(ls -A "$omaps_internal" 2>/dev/null) || ! -d $omaps_internal || $backup_checker -eq 0 ]] && {
+					[[ $(printf '%s\n' "$omaps_internal/"*) == "$omaps_internal/*" || ! -d $omaps_internal || $backup_checker -eq 0 ]] && {
 						print_error "There is nothing to backup"
 						print_aligned "Try running 'Organic Maps' at least once"
 						exit 1
@@ -4457,13 +4463,15 @@ omaps-backup() {
 					check_dependencies "$@"
 
 					# Handles no available omaps backup
-					[[ -z $(ls -A "$omaps_backup_dir" 2>/dev/null) ]] && {
+					[[ $(printf '%s\n' "$omaps_backup_dir/"*) == "$omaps_backup_dir/*" ]] && {
 						print_error "No available backups"
 						exit 1
 					}
 
 					printf '\033[1;97mAvailable backups:\033[00m\n'
-					ls -A "$omaps_backup_dir"
+
+					backup_content="$(printf '%s\n' "$omaps_backup_dir/"*)"
+					printf '%s\n' "${backup_content//"${omaps_backup_dir}/"}"
 					exit 0
 				;;
 				-r | --restore)
@@ -4529,9 +4537,22 @@ package() {
 		# Run only as root user
 		print_not_root_user
 
+		# Check for required dependencies
+		for mis_dep in mkdir ping sed rm; do
+			[[ ! $(type -p "$mis_dep") ]] && {
+				print_missing_dependencies "$mis_dep"
+			}
+		done
+
 		# Check for internet connectivity
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
 			print_error "Failed to detect an internet connection"
+			exit 1
+		}
+
+		# Only run if magisk is installed
+		[[ ! $(type -p magisk) ]] && [[ ! $(type -p su) ]] && {
+			print_error "Magisk is not installed"
 			exit 1
 		}
 
@@ -4549,25 +4570,16 @@ package() {
 		z_version="2301"
 
 		# Iosevka version
-		iosevka_version="28.0.5"
+		iosevka_version="28.0.6"
 
 		# Get current directory
 		current_dir="$PWD"
 
 		# Get date and time in YYYY.MM.DD.HH.MM format
-		current_date="$(date +%Y.%m.%d.%H%M)"
+		current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
 
 		# Declare module backup directory
 		backup_dir="$EXTERNAL_STORAGE/Misc/module-backup"
-
-		# Only run if magisk is installed
-		[[ ! $(type -p magisk) ]] && [[ ! $(type -p su) ]] && {
-			print_error "Magisk is not installed"
-			exit 1
-		}
-
-		# Check if sed is installed
-		[[ ! $(type -p sed) ]] && print_missing_dependencies "sed"
 
 		# Create module package directories
 		mkdir -p "$package_tmp_dir/system/app" 2>/dev/null || print_write_error "$package_tmp_dir/system/app"
@@ -4688,6 +4700,7 @@ package() {
 		# Extract downloaded archive
 		busybox xz -d "7z${z_version}-linux-arm64.tar.xz" &>/dev/null
 		busybox tar -xf "7z${z_version}-linux-arm64.tar" &>/dev/null
+
 		cp -rf "$package_tmp_dir/new/7zzs" "$package_tmp_dir/system/bin/7z" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/7z"
 		cd "$package_tmp_dir/system/bin" || exit 1
 		ln -sf 7z 7zip 2>/dev/null
@@ -4702,6 +4715,7 @@ package() {
 		# Download latest version of tether
 		busybox wget "https://raw.githubusercontent.com/teth3r/tether/master/tether" -O "$package_tmp_dir/tether" &>/dev/null ||
 		download_fail "tether"
+
 		chmod +x "$package_tmp_dir/tether"
 		./tether --silent "$package_tmp_dir/system/bin"
 		tether_version="$(./tether --version)"
@@ -4915,7 +4929,7 @@ hostname "$device_user"
 	dnscrypt_loader &
 
 	# Log service runtime
-	current_date="$(date +%Y.%m.%d.%H%M)"
+	current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
 	setprop tether_dnscrypt_runtime "$current_date"
 }
 
@@ -5046,7 +5060,7 @@ device_config put activity_manager max_empty_time_millis 360000000
 #--------------------------------------------------------------
 # Log script runtime
 #--------------------------------------------------------------
-current_date="$(date +%Y.%m.%d.%H%M)"
+current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
 setprop tether_performance_runtime "$current_date"
 
 #--------------------------------------------------------------
@@ -5193,7 +5207,7 @@ EOF
 		failed_to_create "$@"
 
 		# Move module archive to external storage if available
-		[[ -n $(ls -A "$EXTERNAL_STORAGE" 2>/dev/null) ]] && {
+		[[ -d "$EXTERNAL_STORAGE" ]] && {
 			mkdir -p "$backup_dir" 2>/dev/null || print_write_error "$backup_dir"
 			cp -rf "$tmp_dir/tether/tether.$current_date.zip" "$backup_dir" 2>/dev/null || print_file_write_error "$backup_dir/tether.$current_date.zip"
 			print_success "Finished creating 'tether.$current_date.zip'"
@@ -7088,7 +7102,7 @@ tfetch() {
 
 	get_pkgs() {
 		# Handles Linux with xbps
-		[[ $(type -p xbps-install) ]] && {
+		[[ $(type -p xbps-install) ]] && [[ ! -d /system/app/ ]] && {
 			package_count="0"
 			for package_list in /var/db/xbps/.*; do
 				package_count="$((package_count + 1))"
@@ -7097,7 +7111,7 @@ tfetch() {
 		}
 
 		# Handles Linux with apt
-		[[ $(type -p apt) || $(type -p apt-get) ]] && {
+		[[ $(type -p apt) || $(type -p apt-get) ]] && [[ ! -d /system/app/ ]] && {
 			package_count="0"
 			for package_list in /var/lib/dpkg/info/*.md5sums; do
 				package_count="$((package_count + 1))"
@@ -7640,7 +7654,7 @@ touchzip() {
 
 #--------------------------------------------------------------
 # Platform: voidlinux chroot
-# Dependencies: mkdir, cp, ls, xbps
+# Dependencies: mkdir, cp, xbps
 #--------------------------------------------------------------
 void-backup() {
 	print_help() {
@@ -7672,7 +7686,7 @@ void-backup() {
 		[[ $PRETTY_NAME != "Void Linux" ]] && print_os_error
 
 		# Check for required dependencies
-		for mis_dep in mkdir cp ls; do
+		for mis_dep in mkdir cp; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -7681,8 +7695,8 @@ void-backup() {
 		user_name="${SUDO_USER:=$USER}"
 
 		# Declare xbps package cache directory
-		cache_source_directory="/var/cache/xbps"
-		cache_backup_directory="/media/Misc/xbps-cache"
+		xbps_cache_dir="/var/cache/xbps"
+		xbps_backup_dir="/media/Misc/xbps-cache"
 	}
 
 	failed_copy() {
@@ -7694,21 +7708,22 @@ void-backup() {
 		[[ ! $(type -p xbps-install) ]] && print_missing_dependencies "xbps"
 
 		# Check if external storage is available
-		[[ -z $(ls -A "$EXTERNAL_STORAGE" 2>/dev/null) ]] && {
+		[[ ! -d "$EXTERNAL_STORAGE" ]] && {
 			print_error "External storage is not mounted"
 			exit 1
 		}
 
-		# Check if xbps package cache directory is empty
-		[[ -z $(ls -A "$cache_source_directory" 2>/dev/null) ]] && {
+		# Check if xbps package cache directory is empty or doesnt exist
+		# Alternative to `ls -A "$xbps_cache_dir"`
+		[[ $(printf '%s\n' "$xbps_cache_dir/"*) == "$xbps_cache_dir/*" && $(printf '%s\n' "$xbps_cache_dir/".*) == "$xbps_cache_dir/.*" ]] || [[ ! -d $xbps_cache_dir ]] && {
 			print_error "No packages installed yet"
 			exit 1
 		}
 
-		mkdir -p "$cache_backup_directory" 2>/dev/null || print_write_error "$cache_backup_directory"
+		mkdir -p "$xbps_backup_dir" 2>/dev/null || print_write_error "$xbps_backup_dir"
 
 		unset exit_status
-		cp -f "${cache_source_directory}"/* "$cache_backup_directory" 2>/dev/null && exit_status=0
+		cp -f "${xbps_cache_dir}"/* "$xbps_backup_dir" 2>/dev/null && exit_status=0
 
 		[[ $exit_status -eq 0 ]] && {
 			print_success "Finished backing up xbps package cache"
@@ -7801,9 +7816,9 @@ void-deploy() {
 		user_name="${SUDO_USER:=$USER}"
 
 		# Declare xbps package cache directory
-		cache_source_directory="/var/cache/xbps"
-		cache_backup_directory="/media/Misc/xbps-cache"
-		cache_directory="$cache_backup_directory"
+		xbps_cache_dir="/var/cache/xbps"
+		xbps_backup_dir="/media/Misc/xbps-cache"
+		cache_directory="$xbps_backup_dir"
 	}
 
 	post_install_setup() {
@@ -7821,8 +7836,8 @@ void-deploy() {
 		done
 
 		# Use cache_directory as xbps install dir
-		[[ ! -d $cache_backup_directory ]] && {
-			cache_directory="$cache_source_directory"
+		[[ ! -d $xbps_backup_dir ]] && {
+			cache_directory="$xbps_cache_dir"
 		}
 
 		[[ $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
@@ -8397,7 +8412,7 @@ void-install() {
 			mount "$PHONE_STORAGE" "$chroot_install_dir/mnt/sdcard"
 
 			# Incase there are no dnscrypt-proxy files
-			[[ -n $(ls -A "$module_dns" 2>/dev/null) ]] && {
+			[[ -f $module_dns/dnscrypt-proxy.toml ]] && {
 				mkdir -p "$chroot_install_dir/mnt/module-dnscrypt"
 				mount "$module_dns" "$chroot_install_dir/mnt/module-dnscrypt"
 			}
@@ -8505,7 +8520,7 @@ void-mount() {
 		mount "$PHONE_STORAGE" "$chroot_install_dir/mnt/sdcard"
 
 		# Incase there are no dnscrypt-proxy files
-		[[ -n $(ls -A "$module_dns" 2>/dev/null) ]] && {
+		[[ -f $module_dns/dnscrypt-proxy.toml ]] && {
 			mkdir -p "$chroot_install_dir/mnt/module-dnscrypt"
 			mount "$module_dns" "$chroot_install_dir/mnt/module-dnscrypt"
 		}
@@ -8790,7 +8805,7 @@ void-umount() {
 
 #--------------------------------------------------------------
 # Platform: Android
-# Dependencies: 7zip, ls, pm, date, mkdir
+# Dependencies: 7zip, pm, mkdir
 #--------------------------------------------------------------
 whatsapp-backup() {
 	print_help() {
@@ -8816,7 +8831,7 @@ whatsapp-backup() {
 		}
 
 		# Check for required dependencies
-		for mis_dep in ls 7z pm date mkdir; do
+		for mis_dep in 7z pm mkdir; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -8858,7 +8873,7 @@ whatsapp-backup() {
 		}
 
 		# Handles missing $whatsapp_dir
-		[[ ! $(pm list packages "com.whatsapp" 2>/dev/null) && ! -d $whatsapp_dir ]] && {
+		[[ $(pm list packages "com.whatsapp" 2>/dev/null) && ! -d $whatsapp_dir ]] && {
 			print_error "Cannot stat '${whatsapp_dir:=com.whatsapp}': No such file or directory"
 			print_aligned "Try running 'Whatsapp' at least once"
 			exit 1
@@ -8868,7 +8883,7 @@ whatsapp-backup() {
 		whatsapp_backup_dir="$PHONE_STORAGE/Misc/whatsapp-backup"
 
 		# Use external storage if available
-		[[ -n $(ls -A "$EXTERNAL_STORAGE" 2>/dev/null) ]] && {
+		[[ -d "$EXTERNAL_STORAGE" ]] && {
 			whatsapp_backup_dir="$EXTERNAL_STORAGE/Misc/whatsapp-backup"
 		}
 
@@ -8876,7 +8891,7 @@ whatsapp-backup() {
 		current_dir="$PWD"
 
 		# Get date and time in YYYY.MM.DD.HH.MM format
-		current_date="$(date +%Y.%m.%d.%H%M)"
+		current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
 	}
 
 	failed_to_create() {
@@ -8998,7 +9013,7 @@ whatsapp-backup() {
 					check_dependencies "$@"
 
 					# Handles if $whatsapp_dir exists and is empty
-					[[ -z $(ls -A "$whatsapp_dir" 2>/dev/null) ]] && {
+					[[ $(printf '%s\n' "$whatsapp_dir/"*) == "$whatsapp_dir/*" ]] && {
 						print_error "Nothing to backup"
 						print_aligned "Try using your whatsapp more"
 						exit 1
@@ -9013,19 +9028,21 @@ whatsapp-backup() {
 					check_dependencies "$@"
 
 					# Handles no available whatsapp backup
-					[[ -z $(ls -A "$whatsapp_backup_dir" 2>/dev/null) ]] && {
+					[[ $(printf '%s\n' "$whatsapp_backup_dir/"*) == "$whatsapp_backup_dir/*" ]] && {
 						print_error "No available backups"
 						exit 1
 					}
 
 					printf '\033[1;97mAvailable backups:\033[00m\n'
-					ls -A "$whatsapp_backup_dir"
+
+					backup_content="$(printf '%s\n' "$whatsapp_backup_dir/"*)"
+					printf '%s\n' "${backup_content//"${whatsapp_backup_dir}/"}"
 					exit 0
 				;;
 				-un | --unencrypt)
 					check_dependencies "$@"
 
-					[[ -z $(ls -A "$whatsapp_dir" 2>/dev/null) ]] && {
+					[[ $(printf '%s\n' "$whatsapp_dir/"*) == "$whatsapp_dir/*" ]] && {
 						print_error "Nothing to backup"
 						print_aligned "Try using your whatsapp more"
 						exit 1
@@ -9071,11 +9088,11 @@ whatsapp-backup() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: bash, ls, ln, sed, grep, mkdir
+# Dependencies: bash, ln, sed, grep, mkdir
 #--------------------------------------------------------------
 tether() {
 	# Check for required dependencies
-	for mis_dep in ls ln sed grep mkdir; do
+	for mis_dep in ln sed grep mkdir; do
 		[[ ! $(type -p "$mis_dep") ]] && {
 			print_missing_dependencies "$mis_dep"
 		}

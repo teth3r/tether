@@ -29,7 +29,7 @@
 # Check if bash version is >= 5
 #--------------------------------------------------------------
 [[ ${BASH_VERSINFO[0]} -lt 5 ]] && {
-	printf "\033[1;97m[\033[1;31m-\033[1;97m] 'bash 5.0' or later is required to run this script \n\033[00m"
+	printf "\033[1;97m[\033[1;31m-\033[1;97m] Bash 5.0 or later is required to run this script \n\033[00m" >&2
 	exit 1
 }
 
@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.22.0925"
+SCRIPT_VERSION="2024.01.22.1629"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -106,10 +106,10 @@ CPU_CORE_COUNT="${CPU_CORE_COUNT//[[:space:]]}"
 CPU_CORE_COUNT="$((CPU_CORE_COUNT + 1))"
 
 #--------------------------------------------------------------
-# Print out error message
+# Print out error message to stderr
 #--------------------------------------------------------------
 print_error() {
-	printf '\033[1;97m[\033[1;31m-\033[1;97m] %s \n\033[00m' "$@"
+	printf '\033[1;97m[\033[1;31m-\033[1;97m] %s \n\033[00m' "$@" >&2
 }
 
 #--------------------------------------------------------------
@@ -160,7 +160,7 @@ remove_file_on_exit() {
 # Print out notice/guide after error
 #--------------------------------------------------------------
 print_notification() {
-	print_aligned "Try '$SCRIPT_NAME --help' for more information."
+	print_aligned "Try '$SCRIPT_NAME --help' for more information." >&2
 	exit 1
 }
 
@@ -287,7 +287,7 @@ input_option_type_one() {
 				done
 
 				[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-					print_error "Invalid option '${primary_options}'"
+					print_error "Unrecognized option '${primary_options}'"
 					print_notification
 				}
 
@@ -309,7 +309,7 @@ input_option_type_two() {
 			;;
 			-*)
 				[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-					print_error "Invalid option '${primary_options}'"
+					print_error "Unrecognized option '${primary_options}'"
 					print_notification
 				}
 
@@ -317,7 +317,7 @@ input_option_type_two() {
 				print_notification
 			;;
 			*)
-				print_error "Invalid option '${primary_options}'"
+				print_error "Unrecognized option '${primary_options}'"
 				print_notification
 			;;
 		esac
@@ -2885,7 +2885,7 @@ benchmark() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -2893,7 +2893,7 @@ benchmark() {
 					print_notification
 				;;
 				*)
-					print_error "Invalid option '${primary_options}'"
+					print_error "Unrecognized option '${primary_options}'"
 					print_notification
 				;;
 			esac
@@ -3160,7 +3160,7 @@ dotfiles() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -3176,7 +3176,7 @@ dotfiles() {
 						esac
 					done
 
-					print_error "Invalid option '${primary_options}'"
+					print_error "Unrecognized option '${primary_options}'"
 					print_notification
 				;;
 			esac
@@ -4407,7 +4407,7 @@ omaps-backup() {
 			-*)
 				printf '\n'
 				[[ -z ${backup_option#*\-} ]] && {
-					print_error "Invalid option '${backup_option}'" &&
+					print_error "Unrecognized option '${backup_option}'" &&
 					exit 1
 				}
 
@@ -4436,7 +4436,7 @@ omaps-backup() {
 					exit 0
 				}
 
-				print_error "Invalid option '${backup_option}'" &&
+				print_error "Unrecognized option '${backup_option}'" &&
 				exit 1
 			;;
 		esac
@@ -4484,7 +4484,7 @@ omaps-backup() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -5786,7 +5786,7 @@ EOF
 			-*)
 				printf '\n'
 				[[ -z ${tz_option#*\-} || -z ${tz_option/\-\-*} ]] && {
-					print_error "Invalid option '${tz_option}'" &&
+					print_error "Unrecognized option '${tz_option}'" &&
 					exit 1
 				}
 
@@ -5841,7 +5841,7 @@ EOF
 						}
 
 						[[ $sub_locale -lt 1 || $sub_locale -gt $zone_count ]] && {
-							print_error "Invalid option '${sub_locale}'" &&
+							print_error "Unrecognized option '${sub_locale}'" &&
 							exit 1
 						}
 					}
@@ -5853,13 +5853,13 @@ EOF
 					}
 
 					[[ $tz_locale -lt 1 || $tz_locale -gt $zone_count ]] && {
-						print_error "Invalid option '${tz_locale}'" &&
+						print_error "Unrecognized option '${tz_locale}'" &&
 						exit 1
 					}
 				}
 
 				[[ $tz_option -lt 1 || $tz_option -gt $zone_count ]] && {
-					print_error "Invalid option '${tz_option}'" &&
+					print_error "Unrecognized option '${tz_option}'" &&
 					exit 1
 				}
 			;;
@@ -6050,7 +6050,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${de_option#*\-} || -z ${de_option/\-\-*} ]] && {
-					print_error "Invalid option '${de_option}'" &&
+					print_error "Unrecognized option '${de_option}'" &&
 					exit 1
 				}
 
@@ -6058,7 +6058,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${de_option}'" &&
+				print_error "Unrecognized option '${de_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6099,7 +6099,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${gpu_option#*\-} || -z ${gpu_option/\-\-*} ]] && {
-					print_error "Invalid option '${gpu_option}'" &&
+					print_error "Unrecognized option '${gpu_option}'" &&
 					exit 1
 				}
 
@@ -6107,7 +6107,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${gpu_option}'" &&
+				print_error "Unrecognized option '${gpu_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6141,7 +6141,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${vm_option#*\-} || -z ${vm_option/\-\-*} ]] && {
-					print_error "Invalid option '${vm_option}'" &&
+					print_error "Unrecognized option '${vm_option}'" &&
 					exit 1
 				}
 
@@ -6149,7 +6149,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${vm_option}'" &&
+				print_error "Unrecognized option '${vm_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6197,7 +6197,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${printer_option#*\-} || -z ${printer_option/\-\-*} ]] && {
-					print_error "Invalid option '${printer_option}'" &&
+					print_error "Unrecognized option '${printer_option}'" &&
 					exit 1
 				}
 
@@ -6205,7 +6205,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${printer_option}'" &&
+				print_error "Unrecognized option '${printer_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6253,7 +6253,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${audio_option#*\-} || -z ${audio_option/\-\-*} ]] && {
-					print_error "Invalid option '${audio_option}'" &&
+					print_error "Unrecognized option '${audio_option}'" &&
 					exit 1
 				}
 
@@ -6261,7 +6261,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${audio_option}'" &&
+				print_error "Unrecognized option '${audio_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6302,7 +6302,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${term_option#*\-} || -z ${term_option/\-\-*} ]] && {
-					print_error "Invalid option '${term_option}'" &&
+					print_error "Unrecognized option '${term_option}'" &&
 					exit 1
 				}
 
@@ -6310,7 +6310,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${term_option}'" &&
+				print_error "Unrecognized option '${term_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6344,7 +6344,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${extras_option#*\-} || -z ${extras_option/\-\-*} ]] && {
-					print_error "Invalid option '${extras_option}'" &&
+					print_error "Unrecognized option '${extras_option}'" &&
 					exit 1
 				}
 
@@ -6352,7 +6352,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${extras_option}'" &&
+				print_error "Unrecognized option '${extras_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6386,7 +6386,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${dev_option#*\-} || -z ${dev_option/\-\-*} ]] && {
-					print_error "Invalid option '${dev_option}'" &&
+					print_error "Unrecognized option '${dev_option}'" &&
 					exit 1
 				}
 
@@ -6394,7 +6394,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${dev_option}'" &&
+				print_error "Unrecognized option '${dev_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6428,7 +6428,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${dotfiles_option#*\-} || -z ${dotfiles_option/\-\-*} ]] && {
-					print_error "Invalid option '${dotfiles_option}'" &&
+					print_error "Unrecognized option '${dotfiles_option}'" &&
 					exit 1
 				}
 
@@ -6436,7 +6436,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${dotfiles_option}'" &&
+				print_error "Unrecognized option '${dotfiles_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6477,7 +6477,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${browser_option#*\-} || -z ${browser_option/\-\-*} ]] && {
-					print_error "Invalid option '${browser_option}'" &&
+					print_error "Unrecognized option '${browser_option}'" &&
 					exit 1
 				}
 
@@ -6485,7 +6485,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${browser_option}'" &&
+				print_error "Unrecognized option '${browser_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6526,7 +6526,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${media_player_option#*\-} || -z ${media_player_option/\-\-*} ]] && {
-					print_error "Invalid option '${media_player_option}'" &&
+					print_error "Unrecognized option '${media_player_option}'" &&
 					exit 1
 				}
 
@@ -6534,7 +6534,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${media_player_option}'" &&
+				print_error "Unrecognized option '${media_player_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6566,7 +6566,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${time_zone_option#*\-} || -z ${time_zone_option/\-\-*} ]] && {
-					print_error "Invalid option '${time_zone_option}'" &&
+					print_error "Unrecognized option '${time_zone_option}'" &&
 					exit 1
 				}
 
@@ -6574,7 +6574,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${time_zone_option}'" &&
+				print_error "Unrecognized option '${time_zone_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6607,7 +6607,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${auto_backlight_option#*\-} || -z ${auto_backlight_option/\-\-*} ]] && {
-					print_error "Invalid option '${auto_backlight_option}'" &&
+					print_error "Unrecognized option '${auto_backlight_option}'" &&
 					exit 1
 				}
 
@@ -6615,7 +6615,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${auto_backlight_option}'" &&
+				print_error "Unrecognized option '${auto_backlight_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6658,7 +6658,7 @@ EOF
 			;;
 			-*)
 				[[ -z ${network_option#*\-} || -z ${network_option/\-\-*} ]] && {
-					print_error "Invalid option '${network_option}'" &&
+					print_error "Unrecognized option '${network_option}'" &&
 					exit 1
 				}
 
@@ -6666,7 +6666,7 @@ EOF
 				exit 1
 			;;
 			*)
-				print_error "Invalid option '${network_option}'" &&
+				print_error "Unrecognized option '${network_option}'" &&
 				exit 1
 			;;
 		esac
@@ -6965,7 +6965,7 @@ swapfile() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -7630,7 +7630,7 @@ touchzip() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -7756,7 +7756,7 @@ void-backup() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -7764,7 +7764,7 @@ void-backup() {
 					print_notification
 				;;
 				*)
-					print_error "Invalid option '${primary_options}'"
+					print_error "Unrecognized option '${primary_options}'"
 					print_notification
 				;;
 			esac
@@ -7920,7 +7920,7 @@ void-deploy() {
 			-*)
 				printf '\n'
 				[[ -z ${tz_option#*\-} || -z ${tz_option/\-\-*} ]] && {
-					print_error "Invalid option '${tz_option}'" &&
+					print_error "Unrecognized option '${tz_option}'" &&
 					exit 1
 				}
 
@@ -7975,7 +7975,7 @@ void-deploy() {
 						}
 
 						[[ $sub_locale -lt 1 || $sub_locale -gt $zone_count ]] && {
-							print_error "Invalid option '${sub_locale}'" &&
+							print_error "Unrecognized option '${sub_locale}'" &&
 							exit 1
 						}
 					}
@@ -7987,13 +7987,13 @@ void-deploy() {
 					}
 
 					[[ $tz_locale -lt 1 || $tz_locale -gt $zone_count ]] && {
-						print_error "Invalid option '${tz_locale}'" &&
+						print_error "Unrecognized option '${tz_locale}'" &&
 						exit 1
 					}
 				}
 
 				[[ $tz_option -lt 1 || $tz_option -gt $zone_count ]] && {
-					print_error "Invalid option '${tz_option}'" &&
+					print_error "Unrecognized option '${tz_option}'" &&
 					exit 1
 				}
 			;;
@@ -8132,7 +8132,7 @@ void-deploy() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -8140,7 +8140,7 @@ void-deploy() {
 					print_notification
 				;;
 				*)
-					print_error "Invalid option '${primary_options}'"
+					print_error "Unrecognized option '${primary_options}'"
 					print_notification
 				;;
 			esac
@@ -8766,7 +8766,7 @@ void-umount() {
 			;;
 			 *)
 				printf '\n'
-				print_error "Invalid option '$option_args'"
+				print_error "Unrecognized option '$option_args'"
 				exit 1
 			;;
 		esac
@@ -8787,7 +8787,7 @@ void-umount() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -8795,7 +8795,7 @@ void-umount() {
 					print_notification
 				;;
 				*)
-					print_error "Invalid option '${primary_options}'"
+					print_error "Unrecognized option '${primary_options}'"
 					print_notification
 				;;
 			esac
@@ -8986,7 +8986,7 @@ whatsapp-backup() {
 			-*)
 				printf '\n'
 				[[ -z ${backup_option#*\-} ]] && {
-					print_error "Invalid option '${backup_option}'" &&
+					print_error "Unrecognized option '${backup_option}'" &&
 					exit 1
 				}
 
@@ -9006,7 +9006,7 @@ whatsapp-backup() {
 					exit 0
 				}
 
-				print_error "Invalid option '${backup_option}'" &&
+				print_error "Unrecognized option '${backup_option}'" &&
 				exit 1
 			;;
 		esac
@@ -9065,7 +9065,7 @@ whatsapp-backup() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 
@@ -9235,7 +9235,7 @@ tether() {
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {
-						print_error "Invalid option '${primary_options}'"
+						print_error "Unrecognized option '${primary_options}'"
 						print_notification
 					}
 

@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.22.1629"
+SCRIPT_VERSION="2024.01.24.0440"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3395,7 +3395,7 @@ lyrics() {
 		title="${title//*"Title="}"
 
 		# Fixes broken --show-tags parsing in `lltag`
-		[[ $parsed_file == *=* ]] && {
+		[[ ${parsed_file//*\/} == *=* ]] && {
 			title="$(lltag -S "$parsed_file" 2>/dev/null)"
 			title="${title//*"TITLE="}"
 			title="${title//[A-Z]=*}"
@@ -3522,7 +3522,7 @@ lyrics() {
 		output="$(content_loader "$url")"
 
 		# Check if website gave a valid response
-		[[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha_container"* ]] && {
+		[[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha"* || $output != *az_recaptcha* ]] && {
 			# Sanitize output string
 			output="${output//*"Usage of azlyrics.com"}"
 			output="${output//"</div>"*}"
@@ -3536,6 +3536,7 @@ lyrics() {
 
 			printf '%s\n' "${output}" > "$lrc_file"
 			exit_status=0
+			return
 		}
 
 		# Check for missing lyrics page
@@ -3547,7 +3548,7 @@ lyrics() {
 		}
 
 		# Check for rate limit or captcha page
-		[[ $output == *"az_captcha_container"* ]] && {
+		[[ $output == *"az_captcha"* || $output == *az_recaptcha* ]] && {
 			captcha_response="true"
 			skip="true"
 			exit_status=1
@@ -3570,7 +3571,11 @@ lyrics() {
 				}
 				return
 			}
+
 		}
+
+		# Act as a catch all or `else`
+		skip="true"
 
 		# Add delay between each run to prevent a captcha response
 		read -rt "1" <> <(:) || :
@@ -3652,6 +3657,7 @@ lyrics() {
 
 			printf '%s\n' "${output}" > "$lrc_file"
 			exit_status=0
+			return
 		}
 
 		# Check for missing lyrics page
@@ -3679,6 +3685,118 @@ lyrics() {
 				return
 			}
 		}
+
+		# Act as a catch all or `else`
+		skip="true"
+	}
+
+	lrclib_parser() {
+		# Create variables with song tags
+		fetch_song_tags "$@"
+
+		# Check if run has been skipped
+		[[ $skip == "true" ]] && return
+
+		# Convert to lowercase
+		artist="${artist,,}"
+
+		# Replace all whitespace with +
+		artist="${artist//" "/"+"}"
+
+		# Useful for "artists" like Tydolla$ign, A$APRocky
+		artist="${artist//"$"/"s"}"
+
+		# Remove diacritics from strings
+		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Sanitize artist string
+		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "/" "," "feat." "featuring" "ft." "." "with"; do
+			[[ $sanitize =~ "feat."|"ft."|"featuring"|","|";"|"with"|"'"|'“'|'”'|"‘"|"’"  ]] && {
+				artist="${artist//"$sanitize"*}"
+			}
+			artist="${artist//"$sanitize"}"
+		done
+
+		# Fixes issues with Marina's music
+		[[ $artist == "marina+and+the+diamonds" ]] && {
+			artist="${artist/"marina+and+the+diamonds"/"marina"}"
+		}
+
+		# Convert to lowercase
+		title="${title,,}"
+
+		# Replace all whitespace with +
+		title="${title//" "/"+"}"
+
+		# Remove diacritics from strings
+		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Sanitize title string
+		for sanitize in "(" ")" "[" "]" "?" "&" "#" ":" ";" "*" "-" "/" "," "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
+			[[ $sanitize =~ "'"|'“'|'”'|"‘"|"’" ]] && {
+				title="${title//"$sanitize"*}"
+			}
+			title="${title//"$sanitize"}"
+		done
+
+		# Skip if missing tags, useful for CJK characters
+		[[ -z $artist || -z $title ]] && {
+			missing_lyrics="true"
+			skip="true"
+			exit_status=1
+			return
+		}
+
+		url="https://lrclib.net/api/search?track_name=${title}&artist_name=${artist}"
+
+		output="$(content_loader "$url")"
+
+		# Check if website gave a valid response
+		[[ $output != *"TrackNotFound"* && $output != "[]" ]] &&
+		# Only use this parser if synced lyrics exist
+		[[ $output == *"\"syncedLyrics\":\""* && $output == *[00:* ]] && {
+			# Sanitize output string
+			output="${output//*"\"syncedLyrics\":\""}"
+			output="${output//"\"}]"*}"
+			output="${output//"\\\""}"
+			output="${output//"\"}"*}"
+
+			printf '%b\n' "${output}" > "$lrc_file"
+			exit_status=0
+			return
+		}
+
+		# Check for missing lyrics page
+		[[ $output == "[]" || $output == *"TrackNotFound"* || $output == *"\"instrumental\": true"* || $output == *"\"syncedLyrics\":null"* ]] && {
+			missing_lyrics="true"
+			skip="true"
+			exit_status=1
+			return
+		}
+
+		# Check for connection problems
+		[[ -f $lrc_file ]] && {
+			check_lrc="$(< "$lrc_file")"
+			[[ $check_lrc == "FAILED" ]] && {
+				exit_status=1
+				rm "$lrc_file" 2>/dev/null
+				failed_fetch="true"
+				skip="true"
+				exit_status=1
+				# recheck internet connection before proceeding
+				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
+					print_error "Failed to detect an internet connection"
+					exit 1
+				}
+				return
+			}
+		}
+
+		# Act as a catch all or `else`
+		skip="true"
+
+		# Add delay between each run to prevent a captcha response
+		read -rt "1" <> <(:) || :
 	}
 
 	check_input_argument() {
@@ -3713,8 +3831,19 @@ lyrics() {
 
 							# Only run for audio files
 							[[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus ]] && {
-								# Try www.azlyrics.com first
-								azlyrics_parser "$sec_file_name"
+								# Try lrclib.net first
+								lrclib_parser "$sec_file_name"
+
+								# Try www.azlyrics.com if lrclib_parser fails to fetch lyrics
+								[[ $failed_fetch == "true" || $captcha_response == "true" || $missing_lyrics == "true" ]] && {
+									# Reset variables for new run
+									unset exit_status
+									unset missing_lyrics
+									unset captcha_response
+									unset failed_fetch
+									unset skip
+									azlyrics_parser "$sec_file_name"
+								}
 
 								# Try www.songlyrics.com if azlyrics_parser fails to fetch lyrics
 								[[ $failed_fetch == "true" || $captcha_response == "true" || $missing_lyrics == "true" ]] && {

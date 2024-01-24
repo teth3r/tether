@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.24.0440"
+SCRIPT_VERSION="2024.01.24.0543"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3575,7 +3575,7 @@ lyrics() {
 		}
 
 		# Act as a catch all or `else`
-		skip="true"
+		exit_status=1
 
 		# Add delay between each run to prevent a captcha response
 		read -rt "1" <> <(:) || :
@@ -3687,7 +3687,7 @@ lyrics() {
 		}
 
 		# Act as a catch all or `else`
-		skip="true"
+		exit_status=1
 	}
 
 	lrclib_parser() {
@@ -3754,7 +3754,7 @@ lyrics() {
 		# Check if website gave a valid response
 		[[ $output != *"TrackNotFound"* && $output != "[]" ]] &&
 		# Only use this parser if synced lyrics exist
-		[[ $output == *"\"syncedLyrics\":\""* && $output == *[00:* ]] && {
+		[[ $output == *"\"syncedLyrics\":\""* && $output == *\[[0-9]*:* ]] && {
 			# Sanitize output string
 			output="${output//*"\"syncedLyrics\":\""}"
 			output="${output//"\"}]"*}"
@@ -3793,7 +3793,7 @@ lyrics() {
 		}
 
 		# Act as a catch all or `else`
-		skip="true"
+		exit_status=1
 
 		# Add delay between each run to prevent a captcha response
 		read -rt "1" <> <(:) || :
@@ -3880,6 +3880,7 @@ lyrics() {
 								# Print program run status
 								[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
 									print_success "Added Lyrics file for '$sec_file_name'"
+									exit_status=0
 									printf '\n'
 								}
 							}

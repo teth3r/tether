@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.24.0543"
+SCRIPT_VERSION="2024.01.25.1238"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -3370,6 +3370,28 @@ lyrics() {
 		}
 	}
 
+	connection_checker() {
+		printf '%s\n' "${output}" > "$lrc_file"
+
+		[[ -f $lrc_file ]] && {
+			check_lrc="$(< "$lrc_file")"
+			[[ $check_lrc == *"FAILED"* ]] && {
+				rm "$lrc_file" 2>/dev/null
+				failed_fetch="true"
+				skip="true"
+				exit_status=1
+				# recheck internet connection before proceeding
+				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
+					print_error "Failed to detect an internet connection"
+					exit 1
+				}
+				return
+			}
+		}
+
+		rm "$lrc_file" 2>/dev/null
+	}
+
 	failed_to_fetch() {
 		printf 'FAILED\n'
 		exit 1
@@ -3456,6 +3478,121 @@ lyrics() {
 		}
 	}
 
+	lrclib_parser() {
+		# Create variables with song tags
+		fetch_song_tags "$@"
+
+		# Check if run has been skipped
+		[[ $skip == "true" ]] && return
+
+		# Convert to lowercase
+		artist="${artist,,}"
+
+		# Replace all whitespace with +
+		artist="${artist//[[:space:]]/"+"}"
+		artist="${artist//"++"/"+"}"
+
+		# Useful for "artists" like Tydolla$ign, A$APRocky
+		artist="${artist//"$"/"s"}"
+		fallback_artist="${artist}"
+
+		# Remove diacritics from strings
+		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Useful for CJK characters
+		[[ -z $artist || $artist == *"???"* ]] && artist="${fallback_artist}"
+
+		# Sanitize artist string
+		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "/" "," "'" '“' '”' "‘" "’" "+feat." "+featuring" "+ft." "." "+with"; do
+			[[ $sanitize =~ "+feat."|"+ft."|"+featuring"|","|";"|"+with"|'“'|'”'|"‘"|"’" ]] && {
+				artist="${artist//"$sanitize"*}"
+			}
+			artist="${artist//"$sanitize"}"
+		done
+
+		# Fixes issues with Marina's music
+		[[ $artist == "marina+and+the+diamonds" ]] && {
+			artist="${artist/"marina+and+the+diamonds"/"marina"}"
+		}
+
+		# Convert to lowercase
+		title="${title,,}"
+
+		# Replace all whitespace with +
+		title="${title//[[:space:]]/"+"}"
+		title="${title//"++"/"+"}"
+
+		title="${title//"$"/"s"}"
+		fallback_title="${title}"
+
+		# Remove diacritics from strings
+		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Useful for CJK characters
+		[[ -z $title || $title == *"???"* ]] && title="${fallback_title}"
+
+		# Sanitize title string
+		for sanitize in "(" ")" "[" "]" "?" "&" "#" ":" ";" "*" "-" "/" "," "." "'" '“' '”' "‘" "’" "+explicit" "+digital+bonus+track" "+bonus+track" "+demo+version" "+acoustic+version" "+original+version"; do
+			[[ $sanitize =~ '“'|'”'|"‘"|"’" ]] && {
+				title="${title//"$sanitize"*}"
+			}
+			title="${title//"$sanitize"}"
+		done
+
+		# Skip if missing tags, useful for CJK characters
+		[[ -z $artist || -z $title ]] && {
+			missing_lyrics="true"
+			skip="true"
+			exit_status=1
+			return
+		}
+
+		# Handles double spacing
+		artist="${artist//[[:space:]]/"+"}"
+		artist="${artist//"++"/"+"}"
+
+		title="${title//[[:space:]]/"+"}"
+		title="${title//"++"/"+"}"
+
+		url="https://lrclib.net/api/search?track_name=${title}&artist_name=${artist}"
+
+		output="$(content_loader "$url")"
+
+		# Check for internet connection problems
+		connection_checker "$@"
+
+		# Check if website gave a valid response
+		[[ $output != *"TrackNotFound"* && $output != "[]" ]] &&
+		# Only use this parser if synced lyrics exist
+		[[ $output == *"\"syncedLyrics\":\""* && $output == *\[[0-9]*:* ]] && {
+			# Sanitize output string
+			output="${output//*"\"syncedLyrics\":\""}"
+			output="${output//"\"}]"*}"
+			output="${output//"\\\""}"
+			output="${output//"\"}"*}"
+
+			printf '%b\n' "${output}" > "$lrc_file"
+			exit_status=0
+			return
+		}
+
+		# Check for missing lyrics page
+		[[ $output != *FAILED* ]] && [[ $output == "[]" || $output == *"TrackNotFound"* || $output == *"\"instrumental\": true"* || $output == *"\"syncedLyrics\":null"* ]] && {
+			missing_lyrics="true"
+			skip="true"
+			exit_status=1
+			return
+		}
+
+		# Act as a catch all or `else`
+		missing_lyrics="true"
+		unset failed_fetch
+		exit_status=1
+
+		# Add delay between each run to prevent a captcha response
+		read -rt "1" <> <(:) || :
+	}
+
 	azlyrics_parser() {
 		# Create variables with song tags
 		fetch_song_tags "$@"
@@ -3468,9 +3605,13 @@ lyrics() {
 
 		# Remove all white space
 		artist="${artist//[[:space:]]}"
+		fallback_artist="${artist}"
 
 		# Remove diacritics from strings
 		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+
+		# Useful for CJK characters
+		[[ -z $artist || $artist == *"???"* ]] && artist="${fallback_artist}"
 
 		# Sanitize artist string
 		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "+" '“' '”' "‘" "’" "/" "," "feat." "featuring" "ft." "." "with"; do
@@ -3498,11 +3639,17 @@ lyrics() {
 		# Remove all white space
 		title="${title//[[:space:]]}"
 
+		title="${title//"$"/"s"}"
+		fallback_title="${title}"
+
 		# Remove diacritics from strings
 		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
+		# Useful for CJK characters
+		[[ -z $title || $title == *"???"* ]] && title="${fallback_title}"
+
 		# Sanitize title string
-		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "*" "+" '“' '”' "‘" "’" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
+		for sanitize in "(" ")" "[" "]" "-" "!" "?" "=" "&" "#" ":" ";" "'" "*" "+" '“' '”' "‘" "’" "/" "," "feat." "featuring" "ft." "." "explicit" "digitalbonustrack" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
 			[[ $sanitize =~ "feat."|"ft."|"featuring" ]] && {
 				title="${title//"$sanitize"*}"
 			}
@@ -3517,12 +3664,18 @@ lyrics() {
 			return
 		}
 
+		artist="${artist//[[:space:]]}"
+		title="${title//[[:space:]]}"
+
 		url="https://www.azlyrics.com/lyrics/${artist}/${title}.html"
 
 		output="$(content_loader "$url")"
 
+		# Check for internet connection problems
+		connection_checker "$@"
+
 		# Check if website gave a valid response
-		[[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha"* || $output != *az_recaptcha* ]] && {
+		[[ $output != *FAILED* ]] && [[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha"* || $output != *az_recaptcha* ]] && {
 			# Sanitize output string
 			output="${output//*"Usage of azlyrics.com"}"
 			output="${output//"</div>"*}"
@@ -3555,26 +3708,9 @@ lyrics() {
 			return
 		}
 
-		# Check for connection problems
-		[[ -f $lrc_file ]] && {
-			check_lrc="$(< "$lrc_file")"
-			[[ $check_lrc == "FAILED" ]] && {
-				exit_status=1
-				rm "$lrc_file" 2>/dev/null
-				failed_fetch="true"
-				skip="true"
-				exit_status=1
-				# recheck internet connection before proceeding
-				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
-					print_error "Failed to detect an internet connection"
-					exit 1
-				}
-				return
-			}
-
-		}
-
 		# Act as a catch all or `else`
+		missing_lyrics="true"
+		unset failed_fetch
 		exit_status=1
 
 		# Add delay between each run to prevent a captcha response
@@ -3589,7 +3725,8 @@ lyrics() {
 		artist="${artist,,}"
 
 		# Replace all whitespace with -
-		artist="${artist//" "/"-"}"
+		artist="${artist//[[:space:]]/"-"}"
+		artist="${artist//"--"/"-"}"
 
 		# Fix artist naming scheme
 		artist="${artist//"'"/"-"}"
@@ -3600,13 +3737,17 @@ lyrics() {
 
 		# Useful for "artists" like Tydolla$ign, A$APRocky
 		artist="${artist//"$"/"s"}"
+		fallback_artist="${artist}"
 
 		# Remove diacritics from strings
 		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
 
+		# Useful for CJK characters
+		[[ -z $artist || $artist == *"???"* ]] && artist="${fallback_artist}"
+
 		# Sanitize artist string
-		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "/" "," "feat." "featuring" "ft." "." "with"; do
-			[[ $sanitize =~ "feat."|"ft."|"featuring"|","|";"|"with" ]] && {
+		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "/" "," "-feat." "-featuring" "-ft." "." "-with"; do
+			[[ $sanitize =~ "-feat."|"-ft."|"-featuring"|","|";"|"-with" ]] && {
 				artist="${artist//"$sanitize"*}"
 			}
 			artist="${artist//"$sanitize"}"
@@ -3616,7 +3757,8 @@ lyrics() {
 		title="${title,,}"
 
 		# Replace all whitespace with -
-		title="${title//" "/"-"}"
+		title="${title//[[:space:]]/"-"}"
+		title="${title//"--"/"-"}"
 
 		# Fix title naming scheme
 		title="${title//"'"/"-"}"
@@ -3625,12 +3767,18 @@ lyrics() {
 		title="${title//'“'/"-"}"
 		title="${title//'”'/"-"}"
 
+		title="${title//"$"/"s"}"
+		fallback_title="${title}"
+
 		# Remove diacritics from strings
 		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
+		# Useful for CJK characters
+		[[ -z $title || $title == *"???"* ]] && title="${fallback_title}"
+
 		# Sanitize title string
-		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "*" "/" "," "feat." "featuring" "ft." "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
-			[[ $sanitize =~ "feat."|"ft."|"featuring" ]] && {
+		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "*" "/" "," "-feat." "-featuring" "-ft." "." "-explicit" "-digital-bonus-track" "-bonus-track" "-demo-version" "-acoustic-version" "-original-version"; do
+			[[ $sanitize =~ "-feat."|"-ft."|"-featuring" ]] && {
 				title="${title//"$sanitize"*}"
 			}
 			title="${title//"$sanitize"}"
@@ -3644,16 +3792,34 @@ lyrics() {
 			return
 		}
 
+		# Handles double spacing
+		artist="${artist//"--"/"-"}"
+		artist="${artist//[[:space:]]/"-"}"
+
+		title="${title//"--"/"-"}"
+		title="${title//[[:space:]]/"-"}"
+
 		url="https://www.songlyrics.com/${artist}/${title}-lyrics"
 
 		output="$(content_loader "$url")"
 
+		# Check for internet connection problems
+		connection_checker "$@"
+
 		# Check if website gave a valid response
-		[[ $output != *"Missing Album"* ]] && [[ $output != *"We do not have the lyrics for"* ]] && [[ $output != *"Sorry, we have no"* ]] && {
+		[[ $output != *FAILED* ]] && [[ $output != *"Missing Album"* ]] && [[ $output != *"We do not have the lyrics for"* ]] && [[ $output != *"Sorry, we have no"* ]] && {
 			# Sanitize output string
 			output="${output//*"iComment-text\">"}"
 			output="${output//"<br /></p>"*}"
 			output="${output//"<br />"}"
+
+			# Add secondary check because songlyrics responses are invalid at times
+			[[ ${output} == *songlyrics.com* ]] && {
+				missing_lyrics="true"
+				skip="true"
+				exit_status=1
+				return
+			}
 
 			printf '%s\n' "${output}" > "$lrc_file"
 			exit_status=0
@@ -3668,135 +3834,10 @@ lyrics() {
 			return
 		}
 
-		# Check for connection problems
-		[[ -f $lrc_file ]] && {
-			check_lrc="$(< "$lrc_file")"
-			[[ $check_lrc == "FAILED" ]] && {
-				exit_status=1
-				rm "$lrc_file" 2>/dev/null
-				failed_fetch="true"
-				skip="true"
-				exit_status=1
-				# recheck internet connection before proceeding
-				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
-					print_error "Failed to detect an internet connection"
-					exit 1
-				}
-				return
-			}
-		}
-
 		# Act as a catch all or `else`
+		missing_lyrics="true"
+		unset failed_fetch
 		exit_status=1
-	}
-
-	lrclib_parser() {
-		# Create variables with song tags
-		fetch_song_tags "$@"
-
-		# Check if run has been skipped
-		[[ $skip == "true" ]] && return
-
-		# Convert to lowercase
-		artist="${artist,,}"
-
-		# Replace all whitespace with +
-		artist="${artist//" "/"+"}"
-
-		# Useful for "artists" like Tydolla$ign, A$APRocky
-		artist="${artist//"$"/"s"}"
-
-		# Remove diacritics from strings
-		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
-
-		# Sanitize artist string
-		for sanitize in "(" ")" "[" "]" "!" "?" "=" "&" "#" ":" ";" "/" "," "feat." "featuring" "ft." "." "with"; do
-			[[ $sanitize =~ "feat."|"ft."|"featuring"|","|";"|"with"|"'"|'“'|'”'|"‘"|"’"  ]] && {
-				artist="${artist//"$sanitize"*}"
-			}
-			artist="${artist//"$sanitize"}"
-		done
-
-		# Fixes issues with Marina's music
-		[[ $artist == "marina+and+the+diamonds" ]] && {
-			artist="${artist/"marina+and+the+diamonds"/"marina"}"
-		}
-
-		# Convert to lowercase
-		title="${title,,}"
-
-		# Replace all whitespace with +
-		title="${title//" "/"+"}"
-
-		# Remove diacritics from strings
-		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
-
-		# Sanitize title string
-		for sanitize in "(" ")" "[" "]" "?" "&" "#" ":" ";" "*" "-" "/" "," "." "explicit" "bonustrack" "demoversion" "acousticversion" "originalversion"; do
-			[[ $sanitize =~ "'"|'“'|'”'|"‘"|"’" ]] && {
-				title="${title//"$sanitize"*}"
-			}
-			title="${title//"$sanitize"}"
-		done
-
-		# Skip if missing tags, useful for CJK characters
-		[[ -z $artist || -z $title ]] && {
-			missing_lyrics="true"
-			skip="true"
-			exit_status=1
-			return
-		}
-
-		url="https://lrclib.net/api/search?track_name=${title}&artist_name=${artist}"
-
-		output="$(content_loader "$url")"
-
-		# Check if website gave a valid response
-		[[ $output != *"TrackNotFound"* && $output != "[]" ]] &&
-		# Only use this parser if synced lyrics exist
-		[[ $output == *"\"syncedLyrics\":\""* && $output == *\[[0-9]*:* ]] && {
-			# Sanitize output string
-			output="${output//*"\"syncedLyrics\":\""}"
-			output="${output//"\"}]"*}"
-			output="${output//"\\\""}"
-			output="${output//"\"}"*}"
-
-			printf '%b\n' "${output}" > "$lrc_file"
-			exit_status=0
-			return
-		}
-
-		# Check for missing lyrics page
-		[[ $output == "[]" || $output == *"TrackNotFound"* || $output == *"\"instrumental\": true"* || $output == *"\"syncedLyrics\":null"* ]] && {
-			missing_lyrics="true"
-			skip="true"
-			exit_status=1
-			return
-		}
-
-		# Check for connection problems
-		[[ -f $lrc_file ]] && {
-			check_lrc="$(< "$lrc_file")"
-			[[ $check_lrc == "FAILED" ]] && {
-				exit_status=1
-				rm "$lrc_file" 2>/dev/null
-				failed_fetch="true"
-				skip="true"
-				exit_status=1
-				# recheck internet connection before proceeding
-				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
-					print_error "Failed to detect an internet connection"
-					exit 1
-				}
-				return
-			}
-		}
-
-		# Act as a catch all or `else`
-		exit_status=1
-
-		# Add delay between each run to prevent a captcha response
-		read -rt "1" <> <(:) || :
 	}
 
 	check_input_argument() {
@@ -3835,7 +3876,7 @@ lyrics() {
 								lrclib_parser "$sec_file_name"
 
 								# Try www.azlyrics.com if lrclib_parser fails to fetch lyrics
-								[[ $failed_fetch == "true" || $captcha_response == "true" || $missing_lyrics == "true" ]] && {
+								[[ $failed_fetch == "true" || $captcha_response == "true" || $missing_lyrics == "true" || $exit_status -eq 1 ]] && {
 									# Reset variables for new run
 									unset exit_status
 									unset missing_lyrics
@@ -3846,7 +3887,7 @@ lyrics() {
 								}
 
 								# Try www.songlyrics.com if azlyrics_parser fails to fetch lyrics
-								[[ $failed_fetch == "true" || $captcha_response == "true" || $missing_lyrics == "true" ]] && {
+								[[ $failed_fetch == "true" || $captcha_response == "true" || $missing_lyrics == "true" || $exit_status -eq 1 ]] && {
 									# Reset variables for new run
 									unset exit_status
 									unset missing_lyrics
@@ -5769,7 +5810,7 @@ EOF
 		xbps-install -Syu xbps void-repo-multilib void-repo-nonfree &&
 
 		# Install useful GUI software
-		xbps-install -Syu nicotine+ qbittorrent tageditor libreoffice krita &&
+		xbps-install -Syu nicotine+ qbittorrent tageditor libreoffice gimp &&
 
 		# Install gaming software
 		xbps-install -Syu wine wine-32bit libwine libwine-32bit wine-mono winetricks
@@ -6453,7 +6494,7 @@ EOF
 		}
 
 		# Handles Extra Software Installation
-		printf '\nInstall Extra/Misc Software (krita, libreoffice, wine): \n1. Yes \n2. Skip \n3. Exit\n\n'
+		printf '\nInstall Extra/Misc Software (gimp, libreoffice, wine): \n1. Yes \n2. Skip \n3. Exit\n\n'
 		read -rep "Select option: " extras_option
 		printf '\n'
 		case "$extras_option" in

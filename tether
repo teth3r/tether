@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.25.1238"
+SCRIPT_VERSION="2024.01.26.0504"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5078,8 +5078,7 @@ MODDIR=${0%/*}
 #--------------------------------------------------------------
 # Change device hostname
 #--------------------------------------------------------------
-device_user="tether"
-hostname "$device_user"
+hostname "tether"
 
 #--------------------------------------------------------------
 # Enable and configure dnscrypt-proxy if installed and config files are available
@@ -5099,10 +5098,6 @@ hostname "$device_user"
 		done
 	}
 	dnscrypt_loader &
-
-	# Log service runtime
-	current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
-	setprop tether_dnscrypt_runtime "$current_date"
 }
 
 #--------------------------------------------------------------
@@ -5129,7 +5124,7 @@ while [[ ! -f $test_file ]]; do
 	# Delay to prevent excessive CPU usage on startup
 	read -rt "2" <> <(:) || :
 	# Create test_file file
-	$(touch "$test_file" 2>/dev/null)
+	touch "$test_file" 2>/dev/null
 done
 # User has unlocked device, delete test_file
 rm -f "$test_file" 2>/dev/null
@@ -5145,7 +5140,7 @@ done
 # Set GPU clockspeed to max
 #--------------------------------------------------------------
 [[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
-	printf 2>/dev/null '%s\n' "performance" > /sys/class/kgsl/kgsl-3d0/devfreq/governor
+	printf '%s\n' "performance" > /sys/class/kgsl/kgsl-3d0/devfreq/governor
 	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/default_pwrlevel
 	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel
 	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/min_pwrlevel
@@ -5230,12 +5225,6 @@ device_config put activity_manager max_cached_processes 65536
 device_config put activity_manager max_empty_time_millis 360000000
 
 #--------------------------------------------------------------
-# Log script runtime
-#--------------------------------------------------------------
-current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
-setprop tether_performance_runtime "$current_date"
-
-#--------------------------------------------------------------
 # Add custom dotfiles for Termux
 #--------------------------------------------------------------
 dotfiles --termux
@@ -5251,9 +5240,9 @@ dotfiles --mkshrc
 dotfiles --bashrc
 
 #--------------------------------------------------------------
-# Create 1.5GB swapfile
+# Create 2GB swapfile
 #--------------------------------------------------------------
-swapfile --on 1536MB "$MODDIR/swapfile0"
+swapfile --on 2048MB "$MODDIR/swapfile0"
 
 exit 0
 EOF
@@ -5322,7 +5311,7 @@ EOF
 		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# update module description
-		sed -i "s/description\=.*/description\=Installs tether $tether_version/" "$package_tmp_dir/module.prop" 2>/dev/null
+		sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', disables ZRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# Copy module files to tether/
 		mkdir -p "$tmp_dir/tether" 2>/dev/null || print_write_error "$tmp_dir/tether"

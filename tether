@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.27.1011"
+SCRIPT_VERSION="2024.01.28.0111"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -4026,7 +4026,7 @@ mkcp() {
 						exit_status="$?"
 
 						[[ $exit_status -gt 0 ]] && {
-							print_error "Cannot create file '${folder_name}/${file_name##*\/}': Permission denied"
+							print_error "Cannot create file '${folder_name%\/}/${file_name##*\/}': Permission denied"
 						}
 					}
 
@@ -4217,7 +4217,7 @@ mkmv() {
 						exit_status="$?"
 
 						[[ $exit_status -gt 0 ]] && {
-							print_error "Cannot create file '${folder_name}/${file_name##*\/}': Permission denied"
+							print_error "Cannot create file '${folder_name%\/}/${file_name##*\/}': Permission denied"
 						}
 					}
 

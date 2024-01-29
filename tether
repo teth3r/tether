@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.28.0111"
+SCRIPT_VERSION="2024.01.29.1359"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -1256,7 +1256,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom kitty.conf file
 #--------------------------------------------------------------
-print_kitty() {
+print_kitty_dark() {
 	mkdir -p "/home/${SUDO_USER:=$USER}/.config/kitty" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.config/kitty/kitty.conf
@@ -1399,6 +1399,177 @@ EOF
 }
 
 #--------------------------------------------------------------
+# Create custom kitty.conf file
+#--------------------------------------------------------------
+print_kitty_light() {
+	mkdir -p "/home/${SUDO_USER:=$USER}/.config/kitty" 2>/dev/null
+
+	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.config/kitty/kitty.conf
+#--------------------------------------------------------------
+# Appearance settings
+#--------------------------------------------------------------
+# Font configuration
+#--------------------------------------------------------------
+font_family      Iosevka
+bold_font        Iosevka Bold
+bold_italic_font Iosevka Bold Italic
+italic_font      Iosevka Italic
+
+#--------------------------------------------------------------
+# Set default font size
+#--------------------------------------------------------------
+font_size 12.0
+
+#--------------------------------------------------------------
+# Adjust font thickness on light background
+#--------------------------------------------------------------
+text_composition_strategy 1.5 10
+
+#--------------------------------------------------------------
+# Enable font ligatures
+#--------------------------------------------------------------
+disable_ligatures never
+
+#--------------------------------------------------------------
+# Set cursor shape
+#--------------------------------------------------------------
+cursor_shape beam
+
+#--------------------------------------------------------------
+# Set cursor blink speed
+#--------------------------------------------------------------
+cursor_blink_interval 0.5
+
+#--------------------------------------------------------------
+# Never timeout cursor blinking
+#--------------------------------------------------------------
+cursor_stop_blinking_after 0
+
+#--------------------------------------------------------------
+# Set terminal scrollback buffer size
+#--------------------------------------------------------------
+scrollback_lines 25000
+
+#--------------------------------------------------------------
+# Set terminal size
+#--------------------------------------------------------------
+remember_window_size  no
+initial_window_width  1024
+initial_window_height 960
+
+#--------------------------------------------------------------
+# Disable confirm to close dialog
+#--------------------------------------------------------------
+confirm_os_window_close 0
+
+#--------------------------------------------------------------
+# Tether Kitty colorscheme
+#--------------------------------------------------------------
+# Set cursor color
+#--------------------------------------------------------------
+cursor #000000
+
+#--------------------------------------------------------------
+# Set foreground, background color
+#--------------------------------------------------------------
+foreground            #3C3836
+background            #F9EFE2
+selection_foreground  #F9EFE2
+selection_background  #3C3836
+url_color             #6D77F2
+
+#--------------------------------------------------------------
+# Background
+#--------------------------------------------------------------
+color0    #F9EFE2
+
+#--------------------------------------------------------------
+# Background (secondary)
+#--------------------------------------------------------------
+color7    #EDDFC9
+
+#--------------------------------------------------------------
+# Statusline
+#--------------------------------------------------------------
+color8    #F9EFE2
+color234  #F9EFE2
+
+#--------------------------------------------------------------
+# Comments
+#--------------------------------------------------------------
+color242  #918D7F
+
+#--------------------------------------------------------------
+# Color of lineNr
+#--------------------------------------------------------------
+color238  #A89984
+
+#--------------------------------------------------------------
+# End of buffer
+#--------------------------------------------------------------
+color236  #E9D5B2
+
+#--------------------------------------------------------------
+# Foreground
+#--------------------------------------------------------------
+color15   #3C3836
+
+#--------------------------------------------------------------
+# Red
+#--------------------------------------------------------------
+color1    #AF0000
+color9    #AF0000
+
+#--------------------------------------------------------------
+# Green
+#--------------------------------------------------------------
+color2    #5F8700
+color10   #5F8700
+color121  #5F8700
+
+#--------------------------------------------------------------
+# Yellow
+#--------------------------------------------------------------
+color3    #D86203
+color11   #D86203
+
+#--------------------------------------------------------------
+# Blue
+#--------------------------------------------------------------
+color4    #3E60AF
+color12   #3E60AF
+
+#--------------------------------------------------------------
+# Purple
+#--------------------------------------------------------------
+color5    #DD2179
+color13   #DD2179
+
+#--------------------------------------------------------------
+# Cyan
+#--------------------------------------------------------------
+color6    #005F87
+color14   #005F87
+
+#--------------------------------------------------------------
+# Always show window title bar
+#--------------------------------------------------------------
+hide_window_decorations no
+
+#--------------------------------------------------------------
+# Sync to monitor to prevent screen tearing
+#--------------------------------------------------------------
+sync_to_monitor yes
+
+#--------------------------------------------------------------
+# Disable audio notification / error bell
+#--------------------------------------------------------------
+enable_audio_bell no
+EOF
+	chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.config/kitty/kitty.conf 2>/dev/null
+}
+
+#--------------------------------------------------------------
 # Create custom .Xresources file
 #--------------------------------------------------------------
 print_xresources() {
@@ -1472,6 +1643,7 @@ URxvt.scrollBar_right: false
 URxvt.font: xft:Iosevka:size=12, xft:Sarasa\ Mono\ CL:size=12
 EOF
 	chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.Xresources 2>/dev/null
+	xrdb /home/"${SUDO_USER:=$USER}"/.Xresources 2>/dev/null
 }
 
 #--------------------------------------------------------------
@@ -2278,6 +2450,11 @@ hi SpellCap ctermfg=2 ctermbg=0 cterm=bold,inverse
 hi SpellRare ctermfg=4 ctermbg=0 cterm=bold,inverse
 
 "--------------------------------------------------------------
+" Colors for HTML links etc.
+"--------------------------------------------------------------
+hi Underlined ctermfg=4 ctermbg=0 cterm=bold,underline
+
+"--------------------------------------------------------------
 " Colors for wrongly spelled words
 "--------------------------------------------------------------
 hi SpellLocal ctermfg=1 ctermbg=0 cterm=bold,inverse
@@ -2463,6 +2640,11 @@ hi LineNr ctermfg=238 ctermbg=NONE cterm=NONE
 hi ModeMsg ctermfg=15 ctermbg=0 cterm=bold,inverse
 
 "--------------------------------------------------------------
+" Colors for more-message
+"--------------------------------------------------------------
+hi MoreMsg ctermfg=2 ctermbg=NONE cterm=bold
+
+"--------------------------------------------------------------
 " Colors for the 'press ENTER or type command to continue'
 "--------------------------------------------------------------
 hi Question ctermfg=2 ctermbg=NONE cterm=bold
@@ -2537,7 +2719,7 @@ EOF
 #--------------------------------------------------------------
 # Create custom Termux colorscheme
 #--------------------------------------------------------------
-print_termux_color() {
+print_termux_color_dark() {
 	mkdir -p "$TERMUX_DIRECTORY/home/.termux" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/home/.termux/colors.properties
@@ -2599,6 +2781,102 @@ color13=#ED7782
 #--------------------------------------------------------------
 color6=#A2DAC6
 color14=#A2DAC6
+EOF
+	chmod 755 "$TERMUX_DIRECTORY/home/.termux/colors.properties" 2>/dev/null
+}
+
+#--------------------------------------------------------------
+# Create custom Termux colorscheme
+#--------------------------------------------------------------
+print_termux_color_light() {
+	mkdir -p "$TERMUX_DIRECTORY/home/.termux" 2>/dev/null
+
+	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/home/.termux/colors.properties
+#--------------------------------------------------------------
+# tether color scheme
+#--------------------------------------------------------------
+# Set cursor color
+#--------------------------------------------------------------
+cursor=#000000
+
+#--------------------------------------------------------------
+# Set foreground, background color
+#--------------------------------------------------------------
+foreground=#3C3836
+background=#F9EFE2
+
+#--------------------------------------------------------------
+# Background
+#--------------------------------------------------------------
+color0=#F9EFE2
+
+#--------------------------------------------------------------
+# Background (secondary)
+#--------------------------------------------------------------
+color7=#EDDFC9
+
+#--------------------------------------------------------------
+# Statusline
+#--------------------------------------------------------------
+color8=#F9EFE2
+color234=#F9EFE2
+
+#--------------------------------------------------------------
+# Comments
+#--------------------------------------------------------------
+color242=#918D7F
+
+#--------------------------------------------------------------
+# Color of lineNr
+#--------------------------------------------------------------
+color238=#A89984
+
+#--------------------------------------------------------------
+# End of buffer
+#--------------------------------------------------------------
+color236=#E9D5B2
+
+#--------------------------------------------------------------
+# Foreground
+#--------------------------------------------------------------
+color15=#3C3836
+
+#--------------------------------------------------------------
+# Red
+#--------------------------------------------------------------
+color1=#AF0000
+color9=#AF0000
+
+#--------------------------------------------------------------
+# Green
+#--------------------------------------------------------------
+color2=#5F8700
+color10=#5F8700
+color121=#5F8700
+
+#--------------------------------------------------------------
+# Yellow
+#--------------------------------------------------------------
+color3=#D86203
+color11=#D86203
+
+#--------------------------------------------------------------
+# Blue
+#--------------------------------------------------------------
+color4=#3E60AF
+color12=#3E60AF
+
+#--------------------------------------------------------------
+# Purple
+#--------------------------------------------------------------
+color5=#DD2179
+color13=#DD2179
+
+#--------------------------------------------------------------
+# Cyan
+#--------------------------------------------------------------
+color6=#005F87
+color14=#005F87
 EOF
 	chmod 755 "$TERMUX_DIRECTORY/home/.termux/colors.properties" 2>/dev/null
 }
@@ -2916,17 +3194,19 @@ dotfiles() {
 		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
 		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
 		printf 'Examples: %s --vim\n' "$SCRIPT_NAME"
-		printf '          %s --urxvt\n\n' "$SCRIPT_NAME"
-		printf 'Options: -b,  --bashrc   Add custom .bashrc\n'
-		printf '         -fi, --firefox  Add custom user.js\n'
-		printf '         -h,  --help     Print out this message\n'
-		printf '         -k,  --kitty    Add custom kitty.conf\n'
-		printf '         -m,  --mkshrc   Add custom mkshrc for android\n'
-		printf '         -te, --termux   Add custom colorscheme and prop files\n'
-		printf '         -tm, --tmux     Add custom .tmux.conf\n'
-		printf '         -u,  --urxvt    Add custom .Xresources\n'
-		printf '         -v,  --vim      Add custom .vimrc and vim colorscheme\n'
-		printf '              --version  Show version information\n\n'
+		printf '          %s --urxvt-dark\n\n' "$SCRIPT_NAME"
+		printf 'Options: -b,  --bashrc        Add custom .bashrc\n'
+		printf '         -fi, --firefox       Add custom user.js\n'
+		printf '         -h,  --help          Print out this message\n'
+		printf '         -kd, --kitty-dark    Add custom kitty.conf with dark theme\n'
+		printf '         -kl, --kitty-light   Add custom kitty.conf with light theme\n'
+		printf '         -m,  --mkshrc        Add custom mkshrc for android\n'
+		printf '         -td, --termux-dark   Add custom dark colorscheme and prop files\n'
+		printf '         -tl, --termux-light  Add custom light colorscheme and prop files\n'
+		printf '         -tm, --tmux          Add custom .tmux.conf\n'
+		printf '         -u,  --urxvt         Add custom .Xresources\n'
+		printf '         -v,  --vim           Add custom .vimrc and vim colorscheme\n'
+		printf '              --version      Show version information\n\n'
 		printf 'Install/Update custom dotfiles\n'
 		exit 0
 	}
@@ -2980,10 +3260,27 @@ dotfiles() {
 				-h | --help)
 					print_help
 				;;
-				-k | --kitty)
+				-kd | --kitty-dark)
 					[[ $(type -p kitty) ]] && {
 						unset exit_status
-						print_kitty "$@" && exit_status=0
+						print_kitty_dark "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '~/.config/kitty/kitty.conf'"
+							exit 0
+						}
+
+						print_error "Failed to update '~/.config/kitty/kitty.conf'"
+						exit 1
+					}
+
+					print_missing_dependencies "Kitty"
+					exit 1
+				;;
+				-kl | --kitty-light)
+					[[ $(type -p kitty) ]] && {
+						unset exit_status
+						print_kitty_light "$@" && exit_status=0
 
 						[[ $exit_status -eq 0 ]] && {
 							print_success "Finished updating '~/.config/kitty/kitty.conf'"
@@ -3015,7 +3312,7 @@ dotfiles() {
 					print_os_error
 					exit 1
 				;;
-				-te | --termux)
+				-td | --termux-dark)
 					[[ ! -d /system/app ]] && {
 						print_os_error
 					}
@@ -3049,7 +3346,78 @@ dotfiles() {
 
 						unset exit_status
 						# Update colors.properties
-						print_termux_color "$@" && exit_status=0
+						print_termux_color_dark "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
+						}
+
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
+						}
+
+						unset exit_status
+						# Update usr/etc/.bashrc
+						MODULE_DIRECTORY="${MODULE_DIRECTORY:=/data/local/tmp}"
+						print_bashrc "$@" &&
+						cp -f "$MODULE_DIRECTORY/system/etc/bash/.bashrc" "$TERMUX_DIRECTORY/usr/etc" &&
+						exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/.bashrc'"
+							rm -rf "$TERMUX_DIRECTORY/usr/etc/bash.bashrc" 2>/dev/null
+							rm -rf "$TERMUX_DIRECTORY"/usr/etc/motd* 2>/dev/null
+							exit 0
+						}
+
+						print_error "Failed to update '$TERMUX_DIRECTORY/usr/etc/.bashrc'"
+						exit 1
+					}
+
+					[[ $(pm list packages "com.termux" 2>/dev/null) && ! -d $TERMUX_DIRECTORY ]] && {
+						print_error "Cannot stat '$TERMUX_DIRECTORY': No such file or directory"
+						print_aligned "Try running 'Termux' at least once"
+						exit 1
+					}
+
+					print_missing_dependencies "termux"
+					exit 1
+				;;
+				-tl | --termux-light)
+					[[ ! -d /system/app ]] && {
+						print_os_error
+					}
+
+					[[ $(pm list packages "com.termux" 2>/dev/null) && -d $TERMUX_DIRECTORY ]] && {
+						print_not_root_user "$@"
+
+						unset exit_status
+						# Update termux.properties
+						print_termux_config "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/termux.properties'"
+						}
+
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '$TERMUX_DIRECTORY/home/.termux/termux.properties'"
+						}
+
+						unset exit_status
+						# Update etc/profile
+						print_termux_profile "$@" && exit_status=0
+
+						[[ $exit_status -eq 0 ]] && {
+							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/profile'"
+						}
+
+						[[ -z $exit_status ]] && {
+							print_error "Failed to update '$TERMUX_DIRECTORY/usr/etc/profile'"
+						}
+
+						unset exit_status
+						# Update colors.properties
+						print_termux_color_light "$@" && exit_status=0
 
 						[[ $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
@@ -5227,7 +5595,7 @@ device_config put activity_manager max_empty_time_millis 360000000
 #--------------------------------------------------------------
 # Add custom dotfiles for Termux
 #--------------------------------------------------------------
-dotfiles --termux
+dotfiles --termux-light
 
 #--------------------------------------------------------------
 # Add custom dotfiles for mksh
@@ -5784,7 +6152,7 @@ EOF
 			chown "${SUDO_USER:=$USER}":"${SUDO_USER:=$USER}" /home/"${SUDO_USER:=$USER}"/.local/share/applications/vim.desktop 2>/dev/null
 
 			# Create custom Xresources
-			print_kitty "$@"
+			print_kitty_dark "$@"
 		}
 	}
 

@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.29.1359"
+SCRIPT_VERSION="2024.01.29.1416"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5110,7 +5110,7 @@ package() {
 		z_version="2301"
 
 		# Iosevka version
-		iosevka_version="28.0.6"
+		iosevka_version="28.0.7"
 
 		# Get current directory
 		current_dir="$PWD"

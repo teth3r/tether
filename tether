@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.29.2000"
+SCRIPT_VERSION="2024.01.30.1356"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -5186,7 +5186,7 @@ package() {
 		cp -rf "$package_tmp_dir/blocklist-main"/*.txt "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
 		cp -rf "$package_tmp_dir/blocklist-main"/*.toml "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
 
-		# Change default DNS port
+		# Change default DNS port -- Port 53 is used by dnsmasq for mobile hotspot
 		sed -i 's|127.0.0.1:53|127.0.0.1:5354|g' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
 
 		# Force TCP usage for connecting to upstream resolvers 
@@ -5540,7 +5540,7 @@ done
 }
 
 #--------------------------------------------------------------
-# Disable ZRAM for devices with RAM > 4096MiB
+# Disable zRAM for devices with RAM > 4096MiB
 #--------------------------------------------------------------
 mem_total="$(cat /proc/meminfo)"
 mem_total="${mem_total//kB*}"
@@ -5679,7 +5679,7 @@ EOF
 		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# update module description
-		sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', disables ZRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
+		sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', removes software thermal throttling limits, disables zRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# Copy module files to tether/
 		mkdir -p "$tmp_dir/tether" 2>/dev/null || print_write_error "$tmp_dir/tether"
@@ -9661,7 +9661,7 @@ tether() {
 	}
 
 	print_help() {
-		printf '%s v%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME" "$SCRIPT_VERSION"
+		printf '%s %s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME" "$SCRIPT_VERSION"
 		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
 		printf 'Usage:    %s [FUNCTION] [ARGUMENTS...]\n' "$SCRIPT_NAME"
 		printf '          %s [OPTION] [FOLDER]\n\n' "$SCRIPT_NAME"

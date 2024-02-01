@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.01.30.1356"
+SCRIPT_VERSION="2024.02.01.1347"
 
 #--------------------------------------------------------------
 # Set variables if running on Android
@@ -204,6 +204,14 @@ print_file_write_error() {
 
 print_file_read_error() {
 	print_error "Cannot read '$1' file: Permission denied"
+	exit 1
+}
+
+#--------------------------------------------------------------
+# Print failure to change current directory
+#--------------------------------------------------------------
+print_dir_change_error() {
+	print_error "Failed to change current directory to '$1'"
 	exit 1
 }
 
@@ -381,6 +389,9 @@ print_usage_bar() {
 #--------------------------------------------------------------
 print_bashrc() {
 	bash_file="/home/${SUDO_USER:=$USER}/.bashrc"
+
+	# Handles linux install with missing user
+	[[ ! -d "/home/${SUDO_USER:=$USER}" && ! -d /system/app ]] && return 1
 
 	[[ -d /system/app/ && -f /system/build.prop ]] && {
 		mkdir -p "$MODULE_DIRECTORY/system/etc/bash" 2>/dev/null
@@ -613,6 +624,8 @@ EOF
 # Create custom mkshrc for Android
 #--------------------------------------------------------------
 print_mkshrc_android() {
+	[[ ! -d "$MODULE_DIRECTORY" ]] && return 1
+
 	mkdir -p "$MODULE_DIRECTORY/system/etc" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > "$MODULE_DIRECTORY"/system/etc/mkshrc
@@ -1257,6 +1270,9 @@ EOF
 # Create custom kitty.conf file
 #--------------------------------------------------------------
 print_kitty_dark() {
+	# Handles linux install with missing user
+	[[ ! -d "/home/${SUDO_USER:=$USER}" && ! -d /system/app ]] && return 1
+
 	mkdir -p "/home/${SUDO_USER:=$USER}/.config/kitty" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.config/kitty/kitty.conf
@@ -1402,6 +1418,9 @@ EOF
 # Create custom kitty.conf file
 #--------------------------------------------------------------
 print_kitty_light() {
+	# Handles linux install with missing user
+	[[ ! -d "/home/${SUDO_USER:=$USER}" && ! -d /system/app ]] && return 1
+
 	mkdir -p "/home/${SUDO_USER:=$USER}/.config/kitty" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.config/kitty/kitty.conf
@@ -1573,6 +1592,9 @@ EOF
 # Create custom .Xresources file
 #--------------------------------------------------------------
 print_xresources() {
+	# Handles linux install with missing user
+	[[ ! -d "/home/${SUDO_USER:=$USER}" && ! -d /system/app ]] && return 1
+
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.Xresources
 !--------------------------------------------------------------
 ! tether Urxvt color scheme
@@ -1650,6 +1672,9 @@ EOF
 # Create custom .vimrc file
 #--------------------------------------------------------------
 print_vimrc() {
+	# Handles linux install with missing user
+	[[ ! -d "/home/${SUDO_USER:=$USER}" && ! -d /system/app ]] && return 1
+
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.vimrc
 "--------------------------------------------------------------
 " Disables compatibility with vi
@@ -2151,6 +2176,9 @@ EOF
 # Create custom .tmux.conf file
 #--------------------------------------------------------------
 print_tmux_conf() {
+	# Handles linux install with missing user
+	[[ ! -d "/home/${SUDO_USER:=$USER}" && ! -d /system/app ]] && return 1
+
 	cat 2>/dev/null << "EOF" > /home/"${SUDO_USER:=$USER}"/.tmux.conf
 #--------------------------------------------------------------
 # General settings
@@ -2703,6 +2731,8 @@ EOF
 # Create custom /etc/profile for termux
 #--------------------------------------------------------------
 print_termux_profile() {
+	[[ ! -d "$TERMUX_DIRECTORY" ]] && return 1
+
 	mkdir -p "$TERMUX_DIRECTORY/usr/etc" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/usr/etc/profile
@@ -2720,6 +2750,8 @@ EOF
 # Create custom Termux colorscheme
 #--------------------------------------------------------------
 print_termux_color_dark() {
+	[[ ! -d "$TERMUX_DIRECTORY" ]] && return 1
+
 	mkdir -p "$TERMUX_DIRECTORY/home/.termux" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/home/.termux/colors.properties
@@ -2789,6 +2821,8 @@ EOF
 # Create custom Termux colorscheme
 #--------------------------------------------------------------
 print_termux_color_light() {
+	[[ ! -d "$TERMUX_DIRECTORY" ]] && return 1
+
 	mkdir -p "$TERMUX_DIRECTORY/home/.termux" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/home/.termux/colors.properties
@@ -2885,6 +2919,8 @@ EOF
 # Create custom termux.properties for termux
 #--------------------------------------------------------------
 print_termux_config() {
+	[[ ! -d "$TERMUX_DIRECTORY" ]] && return 1
+
 	mkdir -p "$TERMUX_DIRECTORY/home/.termux" 2>/dev/null
 
 	cat 2>/dev/null << "EOF" > "$TERMUX_DIRECTORY"/home/.termux/termux.properties
@@ -3221,7 +3257,7 @@ dotfiles() {
 						print_not_root_user "$@"
 						print_bashrc "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$MODULE_DIRECTORY/system/etc/bash/.bashrc'"
 							exit 0
 						}
@@ -3232,7 +3268,7 @@ dotfiles() {
 
 					print_bashrc "$@" && exit_status=0
 
-					[[ $exit_status -eq 0 ]] && {
+					[[ -n $exit_status && $exit_status -eq 0 ]] && {
 						print_success "Finished updating '/home/${SUDO_USER:=$USER}/.bashrc'"
 						exit 0
 					}
@@ -3245,7 +3281,7 @@ dotfiles() {
 						unset exit_status
 						print_firefox "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$user_js'"
 							exit 0
 						}
@@ -3265,7 +3301,7 @@ dotfiles() {
 						unset exit_status
 						print_kitty_dark "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '~/.config/kitty/kitty.conf'"
 							exit 0
 						}
@@ -3282,7 +3318,7 @@ dotfiles() {
 						unset exit_status
 						print_kitty_light "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '~/.config/kitty/kitty.conf'"
 							exit 0
 						}
@@ -3300,7 +3336,7 @@ dotfiles() {
 						print_not_root_user "$@"
 						print_mkshrc_android "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$MODULE_DIRECTORY/system/etc/mkshrc'"
 							exit 0
 						}
@@ -3324,7 +3360,7 @@ dotfiles() {
 						# Update termux.properties
 						print_termux_config "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/termux.properties'"
 						}
 
@@ -3336,7 +3372,7 @@ dotfiles() {
 						# Update etc/profile
 						print_termux_profile "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/profile'"
 						}
 
@@ -3348,7 +3384,7 @@ dotfiles() {
 						# Update colors.properties
 						print_termux_color_dark "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
 						}
 
@@ -3363,7 +3399,7 @@ dotfiles() {
 						cp -f "$MODULE_DIRECTORY/system/etc/bash/.bashrc" "$TERMUX_DIRECTORY/usr/etc" &&
 						exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/.bashrc'"
 							rm -rf "$TERMUX_DIRECTORY/usr/etc/bash.bashrc" 2>/dev/null
 							rm -rf "$TERMUX_DIRECTORY"/usr/etc/motd* 2>/dev/null
@@ -3395,7 +3431,7 @@ dotfiles() {
 						# Update termux.properties
 						print_termux_config "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/termux.properties'"
 						}
 
@@ -3407,7 +3443,7 @@ dotfiles() {
 						# Update etc/profile
 						print_termux_profile "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/profile'"
 						}
 
@@ -3419,7 +3455,7 @@ dotfiles() {
 						# Update colors.properties
 						print_termux_color_light "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/home/.termux/colors.properties'"
 						}
 
@@ -3434,7 +3470,7 @@ dotfiles() {
 						cp -f "$MODULE_DIRECTORY/system/etc/bash/.bashrc" "$TERMUX_DIRECTORY/usr/etc" &&
 						exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$TERMUX_DIRECTORY/usr/etc/.bashrc'"
 							rm -rf "$TERMUX_DIRECTORY/usr/etc/bash.bashrc" 2>/dev/null
 							rm -rf "$TERMUX_DIRECTORY"/usr/etc/motd* 2>/dev/null
@@ -3459,7 +3495,7 @@ dotfiles() {
 						unset exit_status
 						print_tmux_conf "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '~/.tmux.conf'"
 							exit 0
 						}
@@ -3476,7 +3512,7 @@ dotfiles() {
 						unset exit_status
 						print_xresources "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '~/.Xresources'"
 							exit 0
 						}
@@ -3497,7 +3533,7 @@ dotfiles() {
 						# Update .vimrc
 						print_vimrc "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '~/.vimrc'"
 						}
 
@@ -3509,7 +3545,7 @@ dotfiles() {
 						# Update /usr/share/vim/*/colors/tether.vim
 						print_vim_color "$@" && exit_status=0
 
-						[[ $exit_status -eq 0 ]] && {
+						[[ -n $exit_status && $exit_status -eq 0 ]] && {
 							print_success "Finished updating '$vim_dir/tether.vim'"
 							exit 0
 						}
@@ -3589,7 +3625,6 @@ extract() {
 
 	failed_to_extract() {
 		printf '\n'
-		print_error "Failed to extract '$archive_file'"
 		rm -rf "$folder_name" 2>/dev/null
 		exit_status=1
 	}
@@ -3642,13 +3677,6 @@ extract() {
 						mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
 						7zip-unrar x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name"  || failed_to_extract
-
-						# Alternative to `ls -A "$folder_name"`
-						[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
-							printf '\n'
-							print_success "Extracted '$archive_file' to '$folder_name'"
-							exit_status=0
-						}
 					}
 
 					# Handles archive files
@@ -3659,30 +3687,73 @@ extract() {
 						mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
 						7z x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name" 2>/dev/null || failed_to_extract
-
-						# Alternative to `ls -A "$folder_name"`
-						[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
-							printf '\n'
-							print_success "Extracted '$archive_file' to '$folder_name'"
-							exit_status=0
-						}
 					}
 
 					# Handles every other archive type
-					[[ -f $archive_file ]] && ! [[ $archive_file =~ .7z|.xz|.gz|.tar|.rar|.tar.xz ]] && {
+					[[ -f $archive_file || $exit_status -eq 1 ]] && ! [[ $archive_file =~ .7z|.xz|.gz|.rar|.tar.xz ]] && {
+						# Handles running without bsdtar but with busybox installed
+						[[ ! $(type -p bsdtar) ]] && [[ $(type -p busybox) ]] && {
+							[[ $archive_file =~ .tar ]] && {
+								# Make $folder_name only if it doesn't already exist
+								mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+
+								busybox tar -xf "${archive_file}" -C "${folder_name}" || failed_to_extract
+							}
+
+							[[ $archive_file =~ .zip ]] && {
+								# Make $folder_name only if it doesn't already exist
+								mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+								current_dir="$PWD"
+
+								cp -rf "${archive_file}" "${folder_name}" 2>/dev/null || print_file_write_error "${archive_file}"
+								cd "${folder_name}" 2>/dev/null || print_dir_change_error "${folder_name}"
+
+								busybox unzip -q "${archive_file}" 2>/dev/null || failed_to_extract
+								rm -r "${archive_file##*\/}" 2>/dev/null
+								cd "$current_dir" 2>/dev/null || print_dir_change_error "$current_dir"
+							}
+
+							[[ $archive_file =~ .xz ]] && {
+								# Make $folder_name only if it doesn't already exist
+								mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+								current_dir="$PWD"
+								
+								cp -rf "${archive_file}" "${folder_name}" 2>/dev/null || print_file_write_error "${archive_file}"
+								cd "${folder_name}" 2>/dev/null || print_dir_change_error "${folder_name}"
+
+								busybox xz -d "${archive_file}" 2>/dev/null || failed_to_extract
+								cd "$current_dir" 2>/dev/null || print_dir_change_error "$current_dir"
+							}
+
+							# Alternative to `ls -A "$folder_name"`
+							# Check for successful decompression
+							[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
+								printf '\n'
+								print_success "Extracted '$archive_file' to '$folder_name'"
+								exit_status=0
+								return
+							}
+						}
+
 						[[ ! $(type -p bsdtar) ]] && print_missing_dependencies "bsdtar"
 
 						# Make $folder_name only if it doesn't already exist
 						mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
 						bsdtar -xf "$archive_file" -C "$folder_name" 2>/dev/null || failed_to_extract
+					}
 
-						# Alternative to `ls -A "$folder_name"`
-						[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
-							printf '\n'
-							print_success "Extracted '$archive_file' to '$folder_name'"
-							exit_status=0
-						}
+					# Alternative to `ls -A "$folder_name"`
+					# Check for successful decompression
+					[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
+						printf '\n'
+						print_success "Extracted '$archive_file' to '$folder_name'"
+						exit_status=0
+					}
+
+					# Handles errors
+					[[ $exit_status -eq 1 ]] && {
+						print_error "Failed to extract '$archive_file'"
 					}
 				;;
 			esac
@@ -4376,6 +4447,7 @@ mkcp() {
 					# Check if source file and destination directory are the same
 					[[ $file_name == "$folder_name" ]] && {
 						print_error "'$file_name' and '$folder_name' are the same file"
+						print_aligned "Aborting"
 						exit 1
 					}
 
@@ -4413,17 +4485,17 @@ mkcp() {
 								new_file_name=${file_name##*\/}
 
 								[[ -z $new_file_name ]] && {
-									# /home/username/file/*  -> /home/username/file/
+									# /home/username/folder/*  -> /home/username/folder/
 									new_file_name=${file_name%\*}
 
-									# /home/username/file/  -> /home/username/file
+									# /home/username/folder/  -> /home/username/folder
 									new_file_name=${new_file_name%\/}
 
-									# /home/username/file  -> file
+									# /home/username/folder  -> folder
 									new_file_name=${new_file_name##*\/}
 								}
 
-								# sec_file_name --> /home/username/folder/folder1/name/ -> folder1/name/
+								# sec_file_name --> /home/username/folder/folder1/name/ -> /folder1/name/
 								sec_file_name="${sec_file_name//*"$new_file_name"}"
 
 								# Creates folder in destination directory using $new_file_name as base directory
@@ -4444,8 +4516,12 @@ mkcp() {
 
 								rm -r "${sec_folder_name}/${new_file_name:=?}/${dup_file_name:=?}" 2>/dev/null
 
-								# Unset exit_status ---- using here_string will kill subshell on error
 								unset exit_status
+
+								# Set exit_status if source folder is empty and is readable
+								[[ $(printf '%s\n' "${file_name}/"*) == "${file_name}/*" || $(printf '%s\n' "${file_name}/".*) == "${file_name}/.*" ]] && {
+									find "$file_name" &>/dev/null && exit_status=0
+								}
 							}
 
 							[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
@@ -4567,6 +4643,7 @@ mkmv() {
 					# Check if source file and destination directory are the same
 					[[ $file_name == "$folder_name" ]] && {
 						print_error "'$file_name' and '$folder_name' are the same file"
+						print_aligned "Aborting"
 						exit 1
 					}
 
@@ -4614,7 +4691,7 @@ mkmv() {
 									new_file_name=${new_file_name##*\/}
 								}
 
-								# sec_file_name --> /home/username/folder/folder1/name/ -> folder1/name/
+								# sec_file_name --> /home/username/folder/folder1/name/ -> /folder1/name/
 								sec_file_name="${sec_file_name//*"$new_file_name"}"
 
 								# Creates folder in destination directory using $new_file_name as base directory
@@ -4635,8 +4712,12 @@ mkmv() {
 
 								rm -r "${sec_folder_name}/${new_file_name:=?}/${dup_file_name:=?}" 2>/dev/null
 
-								# Unset exit_status ---- using here_string will kill subshell on error
 								unset exit_status
+
+								# Set exit_status if source folder is empty and is readable
+								[[ $(printf '%s\n' "${file_name}/"*) == "${file_name}/*" || $(printf '%s\n' "${file_name}/".*) == "${file_name}/.*" ]] && {
+									find "$file_name" &>/dev/null && exit_status=0
+								}
 							}
 
 							[[ -e $sec_file_name && ! -d $sec_file_name ]] && {
@@ -4756,11 +4837,10 @@ mktouch() {
 			unset exit_status
 			case "$file_name" in
 				*)
-					unset exit_status
-
 					# Check if a file exist with $file_name
 					[[ -e "${folder_name}/${file_name}" ]] && {
 						print_error "Cannot create file '$file_name': File exists"
+						print_aligned "Aborting"
 						exit 1
 					}
 
@@ -4771,7 +4851,7 @@ mktouch() {
 
 					exit_status="$?"
 
-					[[ $exit_status -eq 0 ]] && {
+					[[ -n $exit_status && $exit_status -eq 0 ]] && {
 						print_success "Created '$file_name' in '$folder_name'"
 					}
 
@@ -5144,7 +5224,7 @@ package() {
 		print_error "Something went wrong"
 		print_aligned "Failed to download '$*'"
 		rm -r "${package_tmp_dir}" 2>/dev/null
-		cd "$current_dir" || exit 1
+		cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 		exit 1
 	}
 
@@ -5152,13 +5232,13 @@ package() {
 		print_error "Something went wrong"
 		print_aligned "Failed to create 'tether.$current_date.zip'"
 		rm -r "${package_tmp_dir}" "$tmp_dir/tether" 2>/dev/null
-		cd "$current_dir" || exit 1
+		cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 		exit 1
 	}
 
 	download_dnscrypt() {
 		mkdir -p "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/dnscrypt-proxy"
-		cd "$package_tmp_dir" || exit 1
+		cd "$package_tmp_dir" 2>/dev/null || print_dir_change_error "$package_tmp_dir"
 		print_warning "Downloading 'dnscrypt-proxy version $dnscrypt_version'"
 		printf '\n'
 
@@ -5235,16 +5315,16 @@ package() {
 		busybox wget "https://7-zip.org/a/7z${z_version}-linux-arm64.tar.xz" -O "$package_tmp_dir/new/7z${z_version}-linux-arm64.tar.xz" &>/dev/null ||
 		download_fail "7z${z_version}-linux-arm64.tar.xz"
 
-		cd "$package_tmp_dir/new" || exit 1
+		cd "${package_tmp_dir}/new" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/new"
 
 		# Extract downloaded archive
 		busybox xz -d "7z${z_version}-linux-arm64.tar.xz" &>/dev/null
 		busybox tar -xf "7z${z_version}-linux-arm64.tar" &>/dev/null
 
 		cp -rf "$package_tmp_dir/new/7zzs" "$package_tmp_dir/system/bin/7z" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/7z"
-		cd "$package_tmp_dir/system/bin" || exit 1
+		cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
 		ln -sf 7z 7zip 2>/dev/null
-		cd "$package_tmp_dir" || exit 1
+		cd "$package_tmp_dir" 2>/dev/null || print_dir_change_error "${package_tmp_dir}"
 		rm -r "$package_tmp_dir/new" 2>/dev/null
 	}
 
@@ -5272,7 +5352,7 @@ package() {
 			download_fail "Iosevka version $iosevka_version"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-			cd "$package_tmp_dir/system/bin" || exit 1
+			cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
 			7z x "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null
 		}
 
@@ -5285,7 +5365,7 @@ package() {
 			download_fail "Iosevka-Slab version $iosevka_version"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-			cd "$package_tmp_dir/system/bin" || exit 1
+			cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
 			7z x "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null
 		}
 
@@ -5298,7 +5378,7 @@ package() {
 		rm "$package_tmp_dir"/system/bin/*.md "$package_tmp_dir"/system/bin/Iosevka* 2>/dev/null
 
 		# Create font symbolic-links
-		cd "$package_tmp_dir/system/fonts" || exit 1
+		cd "$package_tmp_dir/system/fonts" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/fonts"
 
 		# SourceSansPro
 		ln -sf NotoSerif-Regular.ttf SourceSansPro-Regular.ttf 2>/dev/null
@@ -5311,7 +5391,7 @@ package() {
 		ln -sf NotoSerif-Regular.ttf DroidSansMono.ttf 2>/dev/null
 		ln -sf NotoSerif-Bold.ttf DroidSans-Bold.ttf 2>/dev/null
 
-		cd "$package_tmp_dir" || exit 1
+		cd "$package_tmp_dir" 2>/dev/null || print_dir_change_error "${package_tmp_dir}"
 	}
 
 	populate_dir() {
@@ -5725,7 +5805,7 @@ install_module
 exit 0
 EOF
 
-		cd "$tmp_dir/tether" || exit 1
+		cd "$tmp_dir/tether" 2>/dev/null || print_dir_change_error "${tmp_dir}/tether"
 
 		print_warning "Almost done"
 		print_aligned "Creating archive file 'tether.$current_date.zip'"
@@ -5742,7 +5822,7 @@ EOF
 			print_success "Finished creating 'tether.$current_date.zip'"
 			print_aligned "Check '$backup_dir'"
 			rm -r "$package_tmp_dir" "$tmp_dir/tether" 2>/dev/null
-			cd "$current_dir" || exit 1
+			cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 			exit 0
 		}
 
@@ -5750,7 +5830,7 @@ EOF
 		print_success "Finished creating 'tether.$current_date.zip'"
 		print_aligned "Check '${PHONE_STORAGE}'"
 		rm -r "$package_tmp_dir" "$tmp_dir/tether" 2>/dev/null
-		cd "$current_dir" || exit 1
+		cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 		exit 0
 	}
 
@@ -7364,7 +7444,7 @@ swapfile() {
 
 				rm "${HOME:=/mnt}/.swap_running" 2>/dev/null
 
-				[[ $exit_status -eq 0 ]] && {
+				[[ -n $exit_status && $exit_status -eq 0 ]] && {
 					print_success "Finished creating ${user_value}${size_suffix} swapfile"
 					exit 0
 				}
@@ -7397,7 +7477,7 @@ swapfile() {
 
 				rm "${HOME:=/mnt}/.swap_running" 2>/dev/null
 
-				[[ $exit_status -eq 0 ]] && {
+				[[ -n $exit_status && $exit_status -eq 0 ]] && {
 					print_success "Finished creating ${user_value}${size_suffix} swapfile"
 					exit 0
 				}
@@ -7651,6 +7731,15 @@ tfetch() {
 				package_count="$((package_count + 1))"
 			done
 			printf '%s apt\n' "${package_count//[[:space:]]}"
+		}
+
+		# Handles Linux with apk
+		[[ $(type -p apk) ]] && [[ ! -d /system/app/ ]] && {
+			package_count="0"
+			for package_list in $(< /etc/apk/world); do
+				package_count="$((package_count + 1))"
+			done
+			printf '%s apk\n' "${package_count//[[:space:]]}"
 		}
 
 		# Handles Android
@@ -8112,7 +8201,7 @@ touchzip() {
 		unset exit_status
 		7z a -snl -snh -p"$file_password" -t7z -mx1 -mmt"$CPU_CORE_COUNT" -mhe=on "${archive_name}.7z" "${@:3}" &>/dev/null && exit_status=0
 
-		[[ $exit_status -eq 0 ]] && {
+		[[ -n $exit_status && $exit_status -eq 0 ]] && {
 			print_success "Created encrypted 7z archive '${archive_name}.7z'"
 			unset file_password file_password2
 			exit 0
@@ -8127,7 +8216,7 @@ touchzip() {
 
 		unset exit_status
 		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "${archive_name}.7z" "${@:3}" &>/dev/null && exit_status=0
-		[[ $exit_status -eq 0 ]] && {
+		[[ -n $exit_status && $exit_status -eq 0 ]] && {
 			print_success "Created unencrypted 7z archive '${archive_name}.7z'"
 			exit 0
 		}
@@ -8259,7 +8348,7 @@ void-backup() {
 		unset exit_status
 		cp -f "${xbps_cache_dir}"/* "$xbps_backup_dir" 2>/dev/null && exit_status=0
 
-		[[ $exit_status -eq 0 ]] && {
+		[[ -n $exit_status && $exit_status -eq 0 ]] && {
 			print_success "Finished backing up xbps package cache"
 			exit 0
 		}
@@ -8857,7 +8946,7 @@ void-install() {
 		# Set size of chroot image
 		print_warning "Preparing install location"
 		printf '\n'
-		cd "$PHONE_STORAGE" || exit 1
+		cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
 		rm -r "$chroot_image" 2>/dev/null
 		rm -r "$chroot_install_dir" 2>/dev/null
 
@@ -8933,7 +9022,7 @@ void-install() {
 			losetup "$block_device" "$chroot_image"
 			mount -t ext4 "$block_device" "$chroot_install_dir"
 			cp "$void_rootfs" "$chroot_install_dir"
-			cd "$chroot_install_dir" || exit 1
+			cd "$chroot_install_dir" 2>/dev/null || print_dir_change_error "${chroot_install_dir}"
 			print_warning "Extracting '$rootfs_file'"
 			printf '\n'
 			busybox xz -d "${void_rootfs##*/}" &>/dev/null
@@ -8974,7 +9063,7 @@ void-install() {
 
 			# Clean up files on finish
 			rm -r "${tmp_dir:=/data/local/tmp}/${rootfs_file}" "${tmp_dir:=/data/local/tmp}/sha256sum.txt" 2>/dev/null
-			cd "$current_dir" || exit 1
+			cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 			exit 0
 		}
 
@@ -9195,7 +9284,7 @@ void-umount() {
 	unmount_chroot() {
 		# Handles mounted chroot container with no running processes
 		[[ -f "$chroot_install_dir/bin/bash" ]] && {
-			cd "$PHONE_STORAGE" || exit 1
+			cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
 			umount "$chroot_install_dir/proc"
 			umount "$chroot_install_dir/sys"
 			umount -lf "$chroot_install_dir/dev/pts"
@@ -9246,7 +9335,7 @@ void-umount() {
 				printf '\n'
 				# Handles mounted chroot container with no running processes
 				[[ -f "$chroot_install_dir/bin/bash" ]] && {
-					cd "$PHONE_STORAGE" || exit 1
+					cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
 					umount "$chroot_install_dir/proc"
 					umount "$chroot_install_dir/sys"
 					umount -lf "$chroot_install_dir/dev/pts"
@@ -9282,7 +9371,7 @@ void-umount() {
 				rm -r "$chroot_install_dir" &&
 				exit_status=0
 
-				[[ $exit_status -eq 0 ]]  && {
+				[[ -n $exit_status && $exit_status -eq 0 ]] && {
 					print_success "Removed chroot"
 					exit 0
 				}
@@ -9434,7 +9523,7 @@ whatsapp-backup() {
 		rm -rf "$whatsapp_backup_dir/whatsapp-backup.${current_date}.7z" 2>/dev/null
 
 		# CD back to original directory
-		cd "$current_dir" || exit 1
+		cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 		exit 1
 	}
 
@@ -9451,7 +9540,7 @@ whatsapp-backup() {
 		# Handles password creation
 		create_password "$@"
 
-		cd "$whatsapp_dir" || exit 1
+		cd "$whatsapp_dir" 2>/dev/null || print_dir_change_error "${whatsapp_dir}"
 		mkdir -p "$whatsapp_backup_dir" || print_write_error "$whatsapp_backup_dir"
 
 		# Compress and encrypt $whatsapp-dir contents
@@ -9462,7 +9551,7 @@ whatsapp-backup() {
 		print_aligned "Check '$whatsapp_backup_dir'"
 
 		# CD back to original directory
-		cd "$current_dir" || exit 1
+		cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 		exit 0
 	}
 
@@ -9470,7 +9559,7 @@ whatsapp-backup() {
 		print_warning "Creating unencrypted backup 'whatsapp-backup.${current_date}.7z'"
 		printf '\n'
 
-		cd "$whatsapp_dir" || exit 1
+		cd "$whatsapp_dir" 2>/dev/null || print_dir_change_error "${whatsapp_dir}"
 		mkdir -p "$whatsapp_backup_dir" || print_write_error "$whatsapp_backup_dir"
 
 		# Compress $whatsapp-dir contents
@@ -9480,7 +9569,7 @@ whatsapp-backup() {
 		print_aligned "Check '$whatsapp_backup_dir'"
 
 		# CD back to original directory
-		cd "$current_dir" || exit 1
+		cd "$current_dir" 2>/dev/null || print_dir_change_error "${current_dir}"
 		exit 0
 	}
 

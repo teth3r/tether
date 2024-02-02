@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.02.1529"
+SCRIPT_VERSION="2024.02.02.1620"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -5597,16 +5597,19 @@ terp-install() {
 			# Handles ./${SCRIPT_NAME}
 			[[ -f ${0#\.\/} ]] && {
 				cp -f "${0#\.\/}" "$chroot_install_dir/bin/tether"
+				cp -f "${0#\.\/}" "$chroot_install_dir/bin/terp-deploy"
 			}
 
 			# Handles ./<dirname>/${SCRIPT_NAME}
 			[[ -f ${0#\.} ]] && {
 				cp -f "${0#\.}" "$chroot_install_dir/bin/tether"
+				cp -f "${0#\.}" "$chroot_install_dir/bin/terp-deploy"
 			}
 
 			# Create symlink for /bin/env
 			[[ $terp_flavor == "alpine" ]] && {
 				sed -i 's|#!/bin/env bash|#!/bin/bash|' "$chroot_install_dir/bin/tether" 2>/dev/null
+				sed -i 's|#!/bin/env bash|#!/bin/bash|' "$chroot_install_dir/bin/terp-deploy" 2>/dev/null
 				chroot "$chroot_install_dir" apk add bash &>/dev/null
 			}
 
@@ -5763,19 +5766,22 @@ terp-mount() {
 		# Handles ./${SCRIPT_NAME}
 		[[ -f ${0#\.\/} ]] && {
 			cp -f "${0#\.\/}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.\/}" "$chroot_install_dir/bin/terp-deploy"
 		}
 
 		# Handles ./<dirname>/${SCRIPT_NAME}
 		[[ -f ${0#\.} ]] && {
 			cp -f "${0#\.}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.}" "$chroot_install_dir/bin/terp-deploy"
 		}
 
 		# Create symlink for /bin/env
 		[[ $terp_flavor == "alpine" ]] && {
 			sed -i 's|#!/bin/env bash|#!/bin/bash|' "$chroot_install_dir/bin/tether" 2>/dev/null
+			sed -i 's|#!/bin/env bash|#!/bin/bash|' "$chroot_install_dir/bin/terp-deploy" 2>/dev/null
 		}
 
-		chroot "$chroot_install_dir" /bin/bash -l /bin/tether terp-deploy --setup
+		chroot "$chroot_install_dir" /bin/bash -l /bin/terp-deploy --setup
 		exit 0
 	}
 
@@ -5795,19 +5801,22 @@ terp-mount() {
 		# Handles ./${SCRIPT_NAME}
 		[[ -f ${0#\.\/} ]] && {
 			cp -f "${0#\.\/}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.\/}" "$chroot_install_dir/bin/terp-deploy"
 		}
 
 		# Handles ./<dirname>/${SCRIPT_NAME}
 		[[ -f ${0#\.} ]] && {
 			cp -f "${0#\.}" "$chroot_install_dir/bin/tether"
+			cp -f "${0#\.}" "$chroot_install_dir/bin/terp-deploy"
 		}
 
 		# Create symlink for /bin/env
 		[[ $terp_flavor == "alpine" ]] && {
 			sed -i 's|#!/bin/env bash|#!/bin/bash|' "$chroot_install_dir/bin/tether" 2>/dev/null
+			sed -i 's|#!/bin/env bash|#!/bin/bash|' "$chroot_install_dir/bin/terp-deploy" 2>/dev/null
 		}
 
-		chroot "$chroot_install_dir" /bin/bash -l /bin/tether terp-deploy --setup
+		chroot "$chroot_install_dir" /bin/bash -l /bin/terp-deploy --setup
 		exit 0
 	}
 

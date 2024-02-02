@@ -6,7 +6,7 @@ Think busybox or toybox, except as a shell script, you can create symbolic links
 
 ## Currently defined functions
 
-benchmark
+. benchmark
 . dotfiles
 . extract
 . lyrics
@@ -18,14 +18,13 @@ benchmark
 . replace-su
 . setup
 . swapfile
+. terp-deploy
+. terp-install
+. terp-mount
+. terp-umount
 . tfetch
 . tether
 . touchzip
-. void-backup
-. void-deploy
-. void-install
-. void-mount
-. void-umount
 . whatsapp-backup
 
 <br>
@@ -44,13 +43,12 @@ benchmark
 **replace-su** | mount, unmount | Android (root) | Usage: ` replace-su [OPTION] ` <p> Removes phh-su from AOSP GSI releases >= 12, allowing the use of custom root solutions like `magisk`. Run `replace-su --help` for more details. |
 **setup** | ping, xbps-install | Voidlinux | Usage: ` setup [OPTION] ` <p> Post-installation setup tool for Voidlinux. Run `setup --help` for more details. |
 **swapfile** | awk, dd, df, mkswap, pgrep, swapoff, swapon | Device Agnostic | Usage: ` swapfile [OPTION] [FILSIZE] [FILENAME] ` <p> Swapfile management tool, create and disable swapfiles on the go. Run `swapfile --help` for more details. |
+**terp-deploy** | cp, mkdir | Android (voidlinux chroot) | Usage: ` terp-deploy [OPTION] ` <p> Post-install and post-mount setup tool for chroot running on Android. It was created for, and will only work for chroot images created using `terp-install`. Run `terp-deploy --help` for more details. |
+**terp-install** | busybox, fallocate, losetup, lsof, mke2fs, mount | Android (root) | Usage: ` terp-install [OPTION] ` <p> Installation tool for chroot on Android. Run `terp-install --help` for more details. |
+**terp-mount** | losetup, mkdir, mount | Android (root) | Usage: ` terp-mount [OPTION] ` <p> Mount tool for chroot on Android. It was created for, and will only work for chroot images created using `terp-install`. Run `terp-mount --help` for more details. |
+**terp-umount** | losetup, lsof, mkdir, rm, umount, wc | Android (root) | Usage: ` terp-umount [OPTION] ` <p> Unmount tool for chroot on Android. It was created for, and will only work for chroot images created using `terp-install`. Run `terp-umount --help` for more details. |
 **tfetch** |  | Device Agnostic | Usage: ` tfetch [OPTION] ` <p> System resource information tool, has no external dependencies. Run `tfetch --help` for more details. |
 **touchzip** | 7z, rm, touch | Device Agnostic (requires root on Android) | Usage: ` touchzip [OPTION] [FILENAME] [FILE...] ` <p> This tool creates an encrypted/unencrypted 7z archive of the specified files. Run `touchzip --help` for more details. |
-**void-backup** | cp, mkdir | Android (voidlinux chroot) | Usage: ` void-backup [OPTION] ` <p> Creates backup of XBPS package cache in external storage. Run `void-backup --help` for more details. |
-**void-deploy** | cp, mkdir | Android (voidlinux chroot) | Usage: ` void-deploy [OPTION] ` <p> Post-install and post-mount setup tool for Voidlinux chroot running on Android. It was created for, and will only work for chroot images created using `void-install`. Run `void-deploy --help` for more details. |
-**void-install** | busybox, fallocate, losetup, lsof, mke2fs, mount | Android (root) | Usage: ` void-install [OPTION] ` <p> Installation tool for Voidlinux chroot on Android. Run `void-install --help` for more details. |
-**void-mount** | losetup, mkdir, mount | Android (root) | Usage: ` void-mount [OPTION] ` <p> Mount tool for Voidlinux chroot on Android. It was created for, and will only work for chroot images created using `void-install`. Run `void-mount --help` for more details. |
-**void-umount** | losetup, lsof, mkdir, rm, umount, wc | Android (root) | Usage: ` void-umount [OPTION] ` <p> Unmount tool for Voidlinux chroot on Android. It was created for, and will only work for chroot images created using `void-install`. Run `void-umount --help` for more details. |
 **whatsapp-backup** | 7z, mkdir, pm | Android (root) | Usage: ` whatsapp-backup [OPTION] ` <p> This tool creates and restores encrypted/unencrypted backups of `Whatsapp` (media, chats, etc) in external storage (SD card, USB OTG, etc), It will fallback to using internal storage if no external storage device is available. Run `whatsapp-backup --help` for more details. |
 
 ## Installation

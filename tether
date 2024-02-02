@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.02.1508"
+SCRIPT_VERSION="2024.02.02.1529"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -2810,6 +2810,19 @@ package() {
 		download_fail "bash-arm64"
 		cp -rf "$package_tmp_dir/bash-arm64" "$package_tmp_dir/system/bin/bash" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/bash"
 		rm -rf "$package_tmp_dir/bash-arm64" 2>/dev/null
+
+		# Add custom mkshrc file
+		mkdir -p "$package_tmp_dir/system/etc" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc"
+		mksh_file="$package_tmp_dir/system/etc/mkshrc"
+		busybox wget "https://github.com/teth3r/dotfiles/raw/master/mkshrc" -O "$mksh_file" &>/dev/null ||
+		download_fail "mkshrc"
+
+		# Add custom bashrc file
+		mkdir -p "$package_tmp_dir/system/etc/bash" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/bash"
+		bash_file="$package_tmp_dir/system/etc/bash/.bashrc"
+		busybox wget "https://github.com/teth3r/dotfiles/raw/master/mkshrc" -O "$bash_file" &>/dev/null ||
+		download_fail "bashrc"
+
 	}
 
 	download_adb() {
@@ -2945,9 +2958,6 @@ package() {
 		# AOSP launcher search bar
 		mkdir -p "$package_tmp_dir/system/product/app/QuickSearchBox" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/QuickSearchBox"
 		touch "$package_tmp_dir/system/product/app/QuickSearchBox/QuickSearchBox.apk" 2>/dev/null
-
-		# Create empty mkshrc file to populate with 'dotfiles --mkshrc'
-		touch "$package_tmp_dir/system/etc/mkshrc" 2>/dev/null
 	}
 
 	create_module_prop() {
@@ -3198,16 +3208,6 @@ device_config put activity_manager max_cached_processes 65536
 # Increase max cached process timeout
 #--------------------------------------------------------------
 device_config put activity_manager max_empty_time_millis 360000000
-
-#--------------------------------------------------------------
-# Add custom dotfiles for mksh
-#--------------------------------------------------------------
-dotfiles --mkshrc
-
-#--------------------------------------------------------------
-# Add custom dotfiles for bash
-#--------------------------------------------------------------
-dotfiles --bashrc
 
 #--------------------------------------------------------------
 # Create 2GB swapfile

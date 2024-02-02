@@ -2820,7 +2820,7 @@ package() {
 		# Add custom bashrc file
 		mkdir -p "$package_tmp_dir/system/etc/bash" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/bash"
 		bash_file="$package_tmp_dir/system/etc/bash/.bashrc"
-		busybox wget "https://github.com/teth3r/dotfiles/raw/master/mkshrc" -O "$bash_file" &>/dev/null ||
+		busybox wget "https://github.com/teth3r/dotfiles/raw/master/bashrc" -O "$bash_file" &>/dev/null ||
 		download_fail "bashrc"
 
 	}

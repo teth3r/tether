@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.02.1436"
+SCRIPT_VERSION="2024.02.02.1508"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -652,7 +652,7 @@ dotfiles() {
 		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
 		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
 		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --vim\n' "$SCRIPT_NAME"
+		printf 'Examples: %s --vimrc\n' "$SCRIPT_NAME"
 		printf '          %s --urxvt-dark\n\n' "$SCRIPT_NAME"
 		printf 'Options: -b,  --bashrc        Add custom .bashrc\n'
 		printf '         -fi, --firefox       Add custom user.js\n'
@@ -664,7 +664,7 @@ dotfiles() {
 		printf '         -tl, --termux-light  Add custom light colorscheme and prop files\n'
 		printf '         -tm, --tmux          Add custom .tmux.conf\n'
 		printf '         -u,  --urxvt         Add custom .Xresources\n'
-		printf '         -v,  --vim           Add custom .vimrc\n'
+		printf '         -v,  --vimrc         Add custom .vimrc\n'
 		printf '         -vc, --vim-color     Add custom vim colorscheme\n'
 		printf '              --version       Show version information\n\n'
 		printf 'Install/Update custom dotfiles\n'
@@ -5039,7 +5039,7 @@ terp-deploy() {
 		/bin/tether dotfiles --bashrc &>/dev/null
 
 		# Create custom vimrc and colorscheme
-		/bin/tether dotfiles --vim &>/dev/null
+		/bin/tether dotfiles --vimrc &>/dev/null
 		sudo /bin/tether dotfiles --vim-color &>/dev/null
 
 		# Create custom tmux.conf

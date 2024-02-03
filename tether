@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.03.1734"
+SCRIPT_VERSION="2024.02.03.2003"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -673,14 +673,12 @@ dotfiles() {
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in wget; do
-			[[ ! $(type -p "$mis_dep") && ! $(type -p busybox) ]] && {
-				print_missing_dependencies "$mis_dep"
-			}
+		[[ ! $(type -p "wget") && ! $(type -p busybox) ]] && {
+			print_missing_dependencies "wget"
+		}
 
-			[[ $(type -p busybox) ]] && WGET="busybox wget"
-			[[ $(type -p wget) ]] && WGET="wget"
-		done
+		[[ $(type -p busybox) ]] && WGET="busybox wget"
+		[[ $(type -p wget) ]] && WGET="wget"
 
 		# Check for internet connection
 		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
@@ -5001,17 +4999,11 @@ terp-deploy() {
 		done
 
 		user_name="${SUDO_USER:=$USER}"
-
-		# Check for internet connectivity
-		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
-			print_error "Failed to detect an internet connection"
-			exit 1
-		}
 	}
 
 	post_install_setup() {
 		# Exit if vim and tmux are installed
-		[[ $(type -p tmux) && $(type -p vim) ]] || [[ $TERP_DEPLOY_INSTALL == "true" ]] && {
+		[[ $TERP_DEPLOY_INSTALL == "true" ]] || [[ $(type -p tmux) && $(type -p vim) ]] && {
 			print_error "Chroot has already been setup"
 			exit 1
 		}
@@ -5098,15 +5090,22 @@ terp-deploy() {
 	}
 
 	post_boot_setup() {
-		[[ $HOSTNAME == "$USER" ]] && {
+		# Check if running as saved user
+		[[ $(cat /etc/terp_username.conf 2>/dev/null) == "$USER" ]] && {
 			print_error "Chroot has already been setup"
 			 exit 1
 		}
 
-		source "/etc/profile"
+		source "/etc/profile" 2>/dev/null
 
 		# Check if user account has been created before
 		[[ ! -f /etc/terp-deploy.conf ]] || [[ $TERP_DEPLOY_SETUP != "true" ]] && {
+			# Check for internet connectivity
+			[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
+				print_error "Failed to detect an internet connection"
+				exit 1
+			}
+
 			# Create new user account
 			print_warning "Creating new user account"
 			printf '\n'
@@ -5201,8 +5200,8 @@ terp-deploy() {
 			# Add new user to sudoers file
 			sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
-			# Set hostname
-			printf '%s\n' "$user_name" > /etc/hostname && hostname "$user_name"
+			# Save username for later logins
+			printf '%s\n' "$user_name" > /etc/terp_username.conf
 
 			# Set DNS server
 			printf '%s\n' "nameserver 127.0.0.1" > /etc/resolv.conf
@@ -5236,10 +5235,15 @@ terp-deploy() {
 			chmod 666 /mnt/module-dnscrypt/*
 		}
 
-		user_name="$(< /etc/hostname)"
-		hostname "$user_name"
+		[[ ! -f /etc/terp_username.conf ]] && {
+			print_error "Cannot stat '/etc/terp_username.conf': No such file or directory"
+			exit 1
+		}
 
-		# Switch to new_user
+		# Read in saved username
+		user_name="$(< /etc/terp_username.conf)"
+
+		# Switch to saved user
 		su "$user_name" -s /bin/bash && source "/etc/profile"
 		exit 0
 	}
@@ -6195,23 +6199,29 @@ tfetch() {
 			: '\u'
 			USER="${_@P}"
 		}
+
+		# Handles empty $HOSTNAME
+		[[ -z $HOSTNAME ]] && {
+			: '\h'
+			HOSTNAME="${_@P}"
+		}
 	}
 
 	get_hostname() {
 		[[ $USER == "shell" || $EUID -eq 2000 ]] && {
 			color_blue=$color_cyan
-			printf '%b %s@%s %b\n' "${color_blue}" "$HOSTNAME" "$USER" "${no_color}"
+			printf '%b %s@%s %b\n' "${color_blue}" "$USER" "$HOSTNAME" "${no_color}"
 			return 0
 		}
 
 		[[ $USER == "root" || $EUID -eq 0 ]] && {
 			color_blue=$color_magenta
-			printf '%b %s@%s %b\n' "${color_blue}" "$HOSTNAME" "$USER" "${no_color}"
+			printf '%b %s@%s %b\n' "${color_blue}" "$USER" "$HOSTNAME" "${no_color}"
 			return 0
 		}
 
 		[[ $EUID -eq 1000 ]] || [[ $USER != root && $USER != shell ]] && {
-			printf '%b %s@%s %b\n' "${color_blue}" "$HOSTNAME" "$USER" "${no_color}"
+			printf '%b %s@%s %b\n' "${color_blue}" "$USER" "$HOSTNAME" "${no_color}"
 			return 0
 		}
 	}

@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.02.1620"
+SCRIPT_VERSION="2024.02.03.0914"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -4970,6 +4970,8 @@ terp-deploy() {
 		}
 
 		source "/etc/os-release" 2>/dev/null
+		source "/etc/terp-deploy.conf" 2>/dev/null
+
 		[[ $PRETTY_NAME != "Void Linux" && $NAME != "Alpine Linux" ]] && print_os_error
 
 		# Check for required dependencies
@@ -4980,11 +4982,17 @@ terp-deploy() {
 		done
 
 		user_name="${SUDO_USER:=$USER}"
+
+		# Check for internet connectivity
+		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
+			print_error "Failed to detect an internet connection"
+			exit 1
+		}
 	}
 
 	post_install_setup() {
 		# Exit if vim and tmux are installed
-		[[ $(type -p tmux) && $(type -p vim) ]] && {
+		[[ $(type -p tmux) && $(type -p vim) ]] || [[ $TERP_DEPLOY_INSTALL == "true" ]] && {
 			print_error "Chroot has already been setup"
 			exit 1
 		}
@@ -4998,7 +5006,7 @@ terp-deploy() {
 				}
 			done
 
-			[[ $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
+			[[ $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
 				print_warning "Setting up voidlinux chroot"
 				printf '\n'
 				sudo xbps-install -Syu xbps void-repo-nonfree
@@ -5009,6 +5017,9 @@ terp-deploy() {
 				sudo chmod 777 /tmp || exit 1
 
 				sudo xbps-install -Syu vim tmux || exit 1
+
+				# Set config true status
+				printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" >> /etc/terp-deploy.conf
 			}
 		}
 
@@ -5021,14 +5032,18 @@ terp-deploy() {
 				}
 			done
 
-			[[ $(ping -c4 alpinelinux.org 2>/dev/null) ]] && {
+			[[ $(ping -c2 alpinelinux.org 2>/dev/null) ]] && {
 				print_warning "Setting up alpinelinux chroot"
 				printf '\n'
+				sudo apk add -u apk-tools
 				sudo apk update && sudo apk upgrade
 				sudo apk add 7zip git rust cargo bc ldns wget gcc bash-completion unzip libarchive-tools || exit 1
 				sudo chmod 777 /tmp || exit 1
 
 				sudo apk add vim tmux || exit 1
+
+				# Set config true status
+				printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" >> /etc/terp-deploy.conf
 			}
 		}
 
@@ -5070,7 +5085,6 @@ terp-deploy() {
 		}
 
 		source "/etc/profile"
-		source "/etc/terp-deploy.conf" 2>/dev/null
 
 		# Check if user account has been created before
 		[[ ! -f /etc/terp-deploy.conf ]] || [[ $TERP_DEPLOY_SETUP != "true" ]] && {

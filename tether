@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.03.0914"
+SCRIPT_VERSION="2024.02.03.1734"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -681,12 +681,20 @@ dotfiles() {
 			[[ $(type -p busybox) ]] && WGET="busybox wget"
 			[[ $(type -p wget) ]] && WGET="wget"
 		done
+
+		# Check for internet connection
+		[[ ! $(ping -c4 voidlinux.org 2>/dev/null) ]] && {
+			print_error "Failed to detect an internet connection"
+			exit 1
+		}
 	}
 
 	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
 				-b | --bashrc)
+					check_dependencies "$@"
+
 					unset exit_status
 					[[ -d /system/app/ && -f /system/build.prop ]] && {
 						print_not_root_user "$@"
@@ -723,6 +731,8 @@ dotfiles() {
 					exit 1
 				;;
 				-fi | --firefox)
+					check_dependencies "$@"
+
 					[[ $(type -p firefox) || $(pm list packages "org.mozilla.fennec_fdroid" 2>/dev/null) ]] && {
 						unset exit_status
 						unset user_js
@@ -778,6 +788,8 @@ dotfiles() {
 					print_help
 				;;
 				-kd | --kitty-dark)
+					check_dependencies "$@"
+
 					[[ $(type -p kitty) ]] && {
 						unset exit_status
 						# Handles linux install with missing user
@@ -805,6 +817,8 @@ dotfiles() {
 					exit 1
 				;;
 				-kl | --kitty-light)
+					check_dependencies "$@"
+
 					[[ $(type -p kitty) ]] && {
 						unset exit_status
 						# Handles linux install with missing user
@@ -832,6 +846,8 @@ dotfiles() {
 					exit 1
 				;;
 				-m | --mkshrc)
+					check_dependencies "$@"
+
 					[[ -d /system/app/ && -f /system/build.prop ]] && {
 						unset exit_status
 						print_not_root_user "$@"
@@ -854,6 +870,8 @@ dotfiles() {
 					exit 1
 				;;
 				-td | --termux-dark)
+					check_dependencies "$@"
+
 					[[ ! -d /system/app ]] && print_os_error
 
 					[[ $(pm list packages "com.termux" 2>/dev/null) && -d $TERMUX_DIRECTORY ]] && {
@@ -916,6 +934,8 @@ dotfiles() {
 					exit 1
 				;;
 				-tl | --termux-light)
+					check_dependencies "$@"
+
 					[[ ! -d /system/app ]] && print_os_error
 
 					[[ $(pm list packages "com.termux" 2>/dev/null) && -d $TERMUX_DIRECTORY ]] && {
@@ -978,6 +998,8 @@ dotfiles() {
 					exit 1
 				;;
 				-tm | --tmux)
+					check_dependencies "$@"
+
 					[[ $(type -p tmux) ]] && {
 						unset exit_status
 						# Handles linux install with missing HOME_DIR
@@ -1002,6 +1024,8 @@ dotfiles() {
 					exit 1
 				;;
 				-u | --urxvt)
+					check_dependencies "$@"
+
 					[[ $(type -p urxvt) ]] && {
 						unset exit_status
 						# Handles linux install with missing user
@@ -1030,6 +1054,8 @@ dotfiles() {
 					exit 1
 				;;
 				-v | --vimrc)
+					check_dependencies "$@"
+
 					[[ $(type -p vim) ]] && {
 						unset exit_status
 						# Handles linux install with missing HOME_DIR
@@ -1054,6 +1080,8 @@ dotfiles() {
 					exit 1
 				;;
 				-vc | --vim-color)
+					check_dependencies "$@"
+
 					[[ $(type -p vim) ]] && {
 						print_not_root_user
 
@@ -1108,7 +1136,6 @@ dotfiles() {
 	}
 	trap 'run_on_exit' 1 2 3 15
 	print_no_argument "$@"
-	check_dependencies "$@"
 	check_input_option "$@"
 	exit
 }
@@ -1400,11 +1427,11 @@ lyrics() {
 			return
 		}
 
-		# Skip lyric files
+		# Skip .lrc files
 		[[ $parsed_file  =~ .lrc ]] && {
 			check_lrc="$(< "$lrc_file")"
 
-			# Check if lyric file is empty
+			# Check if .lrc file is empty
 			[[ -n $check_lrc ]] && {
 				print_warning "'$parsed_file' is a Lyrics file"
 				printf '\n'
@@ -1413,7 +1440,7 @@ lyrics() {
 				return
 			}
 
-			# Delete lyrics file if it is empty
+			# Delete .lrc file if it is empty
 			print_error "'$parsed_file' is not a valid Lyrics file"
 			printf '\n'
 			rm "$parsed_file" 2>/dev/null
@@ -1434,6 +1461,9 @@ lyrics() {
 			}
 		}
 
+		# Fetch song tags from audio file
+		fetch_song_tags "$@"
+
 		# Handles missing tags
 		[[ -z $artist || -z $title ]] && {
 			print_error "'$parsed_file' file has incorrect or invalid metadata"
@@ -1441,6 +1471,11 @@ lyrics() {
 			skip="true"
 			exit_status=1
 			return
+		}
+
+		# Handles valid files
+		[[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus ]] && {
+			valid_file="true"
 		}
 	}
 
@@ -1824,20 +1859,18 @@ lyrics() {
 							unset captcha_response
 							unset failed_fetch
 							unset skip
+							unset valid_file
 
 							# Remove file name extension
 							lrc_file="${sec_file_name%.*}.lrc"
 
 							parsed_file="$sec_file_name"
 
-							# Create variables with song tags
-							fetch_song_tags "$@"
-
 							# Check if $sec_file_name contains valid files
 							check_audio_files "$@"
 
 							# Only run for audio files
-							[[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus ]] && {
+							[[ $valid_file == "true" ]] && {
 								# Try lrclib.net first
 								lrclib_parser "$sec_file_name"
 
@@ -3061,11 +3094,6 @@ EOF
 MODDIR=${0%/*}
 
 #--------------------------------------------------------------
-# Change device hostname
-#--------------------------------------------------------------
-hostname "tether"
-
-#--------------------------------------------------------------
 # Enable and configure dnscrypt-proxy if installed and config files are available
 #--------------------------------------------------------------
 [[ -f /system/bin/dnscrypt-proxy && -f /system/etc/dnscrypt-proxy/dnscrypt-proxy.toml ]] && {
@@ -3115,6 +3143,11 @@ done
 rm -f "$test_file" 2>/dev/null
 
 #--------------------------------------------------------------
+# Change hostname to device model -- instead of 'localhost'
+#--------------------------------------------------------------
+hostname "$(getprop ro.product.vendor.name)"
+
+#--------------------------------------------------------------
 # Set CPU clockspeed to max
 #--------------------------------------------------------------
 for core_group in /sys/devices/system/cpu/cpufreq/*/scaling_governor; do
@@ -3133,7 +3166,7 @@ done
 }
 
 #--------------------------------------------------------------
-# Remove vendor thermal*.conf files
+# Remove vendor thermal-engine*.conf files --- will increase device heating on heavy usage 
 #--------------------------------------------------------------
 [[ -f /vendor/etc/thermal-engine.conf ]] && {
 	mount -o remount,rw /vendor &>/dev/null
@@ -3142,7 +3175,7 @@ done
 }
 
 #--------------------------------------------------------------
-# Change default cpusets to all available CPUs
+# Change cpusets to all available CPUs
 #--------------------------------------------------------------
 cpu_core_count="$(cat /sys/devices/system/cpu/online)"
 for dev_cpuset in /dev/cpuset/*/cpus; do
@@ -3174,7 +3207,7 @@ mem_total="${mem_total//[[:space:]]}"
 settings put secure clock_seconds 1
 
 #--------------------------------------------------------------
-# Disable private DNS
+# Disable private DNS -- dnscrypt-proxy is already in use
 #--------------------------------------------------------------
 settings put global private_dns_mode off
 
@@ -3188,26 +3221,6 @@ settings put global captive_portal_mode 0
 # Change default NTP server
 #--------------------------------------------------------------
 settings put global ntp_server pool.ntp.org
-
-#--------------------------------------------------------------
-# Disable monitoring and killing of phantom app processes
-#--------------------------------------------------------------
-settings put global settings_enable_monitor_phantom_procs false
-
-#--------------------------------------------------------------
-# Increase max phantom process limit
-#--------------------------------------------------------------
-device_config put activity_manager max_phantom_processes 65536
-
-#--------------------------------------------------------------
-# Increase max cached process limit
-#--------------------------------------------------------------
-device_config put activity_manager max_cached_processes 65536
-
-#--------------------------------------------------------------
-# Increase max cached process timeout
-#--------------------------------------------------------------
-device_config put activity_manager max_empty_time_millis 360000000
 
 #--------------------------------------------------------------
 # Create 2GB swapfile
@@ -3281,7 +3294,13 @@ EOF
 		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# update module description
-		sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', removes software thermal throttling limits, disables zRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
+		[[ $font_option =~ y|Y ]] && {
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', removes software thermal limits, disables zRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
+		}
+
+		! [[ $font_option =~ y|Y ]] && {
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance', removes software thermal limits, disables zRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
+		}
 
 		# Copy module files to tether/
 		mkdir -p "$tmp_dir/tether" 2>/dev/null || print_write_error "$tmp_dir/tether"
@@ -5687,7 +5706,6 @@ terp-install() {
 	trap 'remove_file_on_exit "${tmp_dir:=/data/local/tmp}/${rootfs_file}" "${tmp_dir:=/data/local/tmp}/sha256sum.txt"' 1 2 3 15
 	print_no_argument "$@"
 	check_input_option "$@"
-	check_dependencies "$@"
 	exit
 }
 

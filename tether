@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.04.0940"
+SCRIPT_VERSION="2024.02.04.0944"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -5091,7 +5091,7 @@ terp-deploy() {
 
 	post_boot_setup() {
 		# Check if running as saved user
-		[[ $(cat /etc/terp_username.conf 2>/dev/null) == "$USER" ]] && {
+		[[ $(cat /etc/terp-username.conf 2>/dev/null) == "$USER" ]] && {
 			print_error "Chroot has already been setup"
 			 exit 1
 		}
@@ -5201,7 +5201,7 @@ terp-deploy() {
 			sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 			# Save username for later logins
-			printf '%s\n' "$user_name" > /etc/terp_username.conf
+			printf '%s\n' "$user_name" > /etc/terp-username.conf
 
 			# Set DNS server
 			printf '%s\n' "nameserver 127.0.0.1" > /etc/resolv.conf
@@ -5235,13 +5235,13 @@ terp-deploy() {
 			chmod 666 /mnt/module-dnscrypt/*
 		}
 
-		[[ ! -f /etc/terp_username.conf ]] && {
-			print_error "Cannot stat '/etc/terp_username.conf': No such file or directory"
+		[[ ! -f /etc/terp-username.conf ]] && {
+			print_error "Cannot stat '/etc/terp-username.conf': No such file or directory"
 			exit 1
 		}
 
 		# Read in saved username
-		user_name="$(< /etc/terp_username.conf)"
+		user_name="$(< /etc/terp-username.conf)"
 
 		# Switch to saved user
 		su "$user_name" -s /bin/bash && source "/etc/profile"

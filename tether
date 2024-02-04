@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.03.2003"
+SCRIPT_VERSION="2024.02.04.0940"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -5030,7 +5030,7 @@ terp-deploy() {
 				sudo xbps-install -Syu vim tmux || exit 1
 
 				# Set config true status
-				printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" >> /etc/terp-deploy.conf
+				sudo printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" >> /etc/terp-deploy.conf
 			}
 		}
 
@@ -5054,7 +5054,7 @@ terp-deploy() {
 				sudo apk add vim tmux || exit 1
 
 				# Set config true status
-				printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" >> /etc/terp-deploy.conf
+				sudo printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" >> /etc/terp-deploy.conf
 			}
 		}
 

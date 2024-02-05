@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.04.1011"
+SCRIPT_VERSION="2024.02.05.1640"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -500,7 +500,6 @@ change_timezone() {
 #--------------------------------------------------------------
 
 #--------------------------------------------------------------
-# 
 # Platform: Device Agnostic
 # Dependencies: bc, bash
 #--------------------------------------------------------------
@@ -2747,9 +2746,6 @@ package() {
 		# 7zip version
 		z_version="2301"
 
-		# Iosevka version
-		iosevka_version="28.0.7"
-
 		# Get current directory
 		current_dir="$PWD"
 
@@ -2853,27 +2849,6 @@ package() {
 		bash_file="$package_tmp_dir/system/etc/bash/.bashrc"
 		busybox wget "https://github.com/teth3r/dotfiles/raw/master/bashrc" -O "$bash_file" &>/dev/null ||
 		download_fail "bashrc"
-
-	}
-
-	download_adb() {
-		print_warning "Downloading 'adb' static binary (adb-ndk)"
-		printf '\n'
-
-		# Download adb static binary from adb-ndk magisk module repo
-		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/raw/master/bin/adb.bin-arm64 -O "$package_tmp_dir/adb.bin-arm64" &>/dev/null ||
-		download_fail "adb.bin-arm64"
-
-		cp -rf "$package_tmp_dir/adb.bin-arm64" "$package_tmp_dir/system/bin/adb" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/adb"
-
-		# Download fastboot static binary from adb-ndk magisk module repo
-		print_warning "Downloading 'fastboot' static binary (adb-ndk)"
-		printf '\n'
-		busybox wget https://github.com/Magisk-Modules-Repo/adb-ndk/raw/master/bin/fastboot.bin-arm64 -O "$package_tmp_dir/fastboot.bin-arm64" &>/dev/null ||
-		download_fail "fastboot.bin-arm64"
-
-		cp -rf "$package_tmp_dir/fastboot.bin-arm64" "$package_tmp_dir/system/bin/fastboot" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/fastboot"
-		rm -r "$package_tmp_dir/adb.bin-arm64" "$package_tmp_dir/fastboot.bin-arm64" 2>/dev/null
 	}
 
 	download_zip() {
@@ -2900,6 +2875,8 @@ package() {
 	}
 
 	download_tether() {
+		cd "$package_tmp_dir" 2>/dev/null || print_dir_change_error "${package_tmp_dir}"
+
 		print_warning "Downloading 'tether'"
 		printf '\n'
 
@@ -2910,17 +2887,17 @@ package() {
 		chmod +x "$package_tmp_dir/tether"
 		./tether --silent "$package_tmp_dir/system/bin"
 		tether_version="$(./tether --version)"
-		rm tether 2>/dev/null
+		rm "$package_tmp_dir/tether" 2>/dev/null
 	}
 
 	download_custom_iosevka() {
 		[[ $font_variant == "sans" ]] && {
-			print_warning "Downloading 'Iosevka version $iosevka_version'"
+			print_warning "Downloading 'Iosevka"
 			printf '\n'
 
 			# Download latest version of Iosevka custom build
-			busybox wget "https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka.7z" -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
-			download_fail "Iosevka version $iosevka_version"
+			busybox wget "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka.7z" -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
+			download_fail "Iosevka"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
@@ -2928,12 +2905,12 @@ package() {
 		}
 
 		[[ $font_variant == "slab" ]] && {
-			print_warning "Downloading 'Iosevka-Slab version $iosevka_version'"
+			print_warning "Downloading 'Iosevka-Slab"
 			printf '\n'
 
 			# Download latest version of Iosevka custom build
-			busybox wget "https://github.com/teth3r/Iosevka-build/releases/download/v${iosevka_version}/Iosevka-slab.7z" -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
-			download_fail "Iosevka-Slab version $iosevka_version"
+			busybox wget "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka-slab.7z" -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
+			download_fail "Iosevka-Slab"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
@@ -3236,7 +3213,6 @@ EOF
 
 		download_dnscrypt "$@"
 		download_bash "$@"
-		download_adb "$@"
 		download_zip "$@"
 		download_tether "$@"
 		populate_dir "$@"

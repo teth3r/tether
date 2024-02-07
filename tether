@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.05.1640"
+SCRIPT_VERSION="2024.02.07.0153"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -6315,116 +6315,84 @@ tfetch() {
 	get_cpu() {
 		# Handles Android devices
 		[[ -d /sys/class/power_supply/battery ]] && {
-			cpu_name="$cpu_file"
-			cpu_name="${cpu_name/*Hardware}"
-			cpu_name="${cpu_name/*: }"
-			cpu_cores="$cpu_file"
-			cpu_cores="${cpu_cores/*processor}"
-			cpu_cores="${cpu_cores/BogoMIPS*}"
-			cpu_cores="${cpu_cores/:}"
-			cpu_cores="${cpu_cores//[[:space:]]}"
-			cpu_cores="$((cpu_cores + 1))"
+			cpu_name="${cpu_file/*Hardware*:\ }"
 		}
 
 		# Handles Intel CPUs
-		[[ -d /sys/class/power_supply/BAT0 && $cpu_file != *AuthenticAMD* ]] || [[ ! -d /sys/class/kgsl && ! -d /sys/class/power_supply/battery ]] || [[ ! -d /proc/gpufreq && ! -d /sys/class/power_supply/battery ]] && {
+		# Check if desktop is linux and CPU is not AMD
+		[[ ! -d /sys/class/power_supply/battery && $cpu_file != *AuthenticAMD* ]] ||
+		# Check if device is not Android with Snapdragon CPU
+		[[ ! -d /sys/class/kgsl && ! -d /sys/class/power_supply/battery ]] ||
+		# Check if device is not Android with Mediatek CPU
+		[[ ! -d /proc/gpufreq && ! -d /sys/class/power_supply/battery ]] && {
 			cpu_name="$cpu_file"
-			cpu_name="${cpu_name/*model name}"
-			cpu_name="${cpu_name/ @ *}"
-			cpu_name="${cpu_name/*: }"
-			cpu_cores="$cpu_file"
-			cpu_cores="${cpu_cores/*cpu cores}"
-			cpu_cores="${cpu_cores/apicid*}"
-			cpu_cores="${cpu_cores/:}"
-			cpu_cores="${cpu_cores//[[:space:]]}"
+			cpu_name="${cpu_name/@*}"
+			cpu_name="${cpu_name/*model name*:\ }"
 		}
 
 		# Handles AMD CPUs
 		[[ $cpu_file == *AuthenticAMD* ]] && {
-			cpu_name="$cpu_file"
-			cpu_name="${cpu_name/*model name}"
-			cpu_name="${cpu_name/stepping*}"
-			cpu_name="${cpu_name/*: }"
+			cpu_name="${cpu_file/stepping*:*}"
+			cpu_name="${cpu_name/*model name*:\ }"
 			cpu_name="${cpu_name%[[:space:]]}"
-			cpu_cores="$cpu_file"
-			cpu_cores="${cpu_cores/*cpu cores}"
-			cpu_cores="${cpu_cores/apicid*}"
-			cpu_cores="${cpu_cores/:}"
-			cpu_cores="${cpu_cores//[[:space:]]}"
 		}
 
 		# Get CPU clockspeed
-		cpu_clock_speed="$(< /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)"
-		cpu_clock_speed="$((cpu_clock_speed / 1000))"
+		cpu_clk="$(( $(< /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq) / 1000 ))"
 
-		# Handles Android with Snapdragon CPUs 
+		# Handles Android with Snapdragon CPUs  -- prime core is the last core
 		[[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
-			cpu_clock_speed="$(< /sys/devices/system/cpu/cpu$((CPU_CORE_COUNT - 1))/cpufreq/scaling_cur_freq)"
-			cpu_clock_speed="$((cpu_clock_speed / 1000))"
+			cpu_clk="$(( $(< /sys/devices/system/cpu/cpu$((CPU_CORE_COUNT - 1))/cpufreq/scaling_cur_freq) / 1000 ))"
 		}
-		printf '%s (%d) @ %dMhz\n' "${cpu_name}" "${cpu_cores}" "${cpu_clock_speed}"
+		printf '%s (%d) @ %dMhz\n' "${cpu_name}" "$CPU_CORE_COUNT" "${cpu_clk}"
 	}
 
 	get_cpu_clusters() {
-		array_counter=1
+		core_domain=1
 
 		for cpu_cluster in /sys/devices/system/cpu/cpufreq/policy*; do
-			# Create Array containing clockspeed of each CPU cluster
-			cluster_clock_speed[array_counter]="$(< "$cpu_cluster"/scaling_cur_freq)"
-			cluster_clock_speed[array_counter]="$((cluster_clock_speed[array_counter] / 1000))"
+			# Create Array containing current clockspeed (in Mhz) and member cores of each CPU cluster
+			cluster_clk[core_domain]="$(( $(< "$cpu_cluster"/scaling_cur_freq) / 1000 )), $(< "$cpu_cluster"/affected_cpus)"
 
-			# Create Array containing member cores of each CPU cluster
-			cluster_cpu_group[array_counter]="$(< "$cpu_cluster"/affected_cpus)"
-
-			array_counter=$((array_counter + 1))
+			# Count the number of available core domains / CPU cluster
+			core_domain=$((core_domain + 1))
 		done
 
-		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
-			# Create array for cpu clockspeeds i.e 2400Mhz
-			cpu_clock_speed[array_checker]="${cluster_clock_speed[$array_checker]}Mhz"
+		for ((cpu_cluster=1; cpu_cluster < core_domain; cpu_cluster++)); do
+			# Cpu group lower limit i.e 0 in 0 1 2 3
+			cpu_low="${cluster_clk[$cpu_cluster]/*,\ }"
+			cpu_low="${cpu_low/\ *}"
 
-			# Create array for cpu group upper limit i.e 3 in 0 1 2 3
-			cpu_clock_group_high[array_checker]="${cluster_cpu_group[$array_checker]/* }"
+			# Cpu group upper limit i.e 3 in 0 1 2 3
+			cpu_high="${cluster_clk[$cpu_cluster]/*\ }"
 
-			# Create array for cpu group lower limit i.e 0 in 0 1 2 3
-			cpu_clock_group_low[array_checker]="${cluster_cpu_group[$array_checker]/ *}"
-
-			# Create array for cpu group higher and lower limit i.e 0-3
-			cpu_clock_group[array_checker]="${cpu_clock_group_low[$array_checker]}-${cpu_clock_group_high[$array_checker]}"
+			# Create array for cpu clusters i.e 0-4 @ 2400Mhz
+			cpu_clk[cpu_cluster]="$cpu_low-$cpu_high @ ${cluster_clk[$cpu_cluster]/,*}Mhz,"
 
 			# Show only 0 in case cpu group contains only one core
-			[[ ${cpu_clock_group_low[$array_checker]} == "${cpu_clock_group_high[$array_checker]}" ]] && {
-				cpu_clock_group[array_checker]="${cpu_clock_group_low[$array_checker]}"
+			[[ $cpu_low == "$cpu_high" ]] && {
+				cpu_clk[cpu_cluster]="$cpu_high @ ${cluster_clk[$cpu_cluster]/,*}Mhz,"
 			}
-
-			# Create array for showing cpu group and clockspeed i.e 0-3 @ 2400Mhz
-			cpu_info[array_checker]="${cpu_clock_group[$array_checker]} @ ${cpu_clock_speed[$array_checker]},"
 		done
 
 		# Clean up output
-		cpu_total="${cpu_info[*]}"
-		printf '%s\n' "${cpu_total%,*}"
+		cpu_total="${cpu_clk[*]}"
+		printf '%s\n' "${cpu_total%,}"
 	}
 
 	get_gpu() {
 		# Handles Mediatek GPUs
 		[[ -d /proc/gpufreq ]] && {
-			gpu_name="$cpu_file"
-			gpu_name="${gpu_name/*Hardware}"
-			gpu_name="${gpu_name/*: }"
-			gpu_clock_speed="$(< /proc/gpufreq/cur_freq)"
-			gpu_clock_speed="$((gpu_clock_speed / 1000))"
-			printf '%s @ %dMhz\n' "${gpu_name}" "${gpu_clock_speed}"
+			gpu_name="${cpu_file/gpu_name/*Hardware*:\ }"
+			gpu_clock_speed="$(( $(< /proc/gpufreq/cur_freq) / 1000 ))"
+			printf '%s @ %dMhz\n' "${gpu_name}" "${gpu_clk}"
 		}
 
 		# Handles Snapdragron GPUs
 		[[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
 			gpu_name="$(< /sys/class/kgsl/kgsl-3d0/gpu_model)"
-			gpu_clock_speed="$(< /sys/class/kgsl/kgsl-3d0/gpuclk)"
-			gpu_clock_speed="$((gpu_clock_speed / 1000000))"
-			gpu_utilization="$(< /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage)"
-			gpu_utilization="${gpu_utilization//[[:space:]]}"
-			printf '%s @ %dMhz - (%s Utilization)\n' "${gpu_name}" "${gpu_clock_speed}" "$gpu_utilization"
+			gpu_clk="$(( $(< /sys/class/kgsl/kgsl-3d0/gpuclk) / 1000000 ))"
+			printf '%s @ %dMhz\n' "${gpu_name}" "${gpu_clk}"
 		}
 	}
 
@@ -6509,7 +6477,7 @@ tfetch() {
 		# UsedMem = MemTotal - MemAvailable
 		used_mem="${mem_file/*MemAvailable: }"
 		used_mem="${used_mem/ kB*}"
-		used_mem="$((( total_mem - used_mem ) / 1024 ))"
+		used_mem="$(( (total_mem - used_mem) / 1024 ))"
 
 		# Convert to MiB
 		total_mem="$((total_mem / 1024))"
@@ -6563,9 +6531,7 @@ tfetch() {
 		[[ ${in_minutes/ *} -eq 1 ]] && in_minutes="${in_minutes/s}"
 		[[ ${in_seconds/ *} -eq 1 ]] && in_seconds="${in_seconds%s}"
 
-		system_uptime="${in_days} ${in_hours} ${in_minutes} ${in_seconds}"
-
-		printf '%s\n' "$system_uptime"
+		printf '%s, %s, %s, %s\n' "${in_days}" "${in_hours}" "${in_minutes}" "${in_seconds}"
 	}
 
 	tfetch_config() {

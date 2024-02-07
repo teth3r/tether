@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.07.0205"
+SCRIPT_VERSION="2024.02.07.1205"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -3101,7 +3101,7 @@ MODDIR=${0%/*}
 #--------------------------------------------------------------
 while [[ $(getprop sys.boot_completed) -ne 1 ]]; do
 	# Delay to prevent excessive CPU usage on startup
-	read -rt "2" <> <(:) || :
+	read -rt "5" <> <(:) || :
 done
 
 #--------------------------------------------------------------
@@ -5306,7 +5306,8 @@ terp-install() {
 			chroot_image="/data/voidimg/void.img"
 			chroot_image_dir="/data/voidimg"
 			chroot_install_dir="/data/voidlinux"
-			block_device="/dev/block/loop7"
+			# Let device handle loop devices
+			block_device="$(losetup -f 2>/dev/null)"
 		}
 
 		# Declare directories for alpine linux
@@ -5314,7 +5315,8 @@ terp-install() {
 			chroot_image="/data/alpineimg/alpine.img"
 			chroot_image_dir="/data/alpineimg"
 			chroot_install_dir="/data/alpinelinux"
-			block_device="/dev/block/loop8"
+			# Let device handle loop devices
+			block_device="$(losetup -f 2>/dev/null)"
 		}
 
 		# Declare directories common to both variants
@@ -5561,6 +5563,11 @@ terp-install() {
 		esac
 	}
 
+	loop_device_active() {
+		print_error "'$block_device' is already in use"
+		exit 1
+	}
+	
 	chroot_installation() {
 		# Create chroot container
 		create_image "$@"
@@ -5568,7 +5575,7 @@ terp-install() {
 		# Extract rootfs in chroot container
 		[[ -f $chroot_image ]] && {
 			mke2fs -t ext4 "$chroot_image" &>/dev/null
-			losetup "$block_device" "$chroot_image"
+			losetup "$block_device" "$chroot_image" 2>/dev/null || loop_device_active "$@"
 			mount -t ext4 "$block_device" "$chroot_install_dir"
 
 			cp "$downloaded_rootfs" "$chroot_install_dir"
@@ -5727,14 +5734,28 @@ terp-mount() {
 		[[ $terp_flavor == "void" ]] && {
 			chroot_image="/data/voidimg/void.img"
 			chroot_install_dir="/data/voidlinux"
-			block_device="/dev/block/loop7"
+			# Let device handle loop devices
+			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
+			block_device="${block_device/*\(}"
+			block_device="${block_device/\)*}"
+			# Use free loop device if one isn't already in use
+			[[ -z $block_device ]] && {
+				block_device="$(losetup -f 2>/dev/null)"
+			}
 		}
 
 		# Declare directories for alpine linux
 		[[ $terp_flavor == "alpine" ]] && {
 			chroot_image="/data/alpineimg/alpine.img"
 			chroot_install_dir="/data/alpinelinux"
-			block_device="/dev/block/loop8"
+			# Let device handle loop devices
+			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
+			block_device="${block_device/*\(}"
+			block_device="${block_device/\)*}"
+			# Use free loop device if one isn't already in use
+			[[ -z $block_device ]] && {
+				block_device="$(losetup -f 2>/dev/null)"
+			}
 		}
 
 		# Declare directories common to both variants
@@ -5753,6 +5774,11 @@ terp-mount() {
 		}
 	}
 
+	loop_device_active() {
+		print_error "'$block_device' is already in use"
+		exit 1
+	}
+	
 	chroot_mount() {
 		mount -t ext4 "$block_device" "$chroot_install_dir"
 		mount -t proc /proc "$chroot_install_dir/proc/"
@@ -5800,7 +5826,7 @@ terp-mount() {
 	chroot_mount_main() {
 		# Handles unmounted chroot container and inactive block device
 		[[ ! $(losetup -j "$chroot_image") ]] && {
-			losetup "$block_device" "$chroot_image"
+			losetup "$block_device" "$chroot_image" 2>/dev/null || loop_device_active "$@"
 			chroot_mount "$@"
 		}
 
@@ -5919,14 +5945,20 @@ terp-umount() {
 		[[ $terp_flavor == "void" ]] && {
 			chroot_image="/data/voidimg/void.img"
 			chroot_install_dir="/data/voidlinux"
-			block_device="/dev/block/loop7"
+			# Let device handle loop devices
+			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
+			block_device="${block_device/*\(}"
+			block_device="${block_device/\)*}"
 		}
 
 		# Declare directories for alpine linux
 		[[ $terp_flavor == "alpine" ]] && {
 			chroot_image="/data/alpineimg/alpine.img"
 			chroot_install_dir="/data/alpinelinux"
-			block_device="/dev/block/loop8"
+			# Let device handle loop devices
+			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
+			block_device="${block_device/*\(}"
+			block_device="${block_device/\)*}"
 		}
 
 		# Check if chroot file exists
@@ -5967,12 +5999,12 @@ terp-umount() {
 
 	unmount_chroot() {
 		# Handles mounted chroot container with no running processes
-		[[ -f "$chroot_install_dir/bin/dmesg" ]] && {
+		[[ -f "$chroot_install_dir/bin/dmesg" || -d "$chroot_install_dir/mnt/sdcard" ]] && {
 			cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
-			umount "$chroot_install_dir/proc"
-			umount "$chroot_install_dir/sys"
-			umount -lf "$chroot_install_dir/dev/pts"
-			umount -lf "$chroot_install_dir/dev"
+			umount "$chroot_install_dir/proc" 2>/dev/null
+			umount "$chroot_install_dir/sys" 2>/dev/null
+			umount -lf "$chroot_install_dir/dev/pts" 2>/dev/null
+			umount -lf "$chroot_install_dir/dev" 2>/dev/null
 			umount "$chroot_install_dir/mnt/sdcard" 2>/dev/null
 
 			# Incase there are no dnscrypt-proxy files
@@ -5980,7 +6012,7 @@ terp-umount() {
 
 			# Incase there's no external storage
 			umount "$chroot_install_dir/media" 2>/dev/null
-			umount -lf "$chroot_install_dir"
+			umount -lf "$chroot_install_dir" 2>/dev/null
 			losetup -d "$block_device" 2>/dev/null
 
 			[[ $(losetup -j "$chroot_image") ]] && {
@@ -6018,12 +6050,12 @@ terp-umount() {
 			y | Y)
 				printf '\n'
 				# Handles mounted chroot container with no running processes
-				[[ -f "$chroot_install_dir/bin/dmesg" ]] && {
+				[[ -f "$chroot_install_dir/bin/dmesg" || -d "$chroot_install_dir/mnt/sdcard" ]] && {
 					cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
-					umount "$chroot_install_dir/proc"
-					umount "$chroot_install_dir/sys"
-					umount -lf "$chroot_install_dir/dev/pts"
-					umount -lf "$chroot_install_dir/dev"
+					umount "$chroot_install_dir/proc" 2>/dev/null
+					umount "$chroot_install_dir/sys" 2>/dev/null
+					umount -lf "$chroot_install_dir/dev/pts" 2>/dev/null
+					umount -lf "$chroot_install_dir/dev" 2>/dev/null
 					umount "$chroot_install_dir/mnt/sdcard" 2>/dev/null
 
 					# Incase there are no dnscrypt-proxy files
@@ -6031,7 +6063,7 @@ terp-umount() {
 
 					# Incase there's no external storage
 					umount "$chroot_install_dir/media" 2>/dev/null
-					umount -lf "$chroot_install_dir"
+					umount -lf "$chroot_install_dir" 2>/dev/null
 					losetup -d "$block_device" 2>/dev/null
 
 					[[ $(losetup -j "$chroot_image") ]] && {

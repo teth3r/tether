@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.07.0153"
+SCRIPT_VERSION="2024.02.07.0205"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -1189,15 +1189,15 @@ extract() {
 					# Handles img.xz
 					folder_name="${folder_name%.img}"
 
-					# Add random number if file exist with $folder_name
-					[[ -e $folder_name ]] && {
-						folder_name="${folder_name}_${RANDOM}"
-					}
-
 					# Use original filename if $folder_name is empty
 					# Only occurs if $archive_file is a hidden file
 					[[ -z $folder_name ]] && {
 						folder_name="${archive_file##*/}_${RANDOM}"
+					}
+
+					# Add random number if file exist with $folder_name
+					[[ -e $folder_name ]] && {
+						folder_name="${folder_name}_${RANDOM}"
 					}
 
 					# Handles if $archive_file is a folder
@@ -1218,8 +1218,8 @@ extract() {
 					[[ -f $archive_file && $archive_file =~ .rar ]] && {
 						[[ ! $(type -p 7zip-unrar) ]] && print_missing_dependencies "7zip-unrar"
 
-						# Make $folder_name only if it doesn't already exist
-						mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+						# Make $folder_name
+						mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
 						7zip-unrar x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name"  || failed_to_extract
 					}
@@ -1228,8 +1228,8 @@ extract() {
 					[[ -f $archive_file && $archive_file =~ .7z|.xz|.gz|.tar|.tar.xz ]] && {
 						[[ ! $(type -p 7z) ]] && print_missing_dependencies "7zip"
 
-						# Make $folder_name only if it doesn't already exist
-						mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+						# Make $folder_name
+						mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
 						7z x "$archive_file" -y -mmt"$CPU_CORE_COUNT" -o"$folder_name" 2>/dev/null || failed_to_extract
 					}
@@ -1239,15 +1239,15 @@ extract() {
 						# Handles running without bsdtar but with busybox installed
 						[[ ! $(type -p bsdtar) ]] && [[ $(type -p busybox) ]] && {
 							[[ $archive_file =~ .tar ]] && {
-								# Make $folder_name only if it doesn't already exist
-								mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+								# Make $folder_name
+								mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
 								busybox tar -xf "${archive_file}" -C "${folder_name}" || failed_to_extract
 							}
 
 							[[ $archive_file =~ .zip ]] && {
-								# Make $folder_name only if it doesn't already exist
-								mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+								# Make $folder_name
+								mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 								current_dir="$PWD"
 
 								cp -rf "${archive_file}" "${folder_name}" 2>/dev/null || print_file_write_error "${archive_file}"
@@ -1259,8 +1259,8 @@ extract() {
 							}
 
 							[[ $archive_file =~ .gz|.xz ]] && {
-								# Make $folder_name only if it doesn't already exist
-								mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+								# Make $folder_name
+								mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 								current_dir="$PWD"
 								
 								cp -rf "${archive_file}" "${folder_name}" 2>/dev/null || print_file_write_error "${archive_file}"
@@ -1288,8 +1288,8 @@ extract() {
 
 						[[ ! $(type -p bsdtar) ]] && print_missing_dependencies "bsdtar"
 
-						# Make $folder_name only if it doesn't already exist
-						mkdir "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+						# Make $folder_name
+						mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
 						bsdtar -xf "$archive_file" -C "$folder_name" 2>/dev/null || failed_to_extract
 					}

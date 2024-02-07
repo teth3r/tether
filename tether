@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.07.1205"
+SCRIPT_VERSION="2024.02.07.1633"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -5465,7 +5465,7 @@ terp-install() {
 
 			# Check file hash if rootfs exists
 			[[ -f ${tmp_dir}/${rootfs_file} ]] && {
-				print_warning "Comparing file checksums"
+				print_warning "Comparing file hashes"
 				printf '\n'
 				check_file_hash "$@"
 			}
@@ -6416,7 +6416,7 @@ tfetch() {
 		# Handles Mediatek GPUs
 		[[ -d /proc/gpufreq ]] && {
 			gpu_name="${cpu_file/gpu_name/*Hardware*:\ }"
-			gpu_clock_speed="$(( $(< /proc/gpufreq/cur_freq) / 1000 ))"
+			gpu_clk="$(( $(< /proc/gpufreq/cur_freq) / 1000 ))"
 			printf '%s @ %dMhz\n' "${gpu_name}" "${gpu_clk}"
 		}
 

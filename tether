@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.07.1633"
+SCRIPT_VERSION="2024.02.09.1208"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -3069,7 +3069,7 @@ EOF
 MODDIR=${0%/*}
 
 #--------------------------------------------------------------
-# Enable and configure dnscrypt-proxy if installed and config files are available
+# Enable and configure dnscrypt-proxy
 #--------------------------------------------------------------
 [[ -f /system/bin/dnscrypt-proxy && -f /system/etc/dnscrypt-proxy/dnscrypt-proxy.toml ]] && {
 	# Change IPv4 DNS settings to prevent leakage
@@ -3089,28 +3089,12 @@ MODDIR=${0%/*}
 }
 
 #--------------------------------------------------------------
-# Remove swapfile if device was rebooted
-#--------------------------------------------------------------
-[[ -f $MODDIR/swapfile0 ]] && {
-	rm -r "$MODDIR"/swapfile0 2>/dev/null
-	read -rt "4" <> <(:) || :
-}
-
-#--------------------------------------------------------------
-# Add check for boot_complete trigger (Incase user has no password set)
-#--------------------------------------------------------------
-while [[ $(getprop sys.boot_completed) -ne 1 ]]; do
-	# Delay to prevent excessive CPU usage on startup
-	read -rt "5" <> <(:) || :
-done
-
-#--------------------------------------------------------------
 # Check if /data partition is decrypted (user unlocks device after booting)
 #--------------------------------------------------------------
 test_file="/data/data/PERMISSION_TEST"
 while [[ ! -f $test_file ]]; do
 	# Delay to prevent excessive CPU usage on startup
-	read -rt "2" <> <(:) || :
+	read -rt "10" <> <(:) || :
 	# Create test_file file
 	touch "$test_file" 2>/dev/null
 done
@@ -3165,18 +3149,6 @@ done
 }
 
 #--------------------------------------------------------------
-# Disable zRAM for devices with RAM > 4096MiB
-#--------------------------------------------------------------
-mem_total="$(cat /proc/meminfo)"
-mem_total="${mem_total//kB*}"
-mem_total="${mem_total//*MemTotal:}"
-mem_total="${mem_total//[[:space:]]}"
-
-[[ $mem_total -gt 4194304 ]] && {
-	swapoff /dev/block/zram0 &>/dev/null
-}
-
-#--------------------------------------------------------------
 # Show clock seconds in status bar
 #--------------------------------------------------------------
 settings put secure clock_seconds 1
@@ -3196,11 +3168,6 @@ settings put global captive_portal_mode 0
 # Change default NTP server
 #--------------------------------------------------------------
 settings put global ntp_server pool.ntp.org
-
-#--------------------------------------------------------------
-# Create 2GB swapfile
-#--------------------------------------------------------------
-swapfile --on 2048MB "$MODDIR/swapfile0"
 
 exit 0
 EOF
@@ -3268,12 +3235,12 @@ EOF
 		sed -i "s/version\=.*/version\=$current_date/" "$package_tmp_dir/module.prop" 2>/dev/null
 
 		# update module description
-		[[ $font_option =~ y|Y ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', removes software thermal limits, disables zRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
+		[[ $font_option == "y" || $font_option == "Y" ]] && {
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits/" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
-		! [[ $font_option =~ y|Y ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance', removes software thermal limits, disables zRAM and enables swap/" "$package_tmp_dir/module.prop" 2>/dev/null
+		[[ $font_option != "y" && $font_option != "Y" ]] && {
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits/" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		# Copy module files to tether/

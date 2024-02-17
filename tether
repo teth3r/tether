@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.09.1208"
+SCRIPT_VERSION="2024.02.17.1052"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -282,7 +282,7 @@ input_option_type_one() {
 			-h | --help)
 				print_help
 			;;
-			--version)
+			-V | --version)
 				print_version
 			;;
 			-*)
@@ -312,7 +312,7 @@ input_option_type_two() {
 			-h | --help)
 				print_help
 			;;
-			--version)
+			-V | --version)
 				print_version
 			;;
 			-*)
@@ -513,7 +513,7 @@ benchmark() {
 		printf '          %s --iteration 20\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h,  --help       Print out this message\n'
 		printf '         -it, --iteration  Number of iterations to perform\n'
-		printf '              --version    Show version information\n\n'
+		printf '         -V,  --version    Show version information\n\n'
 		printf 'Single core performance benchmark using Mersenne primality test\n'
 		exit 0
 	}
@@ -616,7 +616,7 @@ benchmark() {
 					prime_test_benchmark "$@"
 					exit 0
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-*)
@@ -665,7 +665,7 @@ dotfiles() {
 		printf '         -u,  --urxvt         Add custom .Xresources\n'
 		printf '         -v,  --vimrc         Add custom .vimrc\n'
 		printf '         -vc, --vim-color     Add custom vim colorscheme\n'
-		printf '              --version       Show version information\n\n'
+		printf '         -V,  --version       Show version information\n\n'
 		printf 'Install/Update custom dotfiles\n'
 		exit 0
 	}
@@ -1104,7 +1104,7 @@ dotfiles() {
 					print_missing_dependencies "vim"
 					exit 1
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-*)
@@ -1151,7 +1151,7 @@ extract() {
 		printf '          %s /sdcard/*\n' "$SCRIPT_NAME"
 		printf '          %s file1.zip file2.zip\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Extract archive file(s) into a folder with the archive name\n'
 		exit 0
 	}
@@ -1334,7 +1334,7 @@ lyrics() {
 		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
 		printf '          %s /home/user/Music/*.flac\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Batch download .lrc files for your music library\n'
 		exit 0
 	}
@@ -1962,7 +1962,7 @@ mkcp() {
 		printf '          %s output_folder file1 file2\n' "$SCRIPT_NAME"
 		printf '          %s output_folder *\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Copy file(s)/folder(s) to the specified folder\n'
 		exit 0
 	}
@@ -2158,7 +2158,7 @@ mkmv() {
 		printf '          %s output_folder file1 file2\n' "$SCRIPT_NAME"
 		printf '          %s output_folder *\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Move file(s)/folder(s) to the specified folder\n'
 		exit 0
 	}
@@ -2355,7 +2355,7 @@ mktouch() {
 		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
 		printf '          %s output_folder file1 file2\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Create empty file(s) in the specified folder\n'
 		exit 0
 	}
@@ -2449,11 +2449,11 @@ omaps-backup() {
 		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
 		printf 'Examples: %s --encrypt\n' "$SCRIPT_NAME"
 		printf '          %s --restore\n\n' "$SCRIPT_NAME"
-		printf 'Options: -b,  --backup     Create a backup of map files\n'
-		printf '         -h,  --help       Print out this message\n'
-		printf '         -l,  --list       List all available backups\n'
-		printf '         -r,  --restore    Restore maps files from available backups\n'
-		printf '              --version    Show version information\n\n'
+		printf 'Options: -b, --backup   Create a backup of map files\n'
+		printf '         -h, --help     Print out this message\n'
+		printf '         -l, --list     List all available backups\n'
+		printf '         -r, --restore  Restore maps files from available backups\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Create and restore backups of organic maps .mwm files\n'
 		exit 0
 	}
@@ -2655,7 +2655,7 @@ omaps-backup() {
 					check_dependencies "$@"
 					restore_omaps "$@"
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-*)
@@ -2699,7 +2699,7 @@ package() {
 		printf 'Examples: %s\n' "$SCRIPT_NAME"
 		printf '          %s --help\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Magisk module packaging tool\n'
 		exit 0
 	}
@@ -3092,12 +3092,14 @@ MODDIR=${0%/*}
 # Check if /data partition is decrypted (user unlocks device after booting)
 #--------------------------------------------------------------
 test_file="/data/data/PERMISSION_TEST"
+
 while [[ ! -f $test_file ]]; do
 	# Delay to prevent excessive CPU usage on startup
-	read -rt "10" <> <(:) || :
+	read -rt "7" <> <(:) || :
 	# Create test_file file
 	touch "$test_file" 2>/dev/null
 done
+
 # User has unlocked device, delete test_file
 rm -f "$test_file" 2>/dev/null
 
@@ -3236,11 +3238,11 @@ EOF
 
 		# update module description
 		[[ $font_option == "y" || $font_option == "Y" ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits/" "$package_tmp_dir/module.prop" 2>/dev/null
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		[[ $font_option != "y" && $font_option != "Y" ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits/" "$package_tmp_dir/module.prop" 2>/dev/null
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		# Copy module files to tether/
@@ -3335,7 +3337,7 @@ replace-su() {
 		printf 'Examples: %s\n' "$SCRIPT_NAME"
 		printf '          %s --help\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Remove phh-su from AOSP GSI\n'
 		exit 0
 	}
@@ -3411,7 +3413,7 @@ setup() {
 		printf 'Examples: %s\n' "$SCRIPT_NAME"
 		printf '          %s --help\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Post-installation setup utility for voidlinux\n'
 		exit 0
 	}
@@ -4605,7 +4607,7 @@ swapfile() {
 		printf 'Options: -h, --help     Print out this message\n'
 		printf '             --on       Create and Enable swapfile\n'
 		printf '             --off      Disable and Delete swapfile\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Creates a swapfile with user specified parameters\n'
 		exit 0
 	}
@@ -4865,7 +4867,7 @@ swapfile() {
 
 					create_swapfile "$@"
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-*)
@@ -4911,7 +4913,7 @@ terp-deploy() {
 		printf 'Options: -h, --help     Print out this message\n'
 		printf '         -i, --install  Setup chroot after installation\n'
 		printf '         -s, --setup    Setup chroot after mounting\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'Chroot post-install and post-mount setup tool\n'
 		exit 0
 	}
@@ -5205,7 +5207,7 @@ terp-deploy() {
 					check_dependencies "$@"
 					post_boot_setup "$@"
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-*)
@@ -5243,7 +5245,7 @@ terp-install() {
 		printf 'Examples: %s --void\n\n' "$SCRIPT_NAME"
 		printf 'Options: -a  --alpine   Install alpine linux chroot\n'
 		printf '         -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n'
+		printf '         -V, --version  Show version information\n'
 		printf '         -v, --void     Install void linux chroot\n\n'
 		printf 'Chroot installation tool\n'
 		exit 0
@@ -5630,7 +5632,7 @@ terp-install() {
 				-h | --help)
 					print_help
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-v | --void)
@@ -5675,7 +5677,7 @@ terp-mount() {
 		printf 'Examples: %s --alpine\n\n' "$SCRIPT_NAME"
 		printf 'Options: -a, --alpine   Mount alpine linux chroot\n'
 		printf '         -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n'
+		printf '         -V, --version  Show version information\n'
 		printf '         -v, --void     Mount void linux chroot\n\n'
 		printf 'Chroot initialization tool\n'
 		exit 0
@@ -5838,7 +5840,7 @@ terp-mount() {
 				-h | --help)
 					print_help
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-v | --void)
@@ -5886,7 +5888,7 @@ terp-umount() {
 		printf 'Options: -a  --alpine   Unmount alpine linux chroot\n'
 		printf '         -h, --help     Print out this message\n'
 		printf '         -r, --remove   Unmount and delete specified chroot\n'
-		printf '             --version  Show version information\n'
+		printf '         -V, --version  Show version information\n'
 		printf '         -v, --void     Unmount void linux chroot\n\n'
 		printf 'Chroot unmount tool\n'
 		exit 0
@@ -6100,7 +6102,7 @@ terp-umount() {
 					check_dependencies "$@"
 					remove_chroot "$@"
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-v | --void)
@@ -6146,7 +6148,7 @@ tfetch() {
 		printf 'Examples: %s\n' "$SCRIPT_NAME"
 		printf '          %s --help\n\n' "$SCRIPT_NAME"
 		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf 'System resource information tool\n'
 		exit 0
 	}
@@ -6651,7 +6653,7 @@ touchzip() {
 		printf 'Options: -en, --encrypt    Create an encrypted 7z archive\n'
 		printf '         -h,  --help       Print out this message\n'
 		printf '         -un, --unencrypt  Create an unencrypted 7z archive\n'
-		printf '              --version    Show version information\n\n'
+		printf '         -V,  --version    Show version information\n\n'
 		printf 'Create an encrypted/unencrypted 7z archive\n'
 		exit 0
 	}
@@ -6748,7 +6750,7 @@ touchzip() {
 					}
 					unencrypted_archive "$@"
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-*)
@@ -6797,7 +6799,7 @@ whatsapp-backup() {
 		printf '         -l,  --list       List all available backups\n'
 		printf '         -un, --unencrypt  Create an unencrypted backup\n'
 		printf '         -r,  --restore    Restore whatsapp from available backups\n'
-		printf '              --version    Show version information\n\n'
+		printf '         -V,  --version    Show version information\n\n'
 		printf 'Create and restore whatsapp backups\n'
 		exit 0
 	}
@@ -7032,7 +7034,7 @@ whatsapp-backup() {
 					check_dependencies "$@"
 					restore_whatsapp "$@"
 				;;
-				--version)
+				-V | --version)
 					print_version
 				;;
 				-*)
@@ -7066,43 +7068,35 @@ whatsapp-backup() {
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: bash, ln, sed, grep, mkdir
+# Dependencies: bash, ln, grep, mkdir
 #--------------------------------------------------------------
 tether() {
 	# Check for required dependencies
-	for mis_dep in ln sed grep mkdir; do
+	for mis_dep in ln grep mkdir; do
 		[[ ! $(type -p "$mis_dep") ]] && {
 			print_missing_dependencies "$mis_dep"
 		}
 	done
 
-	# Get and parse names of all applets
-	applet_name="$(declare -F)"
-	applet_name="${applet_name//declare -f /}"
-
 	# Declare installation directory
 	folder_name="$2"
 
-	# Output names of all declared functions
-	print_function_names() {
-		for function_spaced in ${applet_name//tether}; do
-			[[ $function_spaced != *_* ]] && {
-				function_space+="${function_spaced}, "
-			}
-		done
-		printf '%s\n' "${function_space%,*}"
-	}
+	# Get and parse names of all available functions
+	applet_name="$(declare -F)"
+	applet_name="${applet_name//declare -f /}"
 
-	# Count declared applets/functions
-	req_func() {
-		func_count=0
-		for applet_count in ${applet_name//tether}; do
-			[[ $applet_count != *_* ]] && {
-				func_count=$(( func_count + 1 ))
-			}
-		done
-		printf '%s\n' "$func_count"
-	}
+	# Manage declared applets/functions
+	func_count=0
+	for applet_count in ${applet_name//tether}; do
+		[[ $applet_count != *_* ]] && {
+			# Create array with declared functions
+			applet[func_count]="${applet_count}"
+			# Concatenate string with function names
+			function_space+="${applet_count}, "
+			# Count available functions
+			func_count=$(( func_count + 1 ))
+		}
+	done
 
 	print_help() {
 		printf '%s %s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME" "$SCRIPT_VERSION"
@@ -7112,23 +7106,23 @@ tether() {
 		printf 'Examples: %s --install /usr/bin\n' "$SCRIPT_NAME"
 		printf '          %s touchzip --encrypt dotfiles.7z .bashrc\n' "$SCRIPT_NAME"
 		printf '          %s extract dotfiles.7z\n\n' "$SCRIPT_NAME"
-		printf 'Options:     --banner   Show program banner\n'
+		printf 'Options: -b, --banner   Show program banner\n'
 		printf '         -h, --help     Print out this message\n'
 		printf '         -i, --install  Create symbolic links in the specified folder\n'
 		printf '         -l, --list     List all available functions\n'
 		printf '         -s, --silent   Create symbolic links without printing to stdout\n'
-		printf '             --version  Show version information\n\n'
+		printf '         -V, --version  Show version information\n\n'
 		printf '\033[1;97m%s\033[00m is a multi-call shell script that combines many applets into a single executable.\n' "$SCRIPT_NAME"
 		printf 'Create symbolic links to \033[1;97m%s\033[00m for each function and \033[1;97m%s\033[00m will act like whatever it was invoked as\n\n' "$SCRIPT_NAME" "$SCRIPT_NAME"
-		printf '\033[1;97mCurrently defined functions (%s):\033[00m\n' "$(req_func)"
-		print_function_names
+		printf '\033[1;97mCurrently defined functions (%s):\033[00m\n' "$func_count"
+		printf '%s\n' "${function_space%,*}"
 		exit 0
 	}
 
 	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
-				--banner)
+				-b | --banner)
 					print_banner
 					exit 0
 				;;
@@ -7145,13 +7139,10 @@ tether() {
 						print_notification
 					}
 
-					# Quoting $applet_name causes errors
-					for function_flat in ${applet_name//tether}; do
-						[[ $function_flat != *_* ]] && {
-							mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
-							ln -sf "$SCRIPT_NAME" "$folder_name/$function_flat" 2>/dev/null || print_file_write_error "$function_flat"
-							print_success "Created '$function_flat' symlink in '$folder_name'"
-						}
+					for function_flat in "${applet[@]}"; do
+						mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+						ln -sf "$SCRIPT_NAME" "$folder_name/$function_flat" 2>/dev/null || print_file_write_error "$function_flat"
+						print_success "Created '$function_flat' symlink in '$folder_name'"
 					done
 
 					# Handles ./${SCRIPT_NAME}
@@ -7167,8 +7158,8 @@ tether() {
 					exit 0
 				;;
 				-l | --list)
-					printf '\033[1;97mCurrently defined functions (%s):\033[00m\n' "$(req_func)"
-					print_function_names
+					printf '\033[1;97mCurrently defined functions (%d):\033[00m\n' "$func_count"
+					printf '%s\n' "$function_space"
 					exit 0
 				;;
 				-s | --silent)
@@ -7181,12 +7172,9 @@ tether() {
 						print_notification
 					}
 
-					# Quoting $applet_name causes errors
-					for function_flat in ${applet_name//tether}; do
-						[[ $function_flat != *_* ]] && {
-							mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
-							ln -sf "$SCRIPT_NAME" "$folder_name/$function_flat" 2>/dev/null || print_file_write_error "$function_flat"
-						}
+					for function_flat in "${applet[@]}"; do
+						mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
+						ln -sf "$SCRIPT_NAME" "$folder_name/$function_flat" 2>/dev/null || print_file_write_error "$function_flat"
 					done
 
 					# Handles ./${SCRIPT_NAME}
@@ -7201,7 +7189,7 @@ tether() {
 
 					exit 0
 				;;
-				--version)
+				-V | --version)
 					print_version
 					exit 0
 				;;
@@ -7215,23 +7203,24 @@ tether() {
 					print_notification
 				;;
 				*)
-					[[ $(printf '%s\n' "$applet_name" | grep -x "$1" 2>/dev/null) ]] && {
+					# Handles main script
+					# Example: tether mkcp newfolder file
+					[[ $(printf '%s\n' "${applet[@]}" | grep -x "$1" 2>/dev/null) ]] && {
 						# Makes $SCRIPT_NAME the name of the executed function
 						SCRIPT_NAME="${1}"
-						# Handles main script
-						# Example: tether mkcp newfolder file
 						"${@:1}"
 						exit 0
 					}
 
 					# Handles renamed main program
-					[[ ! $(printf '%s\n' "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
+					[[ $SCRIPT_NAME != "tether" ]] && {
 						SCRIPT_NAME="tether"
 						print_error "$SCRIPT_NAME: '$0' applet not found"
 						exit 1
 					}
 
 					# Handles specified function not existing
+					# Example: tether dssdsdda
 					# Makes $SCRIPT_NAME the name of the main script
 					SCRIPT_NAME="${0##*/}"
 					print_error "$SCRIPT_NAME: '$1' applet not found"
@@ -7242,19 +7231,15 @@ tether() {
 	}
 
 	trap 'run_on_exit' 1 2 3 15
-
-	# Set $applet_name to only desired functions i.e remove print_error...
-	applet_name="$(printf '%s\n' "$applet_name" | sed 's/.*_.*//' 2>/dev/null)"
-
-
+	
 	# Handles symlinked applets
 	# Example: mkcp newfolder file
-	[[ $(printf '%s\n' "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) && $SCRIPT_NAME != "tether" ]] && {
+	[[ $(printf '%s\n' "${applet[@]}" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
 		"$SCRIPT_NAME" "${@:1}" && exit 0
 	}
 
 	# Handles symlinked applets that don't exist
-	[[ ! $(printf '%s\n' "$applet_name" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
+	[[ ! $(printf '%s\n' "${applet[@]}" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && [[ $SCRIPT_NAME != "tether" ]] && {
 		SCRIPT_NAME="tether"
 		print_error "$SCRIPT_NAME: '${0##*/}' applet not found"
 		exit 1
@@ -7263,7 +7248,7 @@ tether() {
 	# If no input is specified
 	print_no_argument "$@"
 
-	# Handles input to the main script
+	# Handles input arguments to the main script
 	check_input_option "$@"
 
 	exit

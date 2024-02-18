@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.18.2258"
+SCRIPT_VERSION="2024.02.19.0015"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -1436,7 +1436,7 @@ exit 0
 
 #--------------------------------------------------------------
 # Platform: Device Agnostic
-# Dependencies: wget, find, lltag, iconv
+# Dependencies: curl, find, lltag, iconv
 #--------------------------------------------------------------
 lyrics() {
 	print_help() {
@@ -1480,7 +1480,7 @@ exit 0
 
 	check_dependencies() {
 		# Check for required dependencies
-		for mis_dep in lltag wget find iconv ping; do
+		for mis_dep in lltag curl find iconv ping; do
 			[[ ! $(type -p "$mis_dep") ]] && {
 				print_missing_dependencies "$mis_dep"
 			}
@@ -1499,21 +1499,37 @@ exit 0
 		}
 	}
 
-	failed_to_fetch() {
-		# recheck internet connection before proceeding
-		[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
-			print_error "Failed to detect an internet connection"
-			exit 1
+	connection_checker() {
+		printf '%s\n' "${output}" > "$lrc_file"
+
+		[[ -f $lrc_file ]] && {
+			check_lrc="$(< "$lrc_file")"
+			[[ $check_lrc == *"FAILED"* ]] && {
+				rm "$lrc_file" 2>/dev/null
+				failed_fetch="true"
+				skip="true"
+				exit_status=1
+				# recheck internet connection before proceeding
+				[[ ! $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
+					print_error "Failed to detect an internet connection"
+					exit 1
+				}
+				return
+			}
 		}
-		failed_fetch="true"
-		skip="true"
-		exit_status=1
-		return
+
+		rm "$lrc_file" 2>/dev/null
+	}
+
+	failed_to_fetch() {
+		printf 'FAILED\n'
+		exit 1
 	}
 
 	content_loader() {
+		url="$1"
 		user_agent_string="User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:121.0) Gecko/20100101 Firefox/121.0"
-		wget --header "$user_agent_string" "$1" --output-document - 2>/dev/null || failed_to_fetch "$@"
+		curl --silent --location --header "$user_agent_string" "$url" || failed_to_fetch
 	}
 
 	fetch_song_tags() {
@@ -1680,7 +1696,7 @@ exit 0
 		output="$(content_loader "$url")"
 
 		# Check for internet connection problems
-		[[ -z $output ]] && failed_to_fetch "$@"
+		connection_checker "$@"
 
 		# Check if website gave a valid response
 		[[ $output != *"TrackNotFound"* && $output != "[]" ]] &&
@@ -1698,7 +1714,7 @@ exit 0
 		}
 
 		# Check for missing lyrics page
-		[[ $output == "[]" || $output == *"TrackNotFound"* || $output == *"\"instrumental\": true"* || $output == *"\"syncedLyrics\":null"* ]] && {
+		[[ $output != *FAILED* ]] && [[ $output == "[]" || $output == *"TrackNotFound"* || $output == *"\"instrumental\": true"* || $output == *"\"syncedLyrics\":null"* ]] && {
 			missing_lyrics="true"
 			skip="true"
 			exit_status=1
@@ -1793,10 +1809,10 @@ exit 0
 		output="$(content_loader "$url")"
 
 		# Check for internet connection problems
-		[[ -z $output ]] && failed_to_fetch "$@"
+		connection_checker "$@"
 
 		# Check if website gave a valid response
-		[[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha"* || $output != *az_recaptcha* ]] && {
+		[[ $output != *FAILED* ]] && [[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha"* || $output != *az_recaptcha* ]] && {
 			# Sanitize output string
 			output="${output//*"Usage of azlyrics.com"}"
 			output="${output//"</div>"*}"
@@ -1925,10 +1941,10 @@ exit 0
 		output="$(content_loader "$url")"
 
 		# Check for internet connection problems
-		[[ -z $output ]] && failed_to_fetch "$@"
+		connection_checker "$@"
 
 		# Check if website gave a valid response
-		[[ $output != *"Missing Album"* ]] && [[ $output != *"We do not have the lyrics for"* ]] && [[ $output != *"Sorry, we have no"* ]] && {
+		[[ $output != *FAILED* ]] && [[ $output != *"Missing Album"* ]] && [[ $output != *"We do not have the lyrics for"* ]] && [[ $output != *"Sorry, we have no"* ]] && {
 			# Sanitize output string
 			output="${output//*"iComment-text\">"}"
 			output="${output//"<br /></p>"*}"

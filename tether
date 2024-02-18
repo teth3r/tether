@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.18.2237"
+SCRIPT_VERSION="2024.02.18.2258"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -1679,6 +1679,9 @@ exit 0
 
 		output="$(content_loader "$url")"
 
+		# Check for internet connection problems
+		[[ -z $output ]] && failed_to_fetch "$@"
+
 		# Check if website gave a valid response
 		[[ $output != *"TrackNotFound"* && $output != "[]" ]] &&
 		# Only use this parser if synced lyrics exist
@@ -1788,6 +1791,9 @@ exit 0
 		url="https://www.azlyrics.com/lyrics/${artist}/${title}.html"
 
 		output="$(content_loader "$url")"
+
+		# Check for internet connection problems
+		[[ -z $output ]] && failed_to_fetch "$@"
 
 		# Check if website gave a valid response
 		[[ $output != *"Welcome to AZLyrics"* ]] && [[ $output != *"az_captcha"* || $output != *az_recaptcha* ]] && {
@@ -1917,6 +1923,9 @@ exit 0
 		url="https://www.songlyrics.com/${artist}/${title}-lyrics"
 
 		output="$(content_loader "$url")"
+
+		# Check for internet connection problems
+		[[ -z $output ]] && failed_to_fetch "$@"
 
 		# Check if website gave a valid response
 		[[ $output != *"Missing Album"* ]] && [[ $output != *"We do not have the lyrics for"* ]] && [[ $output != *"Sorry, we have no"* ]] && {

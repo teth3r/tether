@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.17.1052"
+SCRIPT_VERSION="2024.02.18.1251"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -3089,19 +3089,23 @@ MODDIR=${0%/*}
 }
 
 #--------------------------------------------------------------
-# Check if /data partition is decrypted (user unlocks device after booting)
+# Check for boot_complete trigger
 #--------------------------------------------------------------
-test_file="/data/data/PERMISSION_TEST"
-
-while [[ ! -f $test_file ]]; do
+while [[ $(getprop sys.boot_completed 2>/dev/null) -ne 1 ]]; do
 	# Delay to prevent excessive CPU usage on startup
-	read -rt "7" <> <(:) || :
-	# Create test_file file
-	touch "$test_file" 2>/dev/null
+	read -rt "5" <> <(:) || :
 done
 
-# User has unlocked device, delete test_file
-rm -f "$test_file" 2>/dev/null
+#--------------------------------------------------------------
+# Check if /data partition is decrypted
+#--------------------------------------------------------------
+while [[ ! $(touch /data/data/TETHER_PERMISSIONS_TEST 2>/dev/null) ]]; do
+	# Delay to prevent excessive CPU usage on startup
+	read -rt "5" <> <(:) || :
+done
+
+# User has unlocked device, delete test file
+rm -rf "/data/data/TETHER_PERMISSIONS_TEST" 2>/dev/null
 
 #--------------------------------------------------------------
 # Change hostname to device model -- instead of 'localhost'
@@ -3127,7 +3131,7 @@ done
 }
 
 #--------------------------------------------------------------
-# Remove vendor thermal-engine*.conf files --- will increase device heating on heavy usage 
+# Remove vendor thermal-engine*.conf files
 #--------------------------------------------------------------
 [[ -f /vendor/etc/thermal-engine.conf ]] && {
 	mount -o remount,rw /vendor &>/dev/null
@@ -3151,12 +3155,29 @@ done
 }
 
 #--------------------------------------------------------------
+# Create swapfile and disable ZRAM
+#--------------------------------------------------------------
+[[ -f $MODDIR/swapfile0 ]] && {
+	rm -rf "$MODDIR"/swapfile0 2>/dev/null
+}
+
+fallocate -l 4G "$MODDIR/swapfile0" &&
+chown root:root "$MODDIR/swapfile0" &&
+chmod 0600 "$MODDIR/swapfile0" &&
+mkswap "$MODDIR/swapfile0" &&
+swapon "$MODDIR/swapfile0"
+
+[[ $(cat /proc/swaps) == *zram0* ]] && {
+	swapoff /dev/block/zram0
+}
+
+#--------------------------------------------------------------
 # Show clock seconds in status bar
 #--------------------------------------------------------------
 settings put secure clock_seconds 1
 
 #--------------------------------------------------------------
-# Disable private DNS -- dnscrypt-proxy is already in use
+# Disable private DNS
 #--------------------------------------------------------------
 settings put global private_dns_mode off
 
@@ -3170,6 +3191,22 @@ settings put global captive_portal_mode 0
 # Change default NTP server
 #--------------------------------------------------------------
 settings put global ntp_server pool.ntp.org
+
+#--------------------------------------------------------------
+# Disable monitoring and killing of phantom app processes
+#--------------------------------------------------------------
+settings put global settings_enable_monitor_phantom_procs false
+resetprop persist.sys.fflag.override.settings_enable_monitor_phantom_procs false
+
+#--------------------------------------------------------------
+# Increase max phantom process limit
+#--------------------------------------------------------------
+device_config put activity_manager max_phantom_processes 2147483647
+
+#--------------------------------------------------------------
+# Increase max cached process limit
+#--------------------------------------------------------------
+device_config put activity_manager max_cached_processes 2048
 
 exit 0
 EOF
@@ -3238,11 +3275,11 @@ EOF
 
 		# update module description
 		[[ $font_option == "y" || $font_option == "Y" ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		[[ $font_option != "y" && $font_option != "Y" ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance' and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
+			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		# Copy module files to tether/

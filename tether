@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.18.1251"
+SCRIPT_VERSION="2024.02.18.1908"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -165,11 +165,13 @@ print_notification() {
 }
 
 #--------------------------------------------------------------
-# Print out help message if there no input argument
+# Print out error message if there no input argument
 #--------------------------------------------------------------
 print_no_argument() {
 	[[ $# -eq 0 ]] && {
-		print_help "$@"
+		print_error "Missing operand"
+		print_aligned "Try '$SCRIPT_NAME --help' for more information." >&2
+		exit 1
 	}
 }
 
@@ -244,8 +246,14 @@ print_not_normal_user() {
 # Print version info
 #--------------------------------------------------------------
 print_version() {
-	printf '%s\n' "${SCRIPT_VERSION}"
-	exit 0
+	printf '%s (tether) %s\n
+Copyright (C) 2023, Kolade Ayomide Olanrewaju.
+License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Kolade Ayomide Olanrewaju.\n' "$SCRIPT_NAME" "${SCRIPT_VERSION}"
+exit 0
 }
 
 #--------------------------------------------------------------
@@ -505,17 +513,44 @@ change_timezone() {
 #--------------------------------------------------------------
 benchmark() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
-		printf '          %s [OPTION] [NUMBER]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
-		printf '          %s --iteration 20\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h,  --help       Print out this message\n'
-		printf '         -it, --iteration  Number of iterations to perform\n'
-		printf '         -V,  --version    Show version information\n\n'
-		printf 'Single core performance benchmark using Mersenne primality test\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - single core performance benchmark tool.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION] [NUMBER]
+
+\033[1;97mDESCRIPTION\033[00m
+	Perform quick system performance comparison using pure bash.
+	It has no external dependencies for '--iterations' <= 62.
+
+	\033[1;97m-h,  --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-it, --iteration\033[00m [NUMBER]
+		specifies the number of iterations to perform, this
+		option only accepts positive integers for [NUMBER].
+
+	\033[1;97m-V,  --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	prime_test_benchmark() {
@@ -648,26 +683,74 @@ benchmark() {
 #--------------------------------------------------------------
 dotfiles() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --vimrc\n' "$SCRIPT_NAME"
-		printf '          %s --urxvt-dark\n\n' "$SCRIPT_NAME"
-		printf 'Options: -b,  --bashrc        Add custom .bashrc\n'
-		printf '         -fi, --firefox       Add custom user.js\n'
-		printf '         -h,  --help          Print out this message\n'
-		printf '         -kd, --kitty-dark    Add custom kitty.conf with dark theme\n'
-		printf '         -kl, --kitty-light   Add custom kitty.conf with light theme\n'
-		printf '         -m,  --mkshrc        Add custom mkshrc for android\n'
-		printf '         -td, --termux-dark   Add custom dark colorscheme and prop files\n'
-		printf '         -tl, --termux-light  Add custom light colorscheme and prop files\n'
-		printf '         -tm, --tmux          Add custom .tmux.conf\n'
-		printf '         -u,  --urxvt         Add custom .Xresources\n'
-		printf '         -v,  --vimrc         Add custom .vimrc\n'
-		printf '         -vc, --vim-color     Add custom vim colorscheme\n'
-		printf '         -V,  --version       Show version information\n\n'
-		printf 'Install/Update custom dotfiles\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - dotfile management tool.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	Replaces the dotfiles of the specified program with a custom version
+	downloaded from <https://github.com/teth3r/dotfiles/>. Be sure to 
+	perform a backup of existing dotfiles before running this program.
+
+	\033[1;97m-b, --bashrc\033[00m
+		Downloads and adds custom .bashrc.
+
+	\033[1;97m-fi, --firefox\033[00m
+		Downloads and adds custom user.js for Firefox.
+
+	\033[1;97m-h,  --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-kd, --kitty-dark\033[00m
+		Downloads and adds custom kitty.conf with dark theme.
+
+	\033[1;97m-kl, --kitty-light\033[00m
+		Downloads and adds custom kitty.conf with light theme.
+
+	\033[1;97m-m, --mkshrc\033[00m
+		Downloads and adds custom mkshrc file for Android.
+
+	\033[1;97m-td, --termux-dark\033[00m
+		Downloads and adds custom prop files with dark theme for Termux.
+
+	\033[1;97m-tl, --termux-light\033[00m
+		Downloads and adds custom prop files with light theme for Termux.
+
+	\033[1;97m-t, --tmux\033[00m
+		Downloads and adds custom .tmux.conf.
+
+	\033[1;97m-u, --urxvt\033[00m
+		Downloads and adds custom .Xresources.
+
+	\033[1;97m-v, --vimrc\033[00m
+		Downloads and adds custom .vimrc.
+
+	\033[1;97m-vc, --vim-color\033[00m
+		Downloads and adds custom vim colorscheme.
+
+	\033[1;97m-V,  --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -1143,17 +1226,46 @@ dotfiles() {
 #--------------------------------------------------------------
 extract() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME" 
-		printf '          %s [FILE...]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
-		printf '          %s /sdcard/*\n' "$SCRIPT_NAME"
-		printf '          %s file1.zip file2.zip\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Extract archive file(s) into a folder with the archive name\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - extract compressed files from archive.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [FILE(s)...]
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m will extract all the files in the specified [FILE(s)...] to
+	a newly created folder in the current directory. The created folder
+	will be named according to the archive file being extracted.
+	For instance archive1.zip will extract into archive1/.
+	\033[1;97mNOTE:\033[00m If a folder already exist with the archive name,
+	the archive name + a random number will be used as the folder name
+	instead i.e archive1_30002/. 
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -1328,15 +1440,42 @@ extract() {
 #--------------------------------------------------------------
 lyrics() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [FILE...]\n\n' "$SCRIPT_NAME" 
-		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
-		printf '          %s /home/user/Music/*.flac\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Batch download .lrc files for your music library\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - batch download lrc files.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [FILE(s)...]
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m reads the audio tags of the specified [FILE(s)...] and searches for
+	and downloads the matching lrc file. The resulting lrc file will be
+	named according to the specified file i.e music1.flac -> music1.lrc.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -1954,17 +2093,41 @@ lyrics() {
 #--------------------------------------------------------------
 mkcp() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
-		printf '          %s [FOLDER] [FILE...]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
-		printf '          %s output_folder file1 file2\n' "$SCRIPT_NAME"
-		printf '          %s output_folder *\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Copy file(s)/folder(s) to the specified folder\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - copy file(s)/folder(s) to the specified folder.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [FOLDER] [FILE(s)...]
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m copies the specified [FILE(s)...] into the specified [FOLDER].
+	It will create the destination folder if it doesn't already exist.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -2150,17 +2313,41 @@ mkcp() {
 #--------------------------------------------------------------
 mkmv() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
-		printf '          %s [FOLDER] [FILE...]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
-		printf '          %s output_folder file1 file2\n' "$SCRIPT_NAME"
-		printf '          %s output_folder *\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Move file(s)/folder(s) to the specified folder\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - move file(s)/folder(s) to the specified folder.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [FOLDER] [FILE(s)...]
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m moves the specified [FILE(s)...] into the specified [FOLDER].
+	It will create the destination folder if it doesn't already exist.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -2348,16 +2535,41 @@ mkmv() {
 #--------------------------------------------------------------
 mktouch() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n' "$SCRIPT_NAME"
-		printf '          %s [FOLDER] [FILE...]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --help\n' "$SCRIPT_NAME"
-		printf '          %s output_folder file1 file2\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Create empty file(s) in the specified folder\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - create empty file(s) in the specified folder.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [FOLDER] [FILE(s)...]
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m creates empty [FILE(s)...] in the specified [FOLDER].
+	It will create the destination folder if it doesn't already exist.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -2444,18 +2656,51 @@ mktouch() {
 #--------------------------------------------------------------
 omaps-backup() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --encrypt\n' "$SCRIPT_NAME"
-		printf '          %s --restore\n\n' "$SCRIPT_NAME"
-		printf 'Options: -b, --backup   Create a backup of map files\n'
-		printf '         -h, --help     Print out this message\n'
-		printf '         -l, --list     List all available backups\n'
-		printf '         -r, --restore  Restore maps files from available backups\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Create and restore backups of organic maps .mwm files\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - create and restore organic maps backups.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m creates or restores backups of organic maps
+	mwm files. It saves and restores the backups from external storage
+	and will only fallback to using Android's internal storage if no
+	external storage device exists.
+
+	\033[1;97m-b, --backup\033[00m
+		create a backup of organic maps.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-l, --list\033[00m
+		list available backup(s).
+
+	\033[1;97m-r, --restore\033[00m
+		restore organic maps from available backup(s).
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -2693,15 +2938,42 @@ omaps-backup() {
 #--------------------------------------------------------------
 package() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s\n' "$SCRIPT_NAME"
-		printf '          %s --help\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Magisk module packaging tool\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - magisk module packaging tool.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m creates a custom magisk module that incorporates different
+	CLI tools and modifications to improve user experience on Android.
+	It saves the created module on external storage and will only fallback
+	to using Android's internal storage if no external storage device exists.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -2886,7 +3158,6 @@ package() {
 
 		chmod +x "$package_tmp_dir/tether"
 		./tether --silent "$package_tmp_dir/system/bin"
-		tether_version="$(./tether --version)"
 		rm "$package_tmp_dir/tether" 2>/dev/null
 	}
 
@@ -2949,23 +3220,6 @@ package() {
 		# Populate app/
 		mkdir -p "$package_tmp_dir/system/app/Stk" 2>/dev/null || print_write_error "$package_tmp_dir/system/app/Stk"
 		touch "$package_tmp_dir/system/app/Stk/Stk.apk" 2>/dev/null
-
-		# Populate product/app/
-		# AOSP webview shell
-		mkdir -p "$package_tmp_dir/system/product/app/Browser2" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Browser2"
-		touch "$package_tmp_dir/system/product/app/Browser2/Browser2.apk" 2>/dev/null
-
-		# AOSP camera app
-		mkdir -p "$package_tmp_dir/system/product/app/Camera2" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Camera2"
-		touch "$package_tmp_dir/system/product/app/Camera2/Camera2.apk" 2>/dev/null
-
-		# AOSP music player
-		mkdir -p "$package_tmp_dir/system/product/app/Music" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Music"
-		touch "$package_tmp_dir/system/product/app/Music/Music.apk" 2>/dev/null
-
-		# AOSP launcher search bar
-		mkdir -p "$package_tmp_dir/system/product/app/QuickSearchBox" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/QuickSearchBox"
-		touch "$package_tmp_dir/system/product/app/QuickSearchBox/QuickSearchBox.apk" 2>/dev/null
 	}
 
 	create_module_prop() {
@@ -3099,13 +3353,17 @@ done
 #--------------------------------------------------------------
 # Check if /data partition is decrypted
 #--------------------------------------------------------------
-while [[ ! $(touch /data/data/TETHER_PERMISSIONS_TEST 2>/dev/null) ]]; do
+test_file="/data/data/PERMISSION_TEST"
+
+while [[ ! -f $test_file ]]; do
 	# Delay to prevent excessive CPU usage on startup
-	read -rt "5" <> <(:) || :
+	read -rt "7" <> <(:) || :
+	# Create test_file file
+	touch "$test_file" 2>/dev/null
 done
 
-# User has unlocked device, delete test file
-rm -rf "/data/data/TETHER_PERMISSIONS_TEST" 2>/dev/null
+# User has unlocked device, delete test_file
+rm -f "$test_file" 2>/dev/null
 
 #--------------------------------------------------------------
 # Change hostname to device model -- instead of 'localhost'
@@ -3275,11 +3533,11 @@ EOF
 
 		# update module description
 		[[ $font_option == "y" || $font_option == "Y" ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
+			sed -i "s/description\=.*/description\=Installs tether, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		[[ $font_option != "y" && $font_option != "Y" ]] && {
-			sed -i "s/description\=.*/description\=Installs tether ${tether_version}, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
+			sed -i "s/description\=.*/description\=Installs tether, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		# Copy module files to tether/
@@ -3368,15 +3626,42 @@ EOF
 #--------------------------------------------------------------
 replace-su() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s\n' "$SCRIPT_NAME"
-		printf '          %s --help\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Remove phh-su from AOSP GSI\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - su removal tool.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m removes phh-su from AOSP GSIs. phh-su is installed
+	by default on AOSP GSIs and as such causes conflicts with Magisk.
+	Flash device stock boot image, gain root access with phh-su and run
+	this program to remove phh-su. This program will only work on Android >= 12
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -3415,9 +3700,14 @@ replace-su() {
 		}
 	}
 
+	failure_to_remount() {
+		print_error "Failed to remount /system as RW"
+		exit 1
+	}
+
 	replace_root() {
 		# mount /system as RW only work on vndk-lite variants
-		mount -o remount,rw / &>/dev/null
+		mount -o remount,rw / &>/dev/null || failure_to_remount "$@"
 		rm -r "/system/bin/phh-remotectl.sh" 2>/dev/null
 		rm -r "/system/bin/phh-securize.sh" 2>/dev/null
 		rm -r "/system/bin/phh-su" 2>/dev/null
@@ -3426,7 +3716,7 @@ replace-su() {
 		umount -lf /system/xbin &>/dev/null
 		rm -r "/system/xbin" 2>/dev/null
 		mount -o remount,ro / &>/dev/null
-		print_success "PHH-SU has been deleted successfully"
+		print_success "PHH-SU has been removed successfully"
 		print_aligned "Reboot your device"
 		exit 0
 	}
@@ -3444,15 +3734,42 @@ replace-su() {
 #--------------------------------------------------------------
 setup() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s\n' "$SCRIPT_NAME"
-		printf '          %s --help\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Post-installation setup utility for voidlinux\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - setup tool for void linux.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m provides an interactive CLI for the installation of useful
+	software on Void Linux.
+	\033[1;97mNOTE:\033[00m This program does not install Void Linux itself, only it's
+	components, i.e the desktop environment or graphic drivers.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -4636,17 +4953,47 @@ EOF
 #--------------------------------------------------------------
 swapfile() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION] [FILESIZE] [FILENAME]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --on 2048M ~/.local/share/swapfile0\n' "$SCRIPT_NAME"
-		printf '          %s --off ~/.local/share/swapfile0\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '             --on       Create and Enable swapfile\n'
-		printf '             --off      Disable and Delete swapfile\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Creates a swapfile with user specified parameters\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - swapfile manager.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION] [FILESIZE] [FILENAME]
+
+\033[1;97mDESCRIPTION\033[00m
+	Perform system swapfile management on the go. This program will create
+	or delete a specified swapfile.
+
+	\033[1;97m-d, --disable\033[00m [FILENAME]
+		disable and delete [FILENAME] swapfile.
+
+	\033[1;97m-e, --enable\033[00m [FILESIZE] [FILENAME]
+		create and enable [FILENAME] swapfile with size [FILESIZE].
+		[FILESIZE] must be specified with the byte type i.e 2048MB.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -4858,10 +5205,7 @@ swapfile() {
 	check_input_option() {
 		for primary_options in "${@:1}"; do
 			case "$primary_options" in
-				-h | --help)
-					print_help
-				;;
-				--off)
+				-d | --disable)
 					# Check for multiple instances
 					multiple_instances "$@"
 					
@@ -4896,13 +5240,16 @@ swapfile() {
 
 					delete_swapfile "$@"
 				;;
-				--on)
+				-e | --enable)
 					# Check for multiple instances
 					multiple_instances "$@"
 
 					check_dependencies "$@"
 
 					create_swapfile "$@"
+				;;
+				-h | --help)
+					print_help
 				;;
 				-V | --version)
 					print_version
@@ -4942,17 +5289,48 @@ swapfile() {
 #--------------------------------------------------------------
 terp-deploy() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --setup\n' "$SCRIPT_NAME"
-		printf '          %s --install\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -i, --install  Setup chroot after installation\n'
-		printf '         -s, --setup    Setup chroot after mounting\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'Chroot post-install and post-mount setup tool\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - chroot setup tool for android.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	Post-install and post-mount setup tool for chroot images running on Android.
+	This program was created for, and will only work for chroot images created using
+	terp-install and terp-mount.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-s, --setup\033[00m
+		setup chroot after mounting. this option is run automatically by
+		terp-mount and manual usage is restricted.
+
+	\033[1;97m-i, --install\033[00m
+		setup chroot image after installation with terp-install.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -5276,16 +5654,49 @@ terp-deploy() {
 #--------------------------------------------------------------
 terp-install() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --void\n\n' "$SCRIPT_NAME"
-		printf 'Options: -a  --alpine   Install alpine linux chroot\n'
-		printf '         -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n'
-		printf '         -v, --void     Install void linux chroot\n\n'
-		printf 'Chroot installation tool\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - chroot installation tool for android.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	Chroot image creation tool for Android. This program downloads and
+	extracts the rootfs file of the specifed linux distribution into an
+	image file. The image file is portable and can be transferred between
+	devices. This program only supports ARM64 rootfs files and Alpine Linux
+	and Void Linux are the only supported Linux distributions.
+
+	\033[1;97m-a, --alpine\033[00m
+		download and install alpine linux rootfs.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+	\033[1;97m-v, --void\033[00m
+		download and install void linux rootfs.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -5708,16 +6119,47 @@ terp-install() {
 #--------------------------------------------------------------
 terp-mount() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --alpine\n\n' "$SCRIPT_NAME"
-		printf 'Options: -a, --alpine   Mount alpine linux chroot\n'
-		printf '         -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n'
-		printf '         -v, --void     Mount void linux chroot\n\n'
-		printf 'Chroot initialization tool\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - chroot initialization tool for android.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	Mount tool for chroot images running on Android. This program was created
+	for, and will only work for chroot images created using terp-install.
+
+	\033[1;97m-a, --alpine\033[00m
+		mount alpine linux chroot image.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+	\033[1;97m-v, --void\033[00m
+		mount void linux chroot image.
+
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -5917,18 +6359,47 @@ terp-mount() {
 #--------------------------------------------------------------
 terp-umount() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --void\n' "$SCRIPT_NAME"
-		printf '          %s --remove void\n\n' "$SCRIPT_NAME"
-		printf 'Options: -a  --alpine   Unmount alpine linux chroot\n'
-		printf '         -h, --help     Print out this message\n'
-		printf '         -r, --remove   Unmount and delete specified chroot\n'
-		printf '         -V, --version  Show version information\n'
-		printf '         -v, --void     Unmount void linux chroot\n\n'
-		printf 'Chroot unmount tool\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - chroot unmount tool for android.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	Unmount tool for chroot images running on Android. This program was
+	created for, and will only work for chroot images created using terp-install.
+
+	\033[1;97m-a, --alpine\033[00m
+		umount alpine linux chroot image.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+	\033[1;97m-v, --void\033[00m
+		umount void linux chroot image.
+
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -6179,15 +6650,39 @@ terp-umount() {
 #--------------------------------------------------------------
 tfetch() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s\n' "$SCRIPT_NAME"
-		printf '          %s --help\n\n' "$SCRIPT_NAME"
-		printf 'Options: -h, --help     Print out this message\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf 'System resource information tool\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - system resource information tool.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m displays system hardware information.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-V, --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -6682,17 +7177,46 @@ tfetch() {
 #--------------------------------------------------------------
 touchzip() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION] [FILENAME] [FILE...]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --encrypt newfile.7z file1 file2\n' "$SCRIPT_NAME"
-		printf '          %s --unencrypt newfile.7z file1 file2\n\n' "$SCRIPT_NAME"
-		printf 'Options: -en, --encrypt    Create an encrypted 7z archive\n'
-		printf '         -h,  --help       Print out this message\n'
-		printf '         -un, --unencrypt  Create an unencrypted 7z archive\n'
-		printf '         -V,  --version    Show version information\n\n'
-		printf 'Create an encrypted/unencrypted 7z archive\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - create 7z archives.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION] [FILENAME] [FILE(s)...]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m creates an (un)encrypted [FILENAME].7z archive file of the
+	specified [FILE(s)...].
+
+	\033[1;97m-en, --encrypt\033[00m [FILENAME] [FILE(s)...]
+		create an encrypted [FILENAME].7z archive of [FILE(s)...].
+
+	\033[1;97m-h,  --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-un, --unencrypt\033[00m [FILENAME] [FILE(s)...]
+		create an unencrypted [FILENAME].7z archive of [FILE(s)...].
+
+	\033[1;97m-V,  --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -6826,19 +7350,54 @@ touchzip() {
 #--------------------------------------------------------------
 whatsapp-backup() {
 	print_help() {
-		printf '%s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [OPTION]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --encrypt\n' "$SCRIPT_NAME"
-		printf '          %s --restore\n\n' "$SCRIPT_NAME"
-		printf 'Options: -en, --encrypt    Create an encrypted backup\n'
-		printf '         -h,  --help       Print out this message\n'
-		printf '         -l,  --list       List all available backups\n'
-		printf '         -un, --unencrypt  Create an unencrypted backup\n'
-		printf '         -r,  --restore    Restore whatsapp from available backups\n'
-		printf '         -V,  --version    Show version information\n\n'
-		printf 'Create and restore whatsapp backups\n'
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - create and restore whatsapp backups.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [OPTION]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m creates or restores (un)encrypted backups of
+	Whatsapp. It saves and restores the backups from external storage
+	and will only fallback to using Android's internal storage if no
+	external storage device exists.
+
+	\033[1;97m-en, --encrypt\033[00m
+		create an encrypted backup of whatsapp.
+
+	\033[1;97m-h,  --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-l,  --list\033[00m
+		list available backup(s).
+
+	\033[1;97m-un, --unencrypt\033[00m
+		create an unencrypted backup of whatsapp.
+
+	\033[1;97m-r,  --restore\033[00m
+		restore whatsapp from available backup(s).
+
+	\033[1;97m-V,  --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_dependencies() {
@@ -7136,24 +7695,57 @@ tether() {
 	done
 
 	print_help() {
-		printf '%s %s (C) 2023, Kolade Ayomide Olanrewaju (tether)\n' "$SCRIPT_NAME" "$SCRIPT_VERSION"
-		printf '%s is Licensed under GPL-3.0-or-later. See <https://www.gnu.org/licenses/> for detailed copyright notices.\n\n' "$SCRIPT_NAME"
-		printf 'Usage:    %s [FUNCTION] [ARGUMENTS...]\n' "$SCRIPT_NAME"
-		printf '          %s [OPTION] [FOLDER]\n\n' "$SCRIPT_NAME"
-		printf 'Examples: %s --install /usr/bin\n' "$SCRIPT_NAME"
-		printf '          %s touchzip --encrypt dotfiles.7z .bashrc\n' "$SCRIPT_NAME"
-		printf '          %s extract dotfiles.7z\n\n' "$SCRIPT_NAME"
-		printf 'Options: -b, --banner   Show program banner\n'
-		printf '         -h, --help     Print out this message\n'
-		printf '         -i, --install  Create symbolic links in the specified folder\n'
-		printf '         -l, --list     List all available functions\n'
-		printf '         -s, --silent   Create symbolic links without printing to stdout\n'
-		printf '         -V, --version  Show version information\n\n'
-		printf '\033[1;97m%s\033[00m is a multi-call shell script that combines many applets into a single executable.\n' "$SCRIPT_NAME"
-		printf 'Create symbolic links to \033[1;97m%s\033[00m for each function and \033[1;97m%s\033[00m will act like whatever it was invoked as\n\n' "$SCRIPT_NAME" "$SCRIPT_NAME"
-		printf '\033[1;97mCurrently defined functions (%s):\033[00m\n' "$func_count"
-		printf '%s\n' "${function_space%,*}"
-		exit 0
+echo -e "\033[1;97mNAME\033[00m
+	$SCRIPT_NAME - multicall shell script.
+
+\033[1;97mSYNOPSIS\033[00m
+	$SCRIPT_NAME [FUNCTION] [ARGUMENT(s)...]
+	$SCRIPT_NAME [OPTION] [FOLDER]
+
+\033[1;97mDESCRIPTION\033[00m
+	\033[1;97m$SCRIPT_NAME\033[00m is a multi-call shell script that combines many applets
+	into a single executable. Think busybox, toybox or GNU coreutils,
+	except as a shell script. Create symbolic links to \033[1;97m$SCRIPT_NAME\033[00m for each
+	function and \033[1;97m$SCRIPT_NAME\033[00m will act like whatever it was invoked as.
+
+	\033[1;97m-b, --banner\033[00m
+		display program banner and exit.
+
+	\033[1;97m-h, --help\033[00m
+		display this help message and exit.
+
+	\033[1;97m-i, --install\033[00m [FOLDER]
+		create symbolic links of all the defined functions in the
+		specified [FOLDER].
+
+	\033[1;97m-l, --list\033[00m
+		list all defined functions.
+
+	\033[1;97m-s, --silent\033[00m [FOLDER]
+		create symbolic links of all the defined functions in the
+		specified [FOLDER] without displaying any output.
+
+	\033[1;97m-V,   --version\033[00m
+		output version information and exit.
+
+\033[1;97mAUTHOR\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Written by Kolade Ayomide Olanrewaju.
+
+\033[1;97mREPORTING BUGS\033[00m
+	Create a new issue at <https://github.com/teth3r/tether/>.
+
+\033[1;97mCOPYRIGHT\033[00m
+	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
+	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+
+tether $SCRIPT_VERSION"
+exit 0
 	}
 
 	check_input_option() {
@@ -7196,7 +7788,7 @@ tether() {
 				;;
 				-l | --list)
 					printf '\033[1;97mCurrently defined functions (%d):\033[00m\n' "$func_count"
-					printf '%s\n' "$function_space"
+					printf '%s\n' "${function_space%,*}"
 					exit 0
 				;;
 				-s | --silent)
@@ -7228,7 +7820,6 @@ tether() {
 				;;
 				-V | --version)
 					print_version
-					exit 0
 				;;
 				-*)
 					[[ -z ${primary_options#*\-} || -z ${primary_options/\-\-*} ]] && {

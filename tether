@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.19.0015"
+SCRIPT_VERSION="2024.02.19.0052"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -3031,6 +3031,7 @@ exit 0
 		mkdir -p "$package_tmp_dir/system/app" 2>/dev/null || print_write_error "$package_tmp_dir/system/app"
 		mkdir -p "$package_tmp_dir/system/bin" 2>/dev/null || print_write_error "$package_tmp_dir/system/bin"
 		mkdir -p "$package_tmp_dir/system/etc" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc"
+		mkdir -p "$package_tmp_dir/system/product" 2>/dev/null || print_write_error "$package_tmp_dir/system/product"
 
 		# Copy magisk busybox if not found in PATH
 		[[ ! $(type -p "busybox") ]] && {
@@ -3219,6 +3220,23 @@ exit 0
 		# Populate app/
 		mkdir -p "$package_tmp_dir/system/app/Stk" 2>/dev/null || print_write_error "$package_tmp_dir/system/app/Stk"
 		touch "$package_tmp_dir/system/app/Stk/Stk.apk" 2>/dev/null
+
+		# Populate product/app/
+		# AOSP webview shell
+		mkdir -p "$package_tmp_dir/system/product/app/Browser2" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Browser2"
+		touch "$package_tmp_dir/system/product/app/Browser2/Browser2.apk" 2>/dev/null
+
+		# AOSP camera app
+		mkdir -p "$package_tmp_dir/system/product/app/Camera2" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Camera2"
+		touch "$package_tmp_dir/system/product/app/Camera2/Camera2.apk" 2>/dev/null
+
+		# AOSP music player
+		mkdir -p "$package_tmp_dir/system/product/app/Music" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/Music"
+		touch "$package_tmp_dir/system/product/app/Music/Music.apk" 2>/dev/null
+
+		# AOSP launcher search bar
+		mkdir -p "$package_tmp_dir/system/product/app/QuickSearchBox" 2>/dev/null || print_write_error "$package_tmp_dir/system/product/app/QuickSearchBox"
+		touch "$package_tmp_dir/system/product/app/QuickSearchBox/QuickSearchBox.apk" 2>/dev/null
 	}
 
 	create_module_prop() {
@@ -3356,7 +3374,7 @@ test_file="/data/data/PERMISSION_TEST"
 
 while [[ ! -f $test_file ]]; do
 	# Delay to prevent excessive CPU usage on startup
-	read -rt "7" <> <(:) || :
+	read -rt "5" <> <(:) || :
 	# Create test_file file
 	touch "$test_file" 2>/dev/null
 done
@@ -3412,20 +3430,24 @@ done
 }
 
 #--------------------------------------------------------------
-# Create swapfile and disable ZRAM
+# Create swapfile
 #--------------------------------------------------------------
-[[ -f $MODDIR/swapfile0 ]] && {
-	rm -rf "$MODDIR"/swapfile0 2>/dev/null
-}
-
 fallocate -l 4G "$MODDIR/swapfile0" &&
 chown root:root "$MODDIR/swapfile0" &&
 chmod 0600 "$MODDIR/swapfile0" &&
-mkswap "$MODDIR/swapfile0" &&
+mkswap "$MODDIR/swapfile0" &>/dev/null &&
 swapon "$MODDIR/swapfile0"
 
-[[ $(cat /proc/swaps) == *zram0* ]] && {
-	swapoff /dev/block/zram0
+#--------------------------------------------------------------
+# Disable zRAM for devices with RAM > 4096MiB
+#--------------------------------------------------------------
+mem_total="$(cat /proc/meminfo)"
+mem_total="${mem_total//kB*}"
+mem_total="${mem_total//*MemTotal:}"
+mem_total="${mem_total//[[:space:]]}"
+
+[[ $mem_total -gt 4194304 ]] && {
+	swapoff /dev/block/zram0 &>/dev/null
 }
 
 #--------------------------------------------------------------

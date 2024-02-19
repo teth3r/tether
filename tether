@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.19.0052"
+SCRIPT_VERSION="2024.02.19.0106"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -759,7 +759,7 @@ exit 0
 			print_missing_dependencies "wget"
 		}
 
-		[[ $(type -p busybox) ]] && WGET="busybox wget"
+		[[ $(type -p busybox) ]] && WGET="busybox wget --no-check-certificate"
 		[[ $(type -p wget) ]] && WGET="wget"
 
 		# Check for internet connection
@@ -3065,14 +3065,14 @@ exit 0
 	download_dnscrypt() {
 		mkdir -p "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/dnscrypt-proxy"
 		cd "$package_tmp_dir" 2>/dev/null || print_dir_change_error "$package_tmp_dir"
-		print_warning "Downloading 'dnscrypt-proxy version $dnscrypt_version'"
+		print_warning "Downloading 'dnscrypt-proxy'"
 		printf '\n'
 
 		# Download dnscrypt-proxy for arm64 Android
 		download_link="https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/${dnscrypt_version}/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
 		output_path="$package_tmp_dir/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
 
-		busybox wget "$download_link" -O "$output_path" &>/dev/null ||
+		busybox wget --no-check-certificate "$download_link" -O "$output_path" &>/dev/null ||
 		download_fail "dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
 
 		# Extract downloaded zip file
@@ -3081,10 +3081,7 @@ exit 0
 		cp -rf "$package_tmp_dir/android-arm64/dnscrypt-proxy" "$package_tmp_dir/system/bin/" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/dnscrypt-proxy"
 		rm -r "$package_tmp_dir/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip" "$package_tmp_dir/android-arm64" 2>/dev/null
 
-		# Download custom config files for dnscrypt-proxy
-		print_warning "Downloading 'dnscrypt-proxy' config files"
-		printf '\n'
-		busybox wget https://github.com/teth3r/blocklist/archive/refs/heads/main.zip -O "$package_tmp_dir/main.zip" &>/dev/null ||
+		busybox wget --no-check-certificate https://github.com/teth3r/blocklist/archive/refs/heads/main.zip -O "$package_tmp_dir/main.zip" &>/dev/null ||
 		download_fail "main.zip"
 
 		# Extract downloaded zip file
@@ -3101,11 +3098,11 @@ exit 0
 	}
 
 	download_bash() {
-		print_warning "Downloading 'bash' static binary (ccbins)"
+		print_warning "Downloading 'bash'"
 		printf '\n'
 
 		# Download bash static binary from ccbins magisk module repo
-		busybox wget https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/raw/master/bash/bash-arm64 -O "$package_tmp_dir/bash-arm64" &>/dev/null ||
+		busybox wget --no-check-certificate https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/raw/master/bash/bash-arm64 -O "$package_tmp_dir/bash-arm64" &>/dev/null ||
 		download_fail "bash-arm64"
 		cp -rf "$package_tmp_dir/bash-arm64" "$package_tmp_dir/system/bin/bash" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/bash"
 		rm -rf "$package_tmp_dir/bash-arm64" 2>/dev/null
@@ -3113,24 +3110,24 @@ exit 0
 		# Add custom mkshrc file
 		mkdir -p "$package_tmp_dir/system/etc" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc"
 		mksh_file="$package_tmp_dir/system/etc/mkshrc"
-		busybox wget "https://github.com/teth3r/dotfiles/raw/master/mkshrc" -O "$mksh_file" &>/dev/null ||
+		busybox wget --no-check-certificate "https://github.com/teth3r/dotfiles/raw/master/mkshrc" -O "$mksh_file" &>/dev/null ||
 		download_fail "mkshrc"
 
 		# Add custom bashrc file
 		mkdir -p "$package_tmp_dir/system/etc/bash" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/bash"
 		bash_file="$package_tmp_dir/system/etc/bash/.bashrc"
-		busybox wget "https://github.com/teth3r/dotfiles/raw/master/bashrc" -O "$bash_file" &>/dev/null ||
+		busybox wget --no-check-certificate "https://github.com/teth3r/dotfiles/raw/master/bashrc" -O "$bash_file" &>/dev/null ||
 		download_fail "bashrc"
 	}
 
 	download_zip() {
-		print_warning "Downloading '7zip' static binary"
+		print_warning "Downloading '7zip'"
 		printf '\n'
 
 		mkdir -p "$package_tmp_dir/new" 2>/dev/null
 
 		# Download 7zip for arm64 Android
-		busybox wget "https://7-zip.org/a/7z${z_version}-linux-arm64.tar.xz" -O "$package_tmp_dir/new/7z${z_version}-linux-arm64.tar.xz" &>/dev/null ||
+		busybox wget --no-check-certificate "https://7-zip.org/a/7z${z_version}-linux-arm64.tar.xz" -O "$package_tmp_dir/new/7z${z_version}-linux-arm64.tar.xz" &>/dev/null ||
 		download_fail "7z${z_version}-linux-arm64.tar.xz"
 
 		cd "${package_tmp_dir}/new" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/new"
@@ -3153,7 +3150,7 @@ exit 0
 		printf '\n'
 
 		# Download latest version of tether
-		busybox wget "https://raw.githubusercontent.com/teth3r/tether/master/tether" -O "$package_tmp_dir/tether" &>/dev/null ||
+		busybox wget --no-check-certificate "https://raw.githubusercontent.com/teth3r/tether/master/tether" -O "$package_tmp_dir/tether" &>/dev/null ||
 		download_fail "tether"
 
 		chmod +x "$package_tmp_dir/tether"
@@ -3163,11 +3160,11 @@ exit 0
 
 	download_custom_iosevka() {
 		[[ $font_variant == "sans" ]] && {
-			print_warning "Downloading 'Iosevka"
+			print_warning "Downloading 'Iosevka'"
 			printf '\n'
 
 			# Download latest version of Iosevka custom build
-			busybox wget "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka.7z" -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
+			busybox wget --no-check-certificate "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka.7z" -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
 			download_fail "Iosevka"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
@@ -3176,11 +3173,11 @@ exit 0
 		}
 
 		[[ $font_variant == "slab" ]] && {
-			print_warning "Downloading 'Iosevka-Slab"
+			print_warning "Downloading 'Iosevka-Slab'"
 			printf '\n'
 
 			# Download latest version of Iosevka custom build
-			busybox wget "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka-slab.7z" -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
+			busybox wget --no-check-certificate "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka-slab.7z" -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
 			download_fail "Iosevka-Slab"
 
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
@@ -5829,7 +5826,7 @@ exit 0
 			shasum_file="https://repo-default.voidlinux.org/live/current/sha256sum.txt"
 
 			# Download sha256sum.txt
-			busybox wget "$shasum_file" -O "$tmp_dir/sha256sum.txt" &>/dev/null ||
+			busybox wget --no-check-certificate "$shasum_file" -O "$tmp_dir/sha256sum.txt" &>/dev/null ||
 
 			# Error handling on download failure
 			download_fail_shasum "$@"
@@ -5849,7 +5846,7 @@ exit 0
 			shasum_file="https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/aarch64/alpine-minirootfs-3.19.1-aarch64.tar.gz.sha256"
 
 			# Download sha256sum.txt
-			busybox wget "$shasum_file" -O "$tmp_dir/sha256sum.txt" &>/dev/null ||
+			busybox wget --no-check-certificate "$shasum_file" -O "$tmp_dir/sha256sum.txt" &>/dev/null ||
 
 			# Error handling on download failure
 			download_fail_shasum "$@"
@@ -5871,7 +5868,7 @@ exit 0
 		printf '\n'
 
 		# Download latest available rootfs
-		busybox wget "$rootfs_version" -O "${tmp_dir}/${rootfs_file}" &>/dev/null ||
+		busybox wget --no-check-certificate "$rootfs_version" -O "${tmp_dir}/${rootfs_file}" &>/dev/null ||
 
 		# Error handling on download failure
 		download_fail "$@"

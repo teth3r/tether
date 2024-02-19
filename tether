@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.19.0106"
+SCRIPT_VERSION="2024.02.19.2337"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -5738,18 +5738,18 @@ exit 0
 
 		# Declare directories for void linux
 		[[ $terp_flavor == "void" ]] && {
-			chroot_image="/data/voidimg/void.img"
-			chroot_image_dir="/data/voidimg"
-			chroot_install_dir="/data/voidlinux"
+			chroot_image="/data/voidlinux/voidlinux.img"
+			chroot_image_dir="/data/voidlinux"
+			chroot_install_dir="/data/voidlinux/mountpoint"
 			# Let device handle loop devices
 			block_device="$(losetup -f 2>/dev/null)"
 		}
 
 		# Declare directories for alpine linux
 		[[ $terp_flavor == "alpine" ]] && {
-			chroot_image="/data/alpineimg/alpine.img"
-			chroot_image_dir="/data/alpineimg"
-			chroot_install_dir="/data/alpinelinux"
+			chroot_image="/data/alpinelinux/alpinelinux.img"
+			chroot_image_dir="/data/alpinelinux"
+			chroot_install_dir="/data/alpinelinux/mountpoint"
 			# Let device handle loop devices
 			block_device="$(losetup -f 2>/dev/null)"
 		}
@@ -5933,8 +5933,8 @@ exit 0
 		print_warning "Preparing install location"
 		printf '\n'
 		cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
-		rm -r "$chroot_image" 2>/dev/null
 		rm -r "$chroot_install_dir" 2>/dev/null
+		rm -r "$chroot_image" 2>/dev/null
 
 		# Process user input
 		read -rep "Input desired size of chroot image: " input_size
@@ -6198,8 +6198,8 @@ exit 0
 
 		# Declare directories for void linux
 		[[ $terp_flavor == "void" ]] && {
-			chroot_image="/data/voidimg/void.img"
-			chroot_install_dir="/data/voidlinux"
+			chroot_image="/data/voidlinux/voidlinux.img"
+			chroot_install_dir="/data/voidlinux/mountpoint"
 			# Let device handle loop devices
 			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
 			block_device="${block_device/*\(}"
@@ -6212,8 +6212,8 @@ exit 0
 
 		# Declare directories for alpine linux
 		[[ $terp_flavor == "alpine" ]] && {
-			chroot_image="/data/alpineimg/alpine.img"
-			chroot_install_dir="/data/alpinelinux"
+			chroot_image="/data/alpinelinux/alpinelinux.img"
+			chroot_install_dir="/data/alpinelinux/mountpoint"
 			# Let device handle loop devices
 			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
 			block_device="${block_device/*\(}"
@@ -6438,8 +6438,8 @@ exit 0
 
 		# Declare directories for void linux
 		[[ $terp_flavor == "void" ]] && {
-			chroot_image="/data/voidimg/void.img"
-			chroot_install_dir="/data/voidlinux"
+			chroot_image="/data/voidlinux/voidlinux.img"
+			chroot_install_dir="/data/voidlinux/mountpoint"
 			# Let device handle loop devices
 			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
 			block_device="${block_device/*\(}"
@@ -6448,8 +6448,8 @@ exit 0
 
 		# Declare directories for alpine linux
 		[[ $terp_flavor == "alpine" ]] && {
-			chroot_image="/data/alpineimg/alpine.img"
-			chroot_install_dir="/data/alpinelinux"
+			chroot_image="/data/alpinelinux/alpinelinux.img"
+			chroot_install_dir="/data/alpinelinux/mountpoint"
 			# Let device handle loop devices
 			block_device="$(losetup -j "$chroot_image" 2>/dev/null)"
 			block_device="${block_device/*\(}"
@@ -6461,8 +6461,8 @@ exit 0
 			print_error "Chroot not detected"
 			print_aligned "Run 'terp-install --${terp_flavor}' before proceeding"
 			[[ -d $chroot_install_dir ]] && {
-				rm -r "${chroot_image%/*}" 2>/dev/null
 				rm -r "$chroot_install_dir" 2>/dev/null
+				rm -r "${chroot_image%/*}" 2>/dev/null
 			}
 			exit 1
 		}
@@ -6578,8 +6578,8 @@ exit 0
 				}
 
 				unset exit_status
-				rm -r "${chroot_image%/*}" &&
-				rm -r "$chroot_install_dir" &&
+				rm -r "$chroot_install_dir" 2>/dev/null &&
+				rm -r "${chroot_image%/*}" 2>/dev/null &&
 				exit_status=0
 
 				[[ -n $exit_status && $exit_status -eq 0 ]] && {

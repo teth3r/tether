@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.19.2337"
+SCRIPT_VERSION="2024.02.25.1311"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -109,35 +109,35 @@ CPU_CORE_COUNT="$((CPU_CORE_COUNT + 1))"
 # Print out error message to stderr
 #--------------------------------------------------------------
 print_error() {
-	printf '\033[1;97m[\033[1;31m-\033[1;97m] %s \n\033[00m' "$@" >&2
+	printf "\033[1;97m[\033[1;31m-\033[1;97m] %s \n\033[00m" "$@" >&2
 }
 
 #--------------------------------------------------------------
 # Print out success message
 #--------------------------------------------------------------
 print_success() {
-	printf '\033[1;97m[\033[1;32m+\033[1;97m] %s \n\033[00m' "$@"
+	printf "\033[1;97m[\033[1;32m+\033[1;97m] %s \n\033[00m" "$@"
 }
 
 #--------------------------------------------------------------
 # Print out warning/notice
 #--------------------------------------------------------------
 print_warning() {
-	printf '\033[1;97m[\033[1;35m*\033[1;97m] %s \n\033[00m' "$@"
+	printf "\033[1;97m[\033[1;35m*\033[1;97m] %s \n\033[00m" "$@"
 }
 
 #--------------------------------------------------------------
 # Print out non bold text aligned with print_error
 #--------------------------------------------------------------
 print_aligned() {
-	printf '    %s\n' "$@"
+	printf "    %s\n" "$@"
 }
 
 #--------------------------------------------------------------
 # Print out status message on exit
 #--------------------------------------------------------------
 run_on_exit() {
-	printf '\n\n'
+	printf "\n\n"
 	print_error "Aborted"
 	unset file_password
 	unset file_password2
@@ -148,7 +148,7 @@ run_on_exit() {
 # Remove files and print out status message on exit
 #--------------------------------------------------------------
 remove_file_on_exit() {
-	printf '\n\n'
+	printf "\n\n"
 	print_error "Aborted"
 	rm -r "$@" 2>/dev/null
 	unset file_password
@@ -246,13 +246,13 @@ print_not_normal_user() {
 # Print version info
 #--------------------------------------------------------------
 print_version() {
-	printf '%s (tether) %s\n
+	printf "%s (tether) %s\n
 Copyright (C) 2023, Kolade Ayomide Olanrewaju.
 License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
-Written by Kolade Ayomide Olanrewaju.\n' "$SCRIPT_NAME" "${SCRIPT_VERSION}"
+Written by Kolade Ayomide Olanrewaju.\n" "$SCRIPT_NAME" "${SCRIPT_VERSION}"
 exit 0
 }
 
@@ -261,10 +261,10 @@ exit 0
 #--------------------------------------------------------------
 create_password() {
 	read -rsp "Input Password: " file_password
-	printf '\n'
+	printf "\n"
 
 	read -rsp "Verify Password: " file_password2
-	printf '\n\n'
+	printf "\n\n"
 
 	[[ $file_password != "$file_password2" ]] && {
 		print_error "Passwords do not match"
@@ -389,7 +389,7 @@ print_usage_bar() {
 	done
 
 	# Output colored progress bar
-	printf '%s[ %s%s ]\n' "${color_white}" "${out_block}" "${out_empty}"
+	printf "%s[ %s%s ]\n" "${color_white}" "${out_block}" "${out_empty}"
 }
 
 #--------------------------------------------------------------
@@ -402,16 +402,16 @@ change_timezone() {
 	# Show available timezone files
 	for zone_files in /usr/share/zoneinfo/*; do
 		[[ -d $zone_files && ${zone_files##*/} != posix && ${zone_files##*/} != right ]] && {
-			printf '%s. %s  ' "${zone_count}" "${zone_files##*/}"
+			printf "%s. %s  " "${zone_count}" "${zone_files##*/}"
 			time_zone[zone_count]="$zone_files"
 			zone_count=$((zone_count + 1))
 		}
 	done
 
-	printf '\n\n'
+	printf "\n\n"
 	# Read user input
 	read -rep "Select Timezone: " tz_option
-	printf '\n'
+	printf "\n"
 
 	# Handles invalid user input
 	[[ -z $tz_option ]] && {
@@ -421,7 +421,7 @@ change_timezone() {
 
 	case "$tz_option" in
 		-*)
-			printf '\n'
+			printf "\n"
 			[[ -z ${tz_option#*\-} || -z ${tz_option/\-\-*} ]] && {
 				print_error "Unrecognized option '${tz_option}'" &&
 				exit 1
@@ -436,14 +436,14 @@ change_timezone() {
 				# List subzones files
 				zone_count=1
 				for sub_zone_files in "${time_zone[$tz_option]}"/*; do
-					printf '%s. %s  ' "${zone_count}" "${sub_zone_files##*/}"
+					printf "%s. %s  " "${zone_count}" "${sub_zone_files##*/}"
 					sub_zone[zone_count]="$sub_zone_files"
 					zone_count=$((zone_count + 1))
 				done
-				printf '\n\n'
+				printf "\n\n"
 				# Read user input
 				read -rep "Select Region: " tz_locale
-				printf '\n'
+				printf "\n"
 
 				# If location in user selection is defined
 				[[ -f ${sub_zone[$tz_locale]} && $tz_locale -ge 1 && $tz_locale -le $zone_count ]] && {
@@ -456,14 +456,14 @@ change_timezone() {
 					# List all sublocale files
 					zone_count=1
 					for sub_region_files in "${sub_zone[$tz_locale]}"/*; do
-						printf '%s. %s  ' "${zone_count}" "${sub_region_files##*/}"
+						printf "%s. %s  " "${zone_count}" "${sub_region_files##*/}"
 						sub_region[zone_count]="$sub_region_files"
 						zone_count=$((zone_count + 1))
 					done
-					printf '\n\n'
+					printf "\n\n"
 					# Read user input
 					read -rep "Select Location: " sub_locale
-					printf '\n'
+					printf "\n"
 
 					# If location in user selection is defined
 					[[ -f ${sub_region[$sub_locale]} && $sub_locale -ge 1 && $sub_locale -le $zone_count ]] && {
@@ -513,11 +513,11 @@ change_timezone() {
 #--------------------------------------------------------------
 benchmark() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - single core performance benchmark tool.
+printf "\033[1;97mNAME\033[00m
+	%s - single core performance benchmark tool.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION] [NUMBER]
+	%s [OPTION] [NUMBER]
 
 \033[1;97mDESCRIPTION\033[00m
 	Perform quick system performance comparison using pure bash.
@@ -549,7 +549,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -566,7 +566,7 @@ exit 0
 			# Use bc to find mersenne numbers
 			# Use mersenne formula 2^n - 1
 			[[ $user_iteration -ge 63 ]] && {
-				mersenne_numbers=$( printf '%d ^ %d - %d\n' "2" "$prime_numbers" "1" | bc )
+				mersenne_numbers=$( printf "%d ^ %d - %d\n" "2" "$prime_numbers" "1" | bc )
 				mersenne_numbers=${mersenne_numbers//\\}
 				mersenne_numbers=${mersenne_numbers//[[:space:]]}
 			}
@@ -587,19 +587,19 @@ exit 0
 			[[ $primality_checker -eq 1 || $prime_numbers == 2 ]] && {
 				found_mersenne_primes=$(( found_mersenne_primes + 1 ))
 				mersenne_prime_largest="Largest Mersenne prime found M($prime_numbers) = $mersenne_numbers"
-				printf 'M(%s) = %s\n' "$prime_numbers" "$mersenne_numbers"
+				printf "M(%s) = %s\n" "$prime_numbers" "$mersenne_numbers"
 			}
 		done
 
 		# Show number of mersenne primes found
-		printf '\n'
+		printf "\n"
 		print_success "Total Mersenne primes found = ${found_mersenne_primes}"
-		printf '\n'
+		printf "\n"
 
 		# Show the largest mersenne prime found
 		[[ $found_mersenne_primes -gt 0 ]] && {
 			print_success "${mersenne_prime_largest}"
-			printf '\n'
+			printf "\n"
 		}
 
 		# Show the time taken to process
@@ -612,9 +612,9 @@ exit 0
 	show_on_exit() {
 		time_suffix="seconds"
 		[[ $SECONDS -eq 1 ]] && time_suffix="${time_suffix%s}"
-		printf '\n\n'
+		printf "\n\n"
 		print_error "Aborted"
-		printf '\n'
+		printf "\n"
 		print_success "Total Time taken = ${SECONDS} ${time_suffix}"
 		exit 1
 	}
@@ -637,7 +637,7 @@ exit 0
 
 					[[ $user_iteration -ge 32 ]] && {
 						print_warning "This may take a while"
-						printf '\n'
+						printf "\n"
 					}
 
 					# Switch to bc since bash overflows at > 2 ^ 62
@@ -645,7 +645,7 @@ exit 0
 						[[ ! $(type -p bc) ]] && print_missing_dependencies "bc"
 						print_warning "Switching from bash to bc"
 						print_aligned "Bash overflows at 2 ^ 63"
-						printf '\n'
+						printf "\n"
 					}
 
 					prime_test_benchmark "$@"
@@ -683,11 +683,11 @@ exit 0
 #--------------------------------------------------------------
 dotfiles() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - dotfile management tool.
+printf "\033[1;97mNAME\033[00m
+	%s - dotfile management tool.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
 	Replaces the dotfiles of the specified program with a custom version
@@ -749,7 +749,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -1226,18 +1226,19 @@ exit 0
 #--------------------------------------------------------------
 extract() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - extract compressed files from archive.
+printf "\033[1;97mNAME\033[00m
+	%s - extract compressed files from archive.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [FILE(s)...]
-	$SCRIPT_NAME [OPTION]
+	%s [FILE(s)...]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m will extract all the files in the specified [FILE(s)...] to
+	\033[1;97m%s\033[00m will extract all the files in the specified [FILE(s)...] to
 	a newly created folder in the current directory. The created folder
 	will be named according to the archive file being extracted.
 	For instance archive1.zip will extract into archive1/.
+
 	\033[1;97mNOTE:\033[00m If a folder already exist with the archive name,
 	the archive name + a random number will be used as the folder name
 	instead i.e archive1_30002/. 
@@ -1264,7 +1265,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -1281,7 +1282,7 @@ exit 0
 	}
 
 	failed_to_extract() {
-		printf '\n'
+		printf "\n"
 		rm -rf "$folder_name" 2>/dev/null
 		exit_status=1
 	}
@@ -1314,14 +1315,14 @@ exit 0
 
 					# Handles if $archive_file is a folder
 					[[ -d $archive_file ]] && {
-						printf '\n'
+						printf "\n"
 						print_error "Cannot extract '$archive_file': Not a valid archive"
 						exit_status=1
 					}
 
 					# Handles if $archive_file doesn't exist
 					[[ ! -e $archive_file ]] && {
-						printf '\n'
+						printf "\n"
 						print_error "Cannot extract '$archive_file': No such file"
 						exit_status=1
 					}
@@ -1390,8 +1391,8 @@ exit 0
 
 							# Alternative to `ls -A "$folder_name"`
 							# Check for successful decompression
-							[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
-								printf '\n'
+							[[ $(printf "%s\n" "$folder_name/"*) != "$folder_name/*" || $(printf "%s\n" "$folder_name/".*) != "$folder_name/.*" ]] && {
+								printf "\n"
 								print_success "Extracted '$archive_file' to '$folder_name'"
 								exit_status=0
 								return
@@ -1408,8 +1409,8 @@ exit 0
 
 					# Alternative to `ls -A "$folder_name"`
 					# Check for successful decompression
-					[[ $(printf '%s\n' "$folder_name/"*) != "$folder_name/*" || $(printf '%s\n' "$folder_name/".*) != "$folder_name/.*" ]] && {
-						printf '\n'
+					[[ $(printf "%s\n" "$folder_name/"*) != "$folder_name/*" || $(printf "%s\n" "$folder_name/".*) != "$folder_name/.*" ]] && {
+						printf "\n"
 						print_success "Extracted '$archive_file' to '$folder_name'"
 						exit_status=0
 					}
@@ -1440,15 +1441,15 @@ exit 0
 #--------------------------------------------------------------
 lyrics() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - batch download lrc files.
+printf "\033[1;97mNAME\033[00m
+	%s - batch download lrc files.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [FILE(s)...]
-	$SCRIPT_NAME [OPTION]
+	%s [FILE(s)...]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m reads the audio tags of the specified [FILE(s)...] and searches for
+	\033[1;97m%s\033[00m reads the audio tags of the specified [FILE(s)...] and searches for
 	and downloads the matching lrc file. The resulting lrc file will be
 	named according to the specified file i.e music1.flac -> music1.lrc.
 
@@ -1474,7 +1475,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -1500,7 +1501,7 @@ exit 0
 	}
 
 	connection_checker() {
-		printf '%s\n' "${output}" > "$lrc_file"
+		printf "%s\n" "${output}" > "$lrc_file"
 
 		[[ -f $lrc_file ]] && {
 			check_lrc="$(< "$lrc_file")"
@@ -1522,7 +1523,7 @@ exit 0
 	}
 
 	failed_to_fetch() {
-		printf 'FAILED\n'
+		printf "FAILED\n"
 		exit 1
 	}
 
@@ -1557,7 +1558,7 @@ exit 0
 		# Only process audio files
 		! [[ $parsed_file =~ .wav|.aac|.vorbis|.flac|.m4a|.mp3|.ogg|.opus|.lrc ]] && [[ ! -d $parsed_file ]] && {
 			print_error "'$parsed_file' is not a valid or supported audio file"
-			printf '\n'
+			printf "\n"
 			skip="true"
 			exit_status=1
 			return
@@ -1570,7 +1571,7 @@ exit 0
 			# Check if .lrc file is empty
 			[[ -n $check_lrc ]] && {
 				print_warning "'$parsed_file' is a Lyrics file"
-				printf '\n'
+				printf "\n"
 				skip="true"
 				exit_status=0
 				return
@@ -1578,7 +1579,7 @@ exit 0
 
 			# Delete .lrc file if it is empty
 			print_error "'$parsed_file' is not a valid Lyrics file"
-			printf '\n'
+			printf "\n"
 			rm "$parsed_file" 2>/dev/null
 			skip="true"
 			exit_status=1
@@ -1590,7 +1591,7 @@ exit 0
 			check_lrc="$(< "$lrc_file")"
 			[[ -n $check_lrc ]] && {
 				print_warning "Lyrics file for '$parsed_file' already exists"
-				printf '\n'
+				printf "\n"
 				skip="true"
 				exit_status=0
 				return
@@ -1603,7 +1604,7 @@ exit 0
 		# Handles missing tags
 		[[ -z $artist || -z $title ]] && {
 			print_error "'$parsed_file' file has incorrect or invalid metadata"
-			printf '\n'
+			printf "\n"
 			skip="true"
 			exit_status=1
 			return
@@ -1634,7 +1635,7 @@ exit 0
 		fallback_artist="${artist}"
 
 		# Remove diacritics from strings
-		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+		artist="$(printf "%s\n" "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Useful for CJK characters
 		[[ -z $artist || $artist == *"???"* ]] && artist="${fallback_artist}"
@@ -1663,7 +1664,7 @@ exit 0
 		fallback_title="${title}"
 
 		# Remove diacritics from strings
-		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+		title="$(printf "%s\n" "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Useful for CJK characters
 		[[ -z $title || $title == *"???"* ]] && title="${fallback_title}"
@@ -1708,7 +1709,7 @@ exit 0
 			output="${output//"\\\""}"
 			output="${output//"\"}"*}"
 
-			printf '%b\n' "${output}" > "$lrc_file"
+			printf "%b\n" "${output}" > "$lrc_file"
 			exit_status=0
 			return
 		}
@@ -1745,7 +1746,7 @@ exit 0
 		fallback_artist="${artist}"
 
 		# Remove diacritics from strings
-		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+		artist="$(printf "%s\n" "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Useful for CJK characters
 		[[ -z $artist || $artist == *"???"* ]] && artist="${fallback_artist}"
@@ -1780,7 +1781,7 @@ exit 0
 		fallback_title="${title}"
 
 		# Remove diacritics from strings
-		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+		title="$(printf "%s\n" "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Useful for CJK characters
 		[[ -z $title || $title == *"???"* ]] && title="${fallback_title}"
@@ -1824,7 +1825,7 @@ exit 0
 			output="${output//"&amp;"}"
 			output="${output//":]"/"]"}"
 
-			printf '%s\n' "${output}" > "$lrc_file"
+			printf "%s\n" "${output}" > "$lrc_file"
 			exit_status=0
 			return
 		}
@@ -1877,7 +1878,7 @@ exit 0
 		fallback_artist="${artist}"
 
 		# Remove diacritics from strings
-		artist="$(printf '%s\n' "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
+		artist="$(printf "%s\n" "$artist" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Useful for CJK characters
 		[[ -z $artist || $artist == *"???"* ]] && artist="${fallback_artist}"
@@ -1908,7 +1909,7 @@ exit 0
 		fallback_title="${title}"
 
 		# Remove diacritics from strings
-		title="$(printf '%s\n' "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
+		title="$(printf "%s\n" "$title" | iconv -f utf8 -t ascii//TRANSLIT)"
 
 		# Useful for CJK characters
 		[[ -z $title || $title == *"???"* ]] && title="${fallback_title}"
@@ -1958,7 +1959,7 @@ exit 0
 				return
 			}
 
-			printf '%s\n' "${output}" > "$lrc_file"
+			printf "%s\n" "${output}" > "$lrc_file"
 			exit_status=0
 			return
 		}
@@ -1984,7 +1985,7 @@ exit 0
 					# Check if source file exists
 					[[ ! -e $file_name ]] && {
 						print_error "Cannot stat '$file_name': No such file or directory"
-						printf '\n'
+						printf "\n"
 						exit_status=1
 					}
 
@@ -2036,7 +2037,7 @@ exit 0
 								[[ $captcha_response == "true" ]] && {
 									print_error "Captcha response detected"
 									print_aligned "Try again later"
-									printf '\n'
+									printf "\n"
 									exit 1
 								}
 
@@ -2044,20 +2045,20 @@ exit 0
 								[[ $missing_lyrics == "true" ]] && {
 									print_error "No lyrics found for '$parsed_file'"
 									exit_status=1
-									printf '\n'
+									printf "\n"
 								}
  
 								[[ $exit_status != 0 && $skip != "true" ]] || [[ $failed_fetch == "true" ]] && {
 									print_error "Failed to fetch lyrics for '$sec_file_name'"
 									exit_status=1
-									printf '\n'
+									printf "\n"
 								}
  
 								# Print program run status
 								[[ -n $exit_status && $exit_status -eq 0 && $skip != "true" ]] && {
 									print_success "Added Lyrics file for '$sec_file_name'"
 									exit_status=0
-									printf '\n'
+									printf "\n"
 								}
 							}
 						}
@@ -2068,7 +2069,7 @@ exit 0
 					# $exit_status will be empty because of a failed file read
 					[[ -z ${exit_status} ]] && {
 						print_error "Cannot read '$file_name' file: Permission denied"
-						printf '\n'
+						printf "\n"
 					}
 
 				;;
@@ -2093,15 +2094,15 @@ exit 0
 #--------------------------------------------------------------
 mkcp() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - copy file(s)/folder(s) to the specified folder.
+printf "\033[1;97mNAME\033[00m
+	%s - copy file(s)/folder(s) to the specified folder.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [FOLDER] [FILE(s)...]
-	$SCRIPT_NAME [OPTION]
+	%s [FOLDER] [FILE(s)...]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m copies the specified [FILE(s)...] into the specified [FOLDER].
+	\033[1;97m%s\033[00m copies the specified [FILE(s)...] into the specified [FOLDER].
 	It will create the destination folder if it doesn't already exist.
 
 	\033[1;97m-h, --help\033[00m
@@ -2126,7 +2127,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -2239,7 +2240,7 @@ exit 0
 								unset exit_status
 
 								# Set exit_status if source folder is empty and is readable
-								[[ $(printf '%s\n' "${file_name}/"*) == "${file_name}/*" || $(printf '%s\n' "${file_name}/".*) == "${file_name}/.*" ]] && {
+								[[ $(printf "%s\n" "${file_name}/"*) == "${file_name}/*" || $(printf "%s\n" "${file_name}/".*) == "${file_name}/.*" ]] && {
 									find "$file_name" &>/dev/null && exit_status=0
 								}
 							}
@@ -2290,7 +2291,7 @@ exit 0
 
 		# Handles specified files not existing
 		# Alternative to `ls -A "$folder_name"`
-		[[ $(printf '%s\n' "$folder_name/"*) == "$folder_name/*" && $(printf '%s\n' "$folder_name/".*) == "$folder_name/.*" ]] && {
+		[[ $(printf "%s\n" "$folder_name/"*) == "$folder_name/*" && $(printf "%s\n" "$folder_name/".*) == "$folder_name/.*" ]] && {
 			rm -r "$folder_name" 2>/dev/null
 			exit 1
 		}
@@ -2313,15 +2314,15 @@ exit 0
 #--------------------------------------------------------------
 mkmv() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - move file(s)/folder(s) to the specified folder.
+printf "\033[1;97mNAME\033[00m
+	%s - move file(s)/folder(s) to the specified folder.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [FOLDER] [FILE(s)...]
-	$SCRIPT_NAME [OPTION]
+	%s [FOLDER] [FILE(s)...]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m moves the specified [FILE(s)...] into the specified [FOLDER].
+	\033[1;97m%s\033[00m moves the specified [FILE(s)...] into the specified [FOLDER].
 	It will create the destination folder if it doesn't already exist.
 
 	\033[1;97m-h, --help\033[00m
@@ -2346,7 +2347,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -2459,7 +2460,7 @@ exit 0
 								unset exit_status
 
 								# Set exit_status if source folder is empty and is readable
-								[[ $(printf '%s\n' "${file_name}/"*) == "${file_name}/*" || $(printf '%s\n' "${file_name}/".*) == "${file_name}/.*" ]] && {
+								[[ $(printf "%s\n" "${file_name}/"*) == "${file_name}/*" || $(printf "%s\n" "${file_name}/".*) == "${file_name}/.*" ]] && {
 									find "$file_name" &>/dev/null && exit_status=0
 								}
 							}
@@ -2512,7 +2513,7 @@ exit 0
 
 		# Handles specified files not existing
 		# Alternative to `ls -A "$folder_name"`
-		[[ $(printf '%s\n' "$folder_name/"*) == "$folder_name/*" && $(printf '%s\n' "$folder_name/".*) == "$folder_name/.*" ]] && {
+		[[ $(printf "%s\n" "$folder_name/"*) == "$folder_name/*" && $(printf "%s\n" "$folder_name/".*) == "$folder_name/.*" ]] && {
 			rm -r "$folder_name" 2>/dev/null
 			exit 1
 		}
@@ -2535,15 +2536,15 @@ exit 0
 #--------------------------------------------------------------
 mktouch() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - create empty file(s) in the specified folder.
+printf "\033[1;97mNAME\033[00m
+	%s - create empty file(s) in the specified folder.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [FOLDER] [FILE(s)...]
-	$SCRIPT_NAME [OPTION]
+	%s [FOLDER] [FILE(s)...]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m creates empty [FILE(s)...] in the specified [FOLDER].
+	\033[1;97m%s\033[00m creates empty [FILE(s)...] in the specified [FOLDER].
 	It will create the destination folder if it doesn't already exist.
 
 	\033[1;97m-h, --help\033[00m
@@ -2568,7 +2569,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -2616,7 +2617,7 @@ exit 0
 					# Create destination directory
 					mkdir -p "$folder_name" 2>/dev/null || print_write_error "$folder_name"
 
-					printf 2>/dev/null '\n' > "${folder_name}"/"${file_name:=?}"
+					printf 2>/dev/null "\n" > "${folder_name}"/"${file_name:=?}"
 
 					exit_status="$?"
 
@@ -2633,7 +2634,7 @@ exit 0
 
 		# Handles specified files not existing
 		# Alternative to `ls -A "$folder_name"`
-		[[ $(printf '%s\n' "$folder_name/"*) == "$folder_name/*" && $(printf '%s\n' "$folder_name/".*) == "$folder_name/.*" ]] && {
+		[[ $(printf "%s\n" "$folder_name/"*) == "$folder_name/*" && $(printf "%s\n" "$folder_name/".*) == "$folder_name/.*" ]] && {
 			rm -r "$folder_name" 2>/dev/null
 			exit 1
 		}
@@ -2656,14 +2657,14 @@ exit 0
 #--------------------------------------------------------------
 omaps-backup() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - create and restore organic maps backups.
+printf "\033[1;97mNAME\033[00m
+	%s - create and restore organic maps backups.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m creates or restores backups of organic maps
+	\033[1;97m%s\033[00m creates or restores backups of organic maps
 	mwm files. It saves and restores the backups from external storage
 	and will only fallback to using Android's internal storage if no
 	external storage device exists.
@@ -2699,7 +2700,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -2750,15 +2751,15 @@ exit 0
 		done
 
 		# Set organic maps backup directory
-		omaps_backup_dir="$PHONE_STORAGE/Misc/omaps-backup"
+		omaps_backup_dir="$PHONE_STORAGE/Backup/omaps-backup"
 
 		# Use external storage if available
 		[[ -d "$EXTERNAL_STORAGE" ]] && {
-			omaps_backup_dir="$EXTERNAL_STORAGE/Misc/omaps-backup"
+			omaps_backup_dir="$EXTERNAL_STORAGE/Backup/omaps-backup"
 		}
 
 		# Get date and time in YYYY.MM.DD.HH.MM format
-		current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
+		current_date="$(printf "%(%Y.%m.%d.%H%M)T\n")"
 	}
 
 	failed_to_create() {
@@ -2769,14 +2770,14 @@ exit 0
 	}
 
 	failed_to_restore() {
-		printf '\n'
+		printf "\n"
 		print_error "Failed to restore '${backup_list[$backup_option]}'"
 		exit 1
 	}
 
 	backup_omaps() {
 		print_warning "Creating organic maps backup 'omaps-backup.${current_date}'"
-		printf '\n'
+		printf "\n"
 
 		unset avail_dir
 
@@ -2818,15 +2819,15 @@ exit 0
 		# List available backups
 		print_banner
 		print_warning "Restoring organic maps"
-		printf '\n'
+		printf "\n"
 		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
-			printf '%s.%s\n' "${array_checker}" "${backup_list[$array_checker]}"
+			printf "%s.%s\n" "${array_checker}" "${backup_list[$array_checker]}"
 		done
-		printf '\n'
+		printf "\n"
 		read -rep "Select preferred backup: " backup_option
 		case "$backup_option" in
 			-*)
-				printf '\n'
+				printf "\n"
 				[[ -z ${backup_option#*\-} ]] && {
 					print_error "Unrecognized option '${backup_option}'" &&
 					exit 1
@@ -2836,7 +2837,7 @@ exit 0
 				exit 1
 			;;
 			*)
-				printf '\n'
+				printf "\n"
 				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
 					print_warning "Restoring organic maps using '${backup_list[$backup_option]}'"
 
@@ -2851,7 +2852,7 @@ exit 0
 						}
 					done
 
-					printf '\n' &&
+					printf "\n" &&
 					print_success "Finished restoring '${backup_list[$backup_option]}'"
 
 					exit 0
@@ -2870,7 +2871,7 @@ exit 0
 					check_dependencies "$@"
 
 					# Handles if $omaps_backup exists and is empty
-					[[ $(printf '%s\n' "$omaps_internal/"*) == "$omaps_internal/*" || ! -d $omaps_internal || $backup_checker -eq 0 ]] && {
+					[[ $(printf "%s\n" "$omaps_internal/"*) == "$omaps_internal/*" || ! -d $omaps_internal || $backup_checker -eq 0 ]] && {
 						print_error "There is nothing to backup"
 						print_aligned "Try running 'Organic Maps' at least once"
 						exit 1
@@ -2885,15 +2886,15 @@ exit 0
 					check_dependencies "$@"
 
 					# Handles no available omaps backup
-					[[ $(printf '%s\n' "$omaps_backup_dir/"*) == "$omaps_backup_dir/*" ]] && {
+					[[ $(printf "%s\n" "$omaps_backup_dir/"*) == "$omaps_backup_dir/*" ]] && {
 						print_error "No available backups"
 						exit 1
 					}
 
-					printf '\033[1;97mAvailable backups:\033[00m\n'
+					printf "\033[1;97mAvailable backups:\033[00m\n"
 
-					backup_content="$(printf '%s\n' "$omaps_backup_dir/"*)"
-					printf '%s\n' "${backup_content//"${omaps_backup_dir}/"}"
+					backup_content="$(printf "%s\n" "$omaps_backup_dir/"*)"
+					printf "%s\n" "${backup_content//"${omaps_backup_dir}/"}"
 					exit 0
 				;;
 				-r | --restore)
@@ -2938,14 +2939,14 @@ exit 0
 #--------------------------------------------------------------
 package() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - magisk module packaging tool.
+printf "\033[1;97mNAME\033[00m
+	%s - magisk module packaging tool.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m creates a custom magisk module that incorporates different
+	\033[1;97m%s\033[00m creates a custom magisk module that incorporates different
 	CLI tools and modifications to improve user experience on Android.
 	It saves the created module on external storage and will only fallback
 	to using Android's internal storage if no external storage device exists.
@@ -2972,7 +2973,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -3022,10 +3023,10 @@ exit 0
 		current_dir="$PWD"
 
 		# Get date and time in YYYY.MM.DD.HH.MM format
-		current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
+		current_date="$(printf "%(%Y.%m.%d.%H%M)T\n")"
 
 		# Declare module backup directory
-		backup_dir="$EXTERNAL_STORAGE/Misc/module-backup"
+		backup_dir="$EXTERNAL_STORAGE/Backup/module-backup"
 
 		# Create module package directories
 		mkdir -p "$package_tmp_dir/system/app" 2>/dev/null || print_write_error "$package_tmp_dir/system/app"
@@ -3066,7 +3067,7 @@ exit 0
 		mkdir -p "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null || print_write_error "$package_tmp_dir/system/etc/dnscrypt-proxy"
 		cd "$package_tmp_dir" 2>/dev/null || print_dir_change_error "$package_tmp_dir"
 		print_warning "Downloading 'dnscrypt-proxy'"
-		printf '\n'
+		printf "\n"
 
 		# Download dnscrypt-proxy for arm64 Android
 		download_link="https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/${dnscrypt_version}/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip"
@@ -3099,7 +3100,7 @@ exit 0
 
 	download_bash() {
 		print_warning "Downloading 'bash'"
-		printf '\n'
+		printf "\n"
 
 		# Download bash static binary from ccbins magisk module repo
 		busybox wget --no-check-certificate https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/raw/master/bash/bash-arm64 -O "$package_tmp_dir/bash-arm64" &>/dev/null ||
@@ -3122,7 +3123,7 @@ exit 0
 
 	download_zip() {
 		print_warning "Downloading '7zip'"
-		printf '\n'
+		printf "\n"
 
 		mkdir -p "$package_tmp_dir/new" 2>/dev/null
 
@@ -3147,7 +3148,7 @@ exit 0
 		cd "$package_tmp_dir" 2>/dev/null || print_dir_change_error "${package_tmp_dir}"
 
 		print_warning "Downloading 'tether'"
-		printf '\n'
+		printf "\n"
 
 		# Download latest version of tether
 		busybox wget --no-check-certificate "https://raw.githubusercontent.com/teth3r/tether/master/tether" -O "$package_tmp_dir/tether" &>/dev/null ||
@@ -3161,7 +3162,7 @@ exit 0
 	download_custom_iosevka() {
 		[[ $font_variant == "sans" ]] && {
 			print_warning "Downloading 'Iosevka'"
-			printf '\n'
+			printf "\n"
 
 			# Download latest version of Iosevka custom build
 			busybox wget --no-check-certificate "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka.7z" -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
@@ -3174,7 +3175,7 @@ exit 0
 
 		[[ $font_variant == "slab" ]] && {
 			print_warning "Downloading 'Iosevka-Slab'"
-			printf '\n'
+			printf "\n"
 
 			# Download latest version of Iosevka custom build
 			busybox wget --no-check-certificate "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka-slab.7z" -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
@@ -3212,7 +3213,7 @@ exit 0
 
 	populate_dir() {
 		print_warning "Populating module directories"
-		printf '\n'
+		printf "\n"
 
 		# Populate app/
 		mkdir -p "$package_tmp_dir/system/app/Stk" 2>/dev/null || print_write_error "$package_tmp_dir/system/app/Stk"
@@ -3238,7 +3239,7 @@ exit 0
 
 	create_module_prop() {
 		print_warning "Creating 'module.prop'"
-		printf '\n'
+		printf "\n"
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/module.prop"
 id=tether
@@ -3252,7 +3253,7 @@ EOF
 
 	create_customize() {
 		print_warning "Creating 'customize.sh'"
-		printf '\n'
+		printf "\n"
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/customize.sh"
 #!/bin/env sh
@@ -3276,7 +3277,7 @@ EOF
 
 	create_post_fs() {
 		print_warning "Creating 'post-fs-data.sh'"
-		printf '\n'
+		printf "\n"
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/post-fs-data.sh"
 #!/bin/env sh
@@ -3326,7 +3327,7 @@ EOF
 
 	create_service() {
 		print_warning "Creating 'service.sh'"
-		printf '\n'
+		printf "\n"
 
 		cat 2>/dev/null << "EOF" > "$package_tmp_dir/service.sh"
 #!/bin/env bash
@@ -3388,18 +3389,18 @@ hostname "$(getprop ro.product.vendor.name)"
 # Set CPU clockspeed to max
 #--------------------------------------------------------------
 for core_group in /sys/devices/system/cpu/cpufreq/*/scaling_governor; do
-	printf '%s\n' "performance" > "$core_group"
+	printf "%s\n" "performance" > "$core_group"
 done
 
 #--------------------------------------------------------------
 # Set GPU clockspeed to max
 #--------------------------------------------------------------
 [[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
-	printf '%s\n' "performance" > /sys/class/kgsl/kgsl-3d0/devfreq/governor
-	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/default_pwrlevel
-	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel
-	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/min_pwrlevel
-	printf '%d\n' "0" > /sys/class/kgsl/kgsl-3d0/throttling
+	printf "%s\n" "performance" > /sys/class/kgsl/kgsl-3d0/devfreq/governor
+	printf "%d\n" "0" > /sys/class/kgsl/kgsl-3d0/default_pwrlevel
+	printf "%d\n" "0" > /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel
+	printf "%d\n" "0" > /sys/class/kgsl/kgsl-3d0/min_pwrlevel
+	printf "%d\n" "0" > /sys/class/kgsl/kgsl-3d0/throttling
 }
 
 #--------------------------------------------------------------
@@ -3416,14 +3417,14 @@ done
 #--------------------------------------------------------------
 cpu_core_count="$(cat /sys/devices/system/cpu/online)"
 for dev_cpuset in /dev/cpuset/*/cpus; do
-	printf '%s\n' "$cpu_core_count" > "$dev_cpuset"
+	printf "%s\n" "$cpu_core_count" > "$dev_cpuset"
 done
 
 #--------------------------------------------------------------
 # Enable USB OTG on certain devices
 #--------------------------------------------------------------
 [[ -f /sys/class/power_supply/usb/otg_switch ]] && {
-	printf '%d\n' "1" > /sys/class/power_supply/usb/otg_switch
+	printf "%d\n" "1" > /sys/class/power_supply/usb/otg_switch
 }
 
 #--------------------------------------------------------------
@@ -3491,7 +3492,7 @@ EOF
 	package_main() {
 		print_warning "Creating 'tether.$current_date' Magisk module"
 		print_aligned "This may take a while"
-		printf '\n'
+		printf "\n"
 
 		download_dnscrypt "$@"
 		download_bash "$@"
@@ -3508,16 +3509,16 @@ EOF
 
 		# Add custom fonts
 		print_warning "Adding custom fonts"
-		printf '\n'
+		printf "\n"
 
 		read -rep "Replace system fonts with Iosevka (y/n) " font_option
-		printf '\n'
+		printf "\n"
 		case "$font_option" in
 			 Y | y)
 				# Select font variant
-				printf '1. %s\n2. %s\n\n' "Sans-serif" "Slab-serif"
+				printf "1. %s\n2. %s\n\n" "Sans-serif" "Slab-serif"
 				read -rep "Select Iosevka typeface: " font_type
-				printf '\n'
+				printf "\n"
 				case "$font_type" in
 					1)
 						font_variant="sans"
@@ -3533,14 +3534,14 @@ EOF
 			;;
 			*)
 				print_warning "Skipping Iosevka font installation"
-				printf '\n'
+				printf "\n"
 			;;
 		esac
 
 		# Populate font/ if custom font files exist
 		[[ -f $tmp_dir/fonts/NotoSerif-Regular.ttf ]] && {
 			print_warning "Adding user provided font files"
-			printf '\n'
+			printf "\n"
 			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
 			cp -r "$tmp_dir"/fonts/*.ttf "$package_tmp_dir/system/fonts" 2>/dev/null
 			create_post_fs "$@"
@@ -3564,7 +3565,7 @@ EOF
 
 		# Create magisk files
 		mkdir -p "$tmp_dir/tether/META-INF/com/google/android" 2>/dev/null || print_write_error "$tmp_dir/tether/META-INF/com/google/android"
-		printf  '%s\n' "#MAGISK" > "$tmp_dir/tether/META-INF/com/google/android/updater-script"
+		printf "%s\n" "#MAGISK" > "$tmp_dir/tether/META-INF/com/google/android/updater-script"
 
 		cat 2>/dev/null << "EOF" > "$tmp_dir/tether/META-INF/com/google/android/update-binary"
 #!/sbin/sh
@@ -3606,7 +3607,7 @@ EOF
 
 		print_warning "Almost done"
 		print_aligned "Creating archive file 'tether.$current_date.zip'"
-		printf '\n'
+		printf "\n"
 
 		# Zip tether/ contents
 		7z a -snl -snh -tzip -mx1 -mmt"$CPU_CORE_COUNT" "tether.$current_date.zip" "*" &>/dev/null ||
@@ -3644,14 +3645,14 @@ EOF
 #--------------------------------------------------------------
 replace-su() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - su removal tool.
+printf "\033[1;97mNAME\033[00m
+	%s - su removal tool.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m removes phh-su from AOSP GSIs. phh-su is installed
+	\033[1;97m%s\033[00m removes phh-su from AOSP GSIs. phh-su is installed
 	by default on AOSP GSIs and as such causes conflicts with Magisk.
 	Flash device stock boot image, gain root access with phh-su and run
 	this program to remove phh-su. This program will only work on Android >= 12
@@ -3678,7 +3679,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -3752,15 +3753,16 @@ exit 0
 #--------------------------------------------------------------
 setup() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - setup tool for void linux.
+printf "\033[1;97mNAME\033[00m
+	%s - setup tool for void linux.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m provides an interactive CLI for the installation of useful
+	\033[1;97m%s\033[00m provides an interactive CLI for the installation of useful
 	software on Void Linux.
+
 	\033[1;97mNOTE:\033[00m This program does not install Void Linux itself, only it's
 	components, i.e the desktop environment or graphic drivers.
 
@@ -3786,7 +3788,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -3903,8 +3905,8 @@ exit 0
 			# Enable tweaks/customizations for qt5 programs
 			env_var_file="$(< /etc/environment)"
 			[[ $env_var_file != *QT_QPA_PLATFORMTHEME* ]] && {
-				printf '%s\n' "QT_QPA_PLATFORMTHEME=qt5ct" >> /etc/environment
-				printf '%s\n' "QT_LOGGING_RULES=\"qt.svg*.warning=false\"" >> /etc/environment
+				printf "%s\n" "QT_QPA_PLATFORMTHEME=qt5ct" >> /etc/environment
+				printf "%s\n" "QT_LOGGING_RULES=\"qt.svg*.warning=false\"" >> /etc/environment
 			}
 
 			# Fixes missing icon bug
@@ -4001,7 +4003,7 @@ exit 0
 
 			sysctl_file="$(< /etc/sysctl.conf)"
 			[[ $sysctl_file != *dev.i915.perf_stream_paranoid* ]] && {
-				printf '%s\n' "dev.i915.perf_stream_paranoid = 0" >> /etc/sysctl.conf
+				printf "%s\n" "dev.i915.perf_stream_paranoid = 0" >> /etc/sysctl.conf
 			}
 
 			# Install microcode-updates
@@ -4230,11 +4232,11 @@ while :; do
 					break
 				}
 				# Set backlight to 30%
-				printf '%d\n' "77" > "$device_name/brightness"
+				printf "%d\n" "77" > "$device_name/brightness"
 				# Turn off keyboard backlight to save power
 				for kbd in /sys/class/leds/*kbd_backlight; do
 					[[ -f $kbd ]] && {
-						printf '%d\n' "0" > "$kbd/brightness"
+						printf "%d\n" "0" > "$kbd/brightness"
 					}
 				done
 				system_set=1
@@ -4247,7 +4249,7 @@ while :; do
 					break
 				}
 				# Set backlight to 50%
-				printf '%d\n' "128" > "$device_name/brightness"
+				printf "%d\n" "128" > "$device_name/brightness"
 				system_set=2
 			}
 			# Handles battery when plugged in or battery is 100%
@@ -4258,7 +4260,7 @@ while :; do
 					break
 				}
 				# Set backlight to 70%
-				printf '%d\n' "179" > "$device_name/brightness"
+				printf "%d\n" "179" > "$device_name/brightness"
 				system_set=3
 			}
 		}
@@ -4268,7 +4270,7 @@ while :; do
 done
 EOF
 			chmod +x /var/service/backlight/run &&
-			printf '%s\n' "Done"
+			printf "%s\n" "Done"
 		}
 	}
 
@@ -4313,7 +4315,7 @@ EOF
 		# Make resolv.conf immutable
 		chattr -i /etc/resolv.conf
 
-		printf '%s\n' "nameserver 127.0.0.1" > /etc/resolv.conf
+		printf "%s\n" "nameserver 127.0.0.1" > /etc/resolv.conf
 
 		chattr +i /etc/resolv.conf
 
@@ -4329,36 +4331,36 @@ EOF
 		print_warning "Setting up Voidlinux"
 
 		# Handles DE Installation
-		printf '\nInstall Desktop Environment: \n1. KDE \n2. Gnome \n3. Xfce \n4. Cinnamon \n5. Skip \n6. Exit\n\n'
+		printf "\nInstall Desktop Environment: \n1. KDE \n2. Gnome \n3. Xfce \n4. Cinnamon \n5. Skip \n6. Exit\n\n"
 		read -rep "Select Desktop: " de_option
-		printf '\n'
+		printf "\n"
 		case "$de_option" in
 			1)
 				print_warning "Installing KDE"
-				printf '\n'
+				printf "\n"
 				install_desktop && desktop_kde && error_check="desktop" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing KDE"
 			;;
 			2)
 				print_warning "Installing Gnome"
-				printf '\n'
+				printf "\n"
 				install_desktop && desktop_gnome && error_check="desktop" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Gnome"
 			;;
 			3)
 				print_warning "Installing Xfce"
-				printf '\n'
+				printf "\n"
 				install_desktop && desktop_xfce && error_check="desktop" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Xfce"
 			;;
 			4)
 				print_warning "Installing Cinnamon"
-				printf '\n'
+				printf "\n"
 				install_desktop && desktop_cinnamon && error_check="desktop" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Cinnamon"
 			;;
 			5)
@@ -4385,29 +4387,29 @@ EOF
 		esac
 
 		[[ $error_check != "desktop" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install Desktop Environment"
 			exit 1
 		}
 
 		# Handles GPU Driver Installation
-		printf '\nInstall GPU Drivers: \n1. Intel \n2. AMD/radeon \n3. Skip \n4. Exit\n\n'
+		printf "\nInstall GPU Drivers: \n1. Intel \n2. AMD/radeon \n3. Skip \n4. Exit\n\n"
 		read -rep "Select GPU: " gpu_option
-		printf '\n'
+		printf "\n"
 		case "$gpu_option" in
 			1)
 				print_warning "Installing Intel GPU Drivers"
-				printf '\n'
+				printf "\n"
 				install_gpu_drivers && intel_drivers && error_check="gpu" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Intel GPU Drivers"
 			;;
 			2)
 				print_warning "Installing AMD GPU Drivers"
-				printf '\n'
+				printf "\n"
 				install_gpu_drivers && amd_drivers && error_check="gpu" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing AMD GPU Drivers"
 			;;
 			3)
@@ -4434,22 +4436,22 @@ EOF
 		esac
 
 		[[ $error_check != "gpu" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install GPU drivers"
 			exit 1
 		}
 
 		# Handles VM Software Installation
-		printf '\nInstall VM Software (qemu, virt-manager): \n1. Yes \n2. Skip \n3. Exit\n\n'
+		printf "\nInstall VM Software (qemu, virt-manager): \n1. Yes \n2. Skip \n3. Exit\n\n"
 		read -rep "Select option: " vm_option
-		printf '\n'
+		printf "\n"
 		case "$vm_option" in
 			1)
 				print_warning "Installing Virtual Machine software"
-				printf '\n'
+				printf "\n"
 				install_vm && error_check="vm" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Virtual Machine software"
 			;;
 			2)
@@ -4476,36 +4478,36 @@ EOF
 		esac
 
 		[[ $error_check != "vm" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install VM software"
 			exit 1
 		}
 
 		# Handles Printer Software Installation
-		printf '\nInstall Printer Software: \n1. HP \n2. Epson \n3. Brother \n4. Skip \n5. Exit\n\n'
+		printf "\nInstall Printer Software: \n1. HP \n2. Epson \n3. Brother \n4. Skip \n5. Exit\n\n"
 		read -rep "Select Printer: " printer_option
-		printf '\n'
+		printf "\n"
 		case "$printer_option" in
 			1)
 				print_warning "Installing HP Printer Software"
-				printf '\n'
+				printf "\n"
 				install_printer_drivers && hp_printer && error_check="printer" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing HP Printer software"
 			;;
 			2)
 				print_warning "Installing Epson Printer Software"
-				printf '\n'
+				printf "\n"
 				install_printer_drivers && epson_printer && error_check="printer" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Epson Printer software"
 			;;
 			3)
 				print_warning "Installing Brother Printer Software"
-				printf '\n'
+				printf "\n"
 				install_printer_drivers && brother_printer && error_check="printer" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Brother Printer software"
 			;;
 			4)
@@ -4532,36 +4534,36 @@ EOF
 		esac
 
 		[[ $error_check != "printer" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install printer software"
 			exit 1
 		}
 
 		# Handles Audio Software Installation
-		printf '\nInstall Audio Software: \n1. Pulseaudio \n2. ALSA \n3. Pipewire \n4. Skip \n5. Exit\n\n'
+		printf "\nInstall Audio Software: \n1. Pulseaudio \n2. ALSA \n3. Pipewire \n4. Skip \n5. Exit\n\n"
 		read -rep "Select Audio: " audio_option
-		printf '\n'
+		printf "\n"
 		case "$audio_option" in
 			1)
 				print_warning "Installing Pulseaudio"
-				printf '\n'
+				printf "\n"
 				install_audio && pulse_audio && error_check="audio" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Pulseaudio"
 			;;
 			2)
 				print_warning "Installing ALSA"
-				printf '\n'
+				printf "\n"
 				install_audio && alsa_utils && error_check="audio" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing ALSA"
 			;;
 			3)
 				print_warning "Installing Pipewire"
-				printf '\n'
+				printf "\n"
 				install_audio && pipe_wire && error_check="audio" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Pipewire"
 			;;
 			4)
@@ -4588,29 +4590,29 @@ EOF
 		esac
 
 		[[ $error_check != "audio" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install audio software"
 			exit 1
 		}
 
 		# Handles Terminal Software Installation
-		printf '\nInstall Terminal: \n1. Urxvt \n2. Kitty \n3. Skip \n4. Exit\n\n'
+		printf "\nInstall Terminal: \n1. Urxvt \n2. Kitty \n3. Skip \n4. Exit\n\n"
 		read -rep "Select Terminal: " term_option
-		printf '\n'
+		printf "\n"
 		case "$term_option" in
 			1)
 				print_warning "Installing Urxvt"
-				printf '\n'
+				printf "\n"
 				install_terminal && install_urxvt "$@" && error_check="terminal" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Urxvt"
 			;;
 			2)
 				print_warning "Installing Kitty"
-				printf '\n'
+				printf "\n"
 				install_terminal && install_kitty "$@" && error_check="terminal" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Kitty"
 			;;
 			3)
@@ -4637,22 +4639,22 @@ EOF
 		esac
 
 		[[ $error_check != "terminal" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install terminal"
 			exit 1
 		}
 
 		# Handles Extra Software Installation
-		printf '\nInstall Extra/Misc Software (gimp, libreoffice, wine): \n1. Yes \n2. Skip \n3. Exit\n\n'
+		printf "\nInstall Extra/Misc Software (gimp, libreoffice, wine): \n1. Yes \n2. Skip \n3. Exit\n\n"
 		read -rep "Select option: " extras_option
-		printf '\n'
+		printf "\n"
 		case "$extras_option" in
 			1)
 				print_warning "Installing Extra/Misc Software"
-				printf '\n'
+				printf "\n"
 				install_extras && error_check="extras" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Extra/Misc software"
 			;;
 			2)
@@ -4679,22 +4681,22 @@ EOF
 		esac
 
 		[[ $error_check != "extras" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install extra/misc software"
 			exit 1
 		}
 
 		# Handles Development Software Installation
-		printf '\nInstall Development Software (gcc, rust, cargo, vim): \n1. Yes \n2. Skip \n3. Exit\n\n'
+		printf "\nInstall Development Software (gcc, rust, cargo, vim): \n1. Yes \n2. Skip \n3. Exit\n\n"
 		read -rep "Select option: " dev_option
-		printf '\n'
+		printf "\n"
 		case "$dev_option" in
 			1)
 				print_warning "Installing Development Software"
-				printf '\n'
+				printf "\n"
 				install_dev_software && error_check="development" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing development software"
 			;;
 			2)
@@ -4721,29 +4723,29 @@ EOF
 		esac
 
 		[[ $error_check != "development" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install development software"
 			exit 1
 		}
 
 		# Handles Browser Installation
-		printf '\nInstall Browser Software: \n1. Chromium \n2. Firefox \n3. Skip \n4. Exit\n\n'
+		printf "\nInstall Browser Software: \n1. Chromium \n2. Firefox \n3. Skip \n4. Exit\n\n"
 		read -rep "Select Browser: " browser_option
-		printf '\n'
+		printf "\n"
 		case "$browser_option" in
 			1)
 				print_warning "Installing Chromium"
-				printf '\n'
+				printf "\n"
 				install_browser && chromium && error_check="browser" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Chromium"
 			;;
 			2)
 				print_warning "Installing Firefox"
-				printf '\n'
+				printf "\n"
 				install_browser && firefox && error_check="browser" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Firefox"
 			;;
 			3)
@@ -4770,29 +4772,29 @@ EOF
 		esac
 
 		[[ $error_check != "browser" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install browser software"
 			exit 1
 		}
 
 		# Handles Media-Player Installation
-		printf '\nInstall Media-Player Software: \n1. VLC \n2. MPV \n3. Skip \n4. Exit\n\n'
+		printf "\nInstall Media-Player Software: \n1. VLC \n2. MPV \n3. Skip \n4. Exit\n\n"
 		read -rep "Select Media-Player: " media_player_option
-		printf '\n'
+		printf "\n"
 		case "$media_player_option" in
 			1)
 				print_warning "Installing VLC"
-				printf '\n'
+				printf "\n"
 				install_media_player && vlc && error_check="media_player" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing VLC"
 			;;
 			2)
 				print_warning "Installing MPV"
-				printf '\n'
+				printf "\n"
 				install_media_player && mpv && error_check="media_player" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing MPV"
 			;;
 			3)
@@ -4825,13 +4827,13 @@ EOF
 		}
 
 		# Handles Setting timezone
-		printf '\nChange Default Timezone: \n1. Yes \n2. Skip \n3. Exit\n\n'
+		printf "\nChange Default Timezone: \n1. Yes \n2. Skip \n3. Exit\n\n"
 		read -rep "Select option: " time_zone_option
-		printf '\n'
+		printf "\n"
 		case "$time_zone_option" in
 			1)
 				print_warning "Changing Timezone"
-				printf '\n'
+				printf "\n"
 				change_timezone "$@" && error_check="timezone" &&
 				print_success "Finished Changing Timezone"
 			;;
@@ -4865,15 +4867,15 @@ EOF
 		}
 
 		# Handles Automatic Backlight Control
-		printf '\nInstall Automatic Backlight Control: \n1. Yes \n2. Skip \n3. Exit\n\n'
+		printf "\nInstall Automatic Backlight Control: \n1. Yes \n2. Skip \n3. Exit\n\n"
 		read -rep "Select option: " auto_backlight_option
-		printf '\n'
+		printf "\n"
 		case "$auto_backlight_option" in
 			1)
 				print_warning "Installing Automatic Backlight Control"
-				printf '\n'
+				printf "\n"
 				install_backlight_control && error_check="auto_backlight" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished installing Automatic Backlight Control"
 			;;
 			2)
@@ -4900,33 +4902,33 @@ EOF
 		esac
 
 		[[ $error_check == "no_battery" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Battery not installed"
 			exit 1
 		}
 
 		[[ $error_check != "auto_backlight" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Unsupported init detected"
 			print_aligned "Couldn't install automatic backlight control"
 			exit 1
 		}
 
 		# Handles Networking Software Installation
-		printf '\nInstall Networking Software: \n1. Yes \n2. Skip \n3. Exit\n\n'
+		printf "\nInstall Networking Software: \n1. Yes \n2. Skip \n3. Exit\n\n"
 		read -rep "Select option: " network_option
-		printf '\n'
+		printf "\n"
 		case "$network_option" in
 			1)
 				print_warning "Installing Networking Software"
-				printf '\n'
+				printf "\n"
 				install_networking && error_check="network" &&
-				printf '\n' &&
+				printf "\n" &&
 				print_success "Finished setting up void linux"
 			;;
 			2)
 				print_warning "Skipping Networking Software Installation"
-				printf '\n'
+				printf "\n"
 				print_error "Nothing left to do, exiting"
 				error_check="network"
 				exit 1
@@ -4951,7 +4953,7 @@ EOF
 		esac
 
 		[[ $error_check != "network" ]] && {
-			printf '\n'
+			printf "\n"
 			print_error "Something went wrong"
 			print_aligned "Couldn't install networking software"
 			exit 1
@@ -4971,15 +4973,15 @@ EOF
 #--------------------------------------------------------------
 swapfile() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - swapfile manager.
+printf "\033[1;97mNAME\033[00m
+	%s - swapfile manager.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION] [FILESIZE] [FILENAME]
+	%s [OPTION] [FILESIZE] [FILENAME]
 
 \033[1;97mDESCRIPTION\033[00m
 	Perform system swapfile management on the go. This program will create
-	or delete a specified swapfile.
+	and enable or delete a specified swapfile.
 
 	\033[1;97m-d, --disable\033[00m [FILENAME]
 		disable and delete [FILENAME] swapfile.
@@ -5010,7 +5012,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -5135,7 +5137,7 @@ exit 0
 
 				print_warning "Creating ${user_value}MB swapfile"
 				print_aligned "This may take a while"
-				printf '\n'
+				printf "\n"
 				dd if=/dev/zero of="$file_name" bs=1M count="$user_value" &>/dev/null || exit_status=1
 				chown root:root "$file_name" 2>/dev/null &&
 				chmod 0600 "$file_name" 2>/dev/null &&
@@ -5168,7 +5170,7 @@ exit 0
 
 				print_warning "Creating ${user_value}GB swapfile"
 				print_aligned "This may take a while"
-				printf '\n'
+				printf "\n"
 				dd if=/dev/zero of="$file_name" bs=1G count="$user_value" &>/dev/null || exit_status=1
 				chown root:root "$file_name" 2>/dev/null &&
 				chmod 0600 "$file_name" 2>/dev/null &&
@@ -5211,7 +5213,7 @@ exit 0
 
 		print_warning "Disabling '$file_name' swapfile"
 		print_aligned "This may take a while"
-		printf '\n'
+		printf "\n"
 
 		swapoff "$file_name" 2>/dev/null &&
 		rm -r "$file_name" 2>/dev/null
@@ -5238,16 +5240,16 @@ exit 0
 					# Check used swap space for the specified file
 					used_swap="$(< /proc/swaps)"
 					used_swap="${used_swap//*"$file_name"}"
-					used_swap="$(printf '%s\n' "${used_swap//\/*}" | awk '{print $3}')"
+					used_swap="$(printf "%s\n" "${used_swap//\/*}" | awk '{print $3}')"
 
 					# /proc/swaps stores values in KB
 					[[ $used_swap -gt 204796 ]] && {
 						print_warning "Swapfile is currently in use: Disabling it might cause problems"
-						printf '\n'
+						printf "\n"
 						read -rep "Do you want to proceed (y/n) " user_option
 						case "$user_option" in
 							 Y | y)
-								printf '\n'
+								printf "\n"
 								delete_swapfile "$@"
 							;;
 							*)
@@ -5307,11 +5309,11 @@ exit 0
 #--------------------------------------------------------------
 terp-deploy() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - chroot setup tool for android.
+printf "\033[1;97mNAME\033[00m
+	%s - chroot setup tool for android.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
 	Post-install and post-mount setup tool for chroot images running on Android.
@@ -5347,7 +5349,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -5397,7 +5399,7 @@ exit 0
 
 			[[ $(ping -c2 voidlinux.org 2>/dev/null) ]] && {
 				print_warning "Setting up voidlinux chroot"
-				printf '\n'
+				printf "\n"
 				sudo xbps-install -Syu xbps void-repo-nonfree
 				sudo xbps-install -Syu 7zip-unrar git rust cargo bc ldns man 7zip wget gcc bash-completion unzip bsdtar || exit 1
 				sudo xbps-install -Syu || exit 1
@@ -5408,7 +5410,7 @@ exit 0
 				sudo xbps-install -Syu vim tmux || exit 1
 
 				# Set config true status
-				printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" | sudo tee -a /etc/terp-deploy.conf &>/dev/null
+				printf "%s\n" "TERP_DEPLOY_INSTALL=\"true\"" | sudo tee -a /etc/terp-deploy.conf &>/dev/null
 			}
 		}
 
@@ -5423,7 +5425,7 @@ exit 0
 
 			[[ $(ping -c2 alpinelinux.org 2>/dev/null) ]] && {
 				print_warning "Setting up alpinelinux chroot"
-				printf '\n'
+				printf "\n"
 				sudo apk add -u apk-tools
 				sudo apk update && sudo apk upgrade
 				sudo apk add 7zip git rust cargo bc ldns wget gcc bash-completion unzip libarchive-tools || exit 1
@@ -5432,7 +5434,7 @@ exit 0
 				sudo apk add vim tmux || exit 1
 
 				# Set config true status
-				printf '%s\n' "TERP_DEPLOY_INSTALL=\"true\"" | sudo tee -a /etc/terp-deploy.conf &>/dev/null
+				printf "%s\n" "TERP_DEPLOY_INSTALL=\"true\"" | sudo tee -a /etc/terp-deploy.conf &>/dev/null
 			}
 		}
 
@@ -5454,14 +5456,14 @@ exit 0
 		sudo ln -sf "/home/${user_name}/.vimrc" "/root" &&
 
 		mkdir -p "/home/${user_name}/.vim" &&
-		printf '\n' &&
+		printf "\n" &&
 		print_success "Finished setting up chroot"
 		print_aligned "Run 'source /home/${user_name}/.bashrc' to reload shell"
-		printf '\n'
+		printf "\n"
 	}
 
 	password_mismatch() {
-		printf '\n'
+		printf "\n"
 		print_error "Failed to change '$*' user password"
 		print_aligned "Passwords do not match"
 		exit 1
@@ -5486,20 +5488,20 @@ exit 0
 
 			# Create new user account
 			print_warning "Creating new user account"
-			printf '\n'
+			printf "\n"
 
 			source "/etc/profile"
 			read -rep "Input new username: " user_name
 			read -rep "Confirm new username: " user_name2
 
 			[[ $user_name != "$user_name2" ]] && {
-				printf '\n'
+				printf "\n"
 				print_error "Username does not match"
 				exit 1
 			}
 
 			[[ -z $user_name || -z $user_name2 ]] && {
-				printf '\n'
+				printf "\n"
 				print_error "Username string cannot be empty"
 				exit 1
 			}
@@ -5510,13 +5512,13 @@ exit 0
 
 			[[ $PRETTY_NAME == "Void Linux" ]] && {
 				# Change default locale
-				printf '%s\n' "LANG=en_US.UTF-8" > /etc/locale.conf
+				printf "%s\n" "LANG=en_US.UTF-8" > /etc/locale.conf
 				sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/default/libc-locales
 
 				# Add locale if it doesn't exist
 				locale_file="$(< /etc/default/libc-locales)"
 				[[ $locale_file != *en_US.UTF-8\ UTF-8* ]] && {
-				    printf '%s\n' "en_US.UTF-8 UTF-8" >> /etc/default/libc-locales
+				    printf "%s\n" "en_US.UTF-8 UTF-8" >> /etc/default/libc-locales
 				}
 
 				# Create network groups and add user
@@ -5559,17 +5561,17 @@ exit 0
 				adduser "${user_name}" aid_net_bt_stack 2>/dev/null
 			}
 
-			printf '\n'
+			printf "\n"
 
 			# Create new user password
 			print_warning "Set password for new user '$user_name'"
-			printf '\n'
+			printf "\n"
 			passwd "$user_name" || password_mismatch "$user_name"
-			printf '\n'
+			printf "\n"
 
 			# Change default root-user password
 			print_warning "Change the default 'root' user password"
-			printf '\n'
+			printf "\n"
 			passwd root || password_mismatch "root"
 
 			# Adds missing zoneinfo, resolv.conf and sudoers files
@@ -5579,22 +5581,22 @@ exit 0
 			sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 			# Save username for later logins
-			printf '%s\n' "$user_name" > /etc/terp-username.conf
+			printf "%s\n" "$user_name" > /etc/terp-username.conf
 
 			# Set DNS server
-			printf '%s\n' "nameserver 127.0.0.1" > /etc/resolv.conf
+			printf "%s\n" "nameserver 127.0.0.1" > /etc/resolv.conf
 			chattr +i /etc/resolv.conf
 
-			printf '\n'
+			printf "\n"
 			print_warning "Changing default timezone"
-			printf '\n'
+			printf "\n"
 
 			# Change default time zone
 			change_timezone "$@"
 
 			print_success "Done, switching to new user '$user_name'"
 			print_aligned "Run '$SCRIPT_NAME --install' to finish setting up chroot"
-			printf '\n'
+			printf "\n"
 
 			# Change permissions of mounted dnscrypt files
 			[[ -f "/mnt/module-dnscrypt/dnscrypt-proxy.toml" ]] && {
@@ -5602,7 +5604,7 @@ exit 0
 			}
 
 			# Set config true status
-			printf '%s\n' "TERP_DEPLOY_SETUP=\"true\"" > /etc/terp-deploy.conf
+			printf "%s\n" "TERP_DEPLOY_SETUP=\"true\"" > /etc/terp-deploy.conf
 
 			# Switch to new_user
 			su "$user_name" -s /bin/bash && source "/etc/profile"
@@ -5672,11 +5674,11 @@ exit 0
 #--------------------------------------------------------------
 terp-install() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - chroot installation tool for android.
+printf "\033[1;97mNAME\033[00m
+	%s - chroot installation tool for android.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
 	Chroot image creation tool for Android. This program downloads and
@@ -5713,7 +5715,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -5820,7 +5822,7 @@ exit 0
 
 	fetch_rootfs() {
 		print_warning "Downloading 'sha256sum.txt'"
-		printf '\n'
+		printf "\n"
 
 		[[ $terp_flavor == "void" ]] && {
 			shasum_file="https://repo-default.voidlinux.org/live/current/sha256sum.txt"
@@ -5865,7 +5867,7 @@ exit 0
 
 		print_warning "Downloading '$rootfs_file'"
 		print_aligned "This may take a while"
-		printf '\n'
+		printf "\n"
 
 		# Download latest available rootfs
 		busybox wget --no-check-certificate "$rootfs_version" -O "${tmp_dir}/${rootfs_file}" &>/dev/null ||
@@ -5873,7 +5875,7 @@ exit 0
 		# Error handling on download failure
 		download_fail "$@"
 		print_warning "Comparing file hashes"
-		printf '\n'
+		printf "\n"
 
 		# Check downloaded file hashsum
 		check_file_hash "$@"
@@ -5901,7 +5903,7 @@ exit 0
 			# Check file hash if rootfs exists
 			[[ -f ${tmp_dir}/${rootfs_file} ]] && {
 				print_warning "Comparing file hashes"
-				printf '\n'
+				printf "\n"
 				check_file_hash "$@"
 			}
 
@@ -5931,14 +5933,14 @@ exit 0
 
 		# Set size of chroot image
 		print_warning "Preparing install location"
-		printf '\n'
+		printf "\n"
 		cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
 		rm -r "$chroot_install_dir" 2>/dev/null
 		rm -r "$chroot_image" 2>/dev/null
 
 		# Process user input
 		read -rep "Input desired size of chroot image: " input_size
-		printf '\n'
+		printf "\n"
 
 		# Process user input and seperate characters from integers
 		user_value="$input_size"
@@ -5974,7 +5976,7 @@ exit 0
 				}
 
 				print_warning "Creating ${user_value}MB image file"
-				printf '\n'
+				printf "\n"
 				fallocate -l "${user_value}"M "$chroot_image"
 				size_suffix="MB"
 			;;
@@ -5986,7 +5988,7 @@ exit 0
 				}
 
 				print_warning "Creating ${user_value}GB image file"
-				printf '\n'
+				printf "\n"
 				fallocate -l "${user_value}"G "$chroot_image"
 				size_suffix="GB"
 			;;
@@ -6017,7 +6019,7 @@ exit 0
 			cd "$chroot_install_dir" 2>/dev/null || print_dir_change_error "${chroot_install_dir}"
 
 			print_warning "Extracting '$rootfs_file'"
-			printf '\n'
+			printf "\n"
 
 			[[ $terp_flavor == "void" ]] && {
 				busybox xz -d "${downloaded_rootfs##*/}" &>/dev/null
@@ -6137,11 +6139,11 @@ exit 0
 #--------------------------------------------------------------
 terp-mount() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - chroot initialization tool for android.
+printf "\033[1;97mNAME\033[00m
+	%s - chroot initialization tool for android.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
 	Mount tool for chroot images running on Android. This program was created
@@ -6176,7 +6178,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -6377,11 +6379,11 @@ exit 0
 #--------------------------------------------------------------
 terp-umount() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - chroot unmount tool for android.
+printf "\033[1;97mNAME\033[00m
+	%s - chroot unmount tool for android.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
 	Unmount tool for chroot images running on Android. This program was
@@ -6416,7 +6418,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -6539,11 +6541,11 @@ exit 0
 
 	remove_chroot() {
 		print_warning "This action is irreversible"
-		printf '\n'
+		printf "\n"
 		read -rep "Do you want to proceed (y/n) " option_args
 		case "$option_args" in
 			y | Y)
-				printf '\n'
+				printf "\n"
 				# Handles mounted chroot container with no running processes
 				[[ -f "$chroot_install_dir/bin/dmesg" || -d "$chroot_install_dir/mnt/sdcard" ]] && {
 					cd "$PHONE_STORAGE" 2>/dev/null || print_dir_change_error "${PHONE_STORAGE}"
@@ -6590,12 +6592,12 @@ exit 0
 				failed_delete "$@"
 			;;
 			n | N)
-				printf '\n'
+				printf "\n"
 				print_error "Aborted"
 				exit 1
 			;;
 			 *)
-				printf '\n'
+				printf "\n"
 				print_error "Unrecognized option '$option_args'"
 				exit 1
 			;;
@@ -6668,14 +6670,14 @@ exit 0
 #--------------------------------------------------------------
 tfetch() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - system resource information tool.
+printf "\033[1;97mNAME\033[00m
+	%s - system resource information tool.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m displays system hardware information.
+	\033[1;97m%s\033[00m displays system hardware information.
 
 	\033[1;97m-h, --help\033[00m
 		display this help message and exit.
@@ -6699,7 +6701,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -6737,20 +6739,14 @@ exit 0
 	get_hostname() {
 		[[ $USER == "shell" || $EUID -eq 2000 ]] && {
 			color_blue=$color_cyan
-			printf '%b %s@%s %b\n' "${color_blue}" "$USER" "$HOSTNAME" "${no_color}"
-			return 0
 		}
 
 		[[ $USER == "root" || $EUID -eq 0 ]] && {
 			color_blue=$color_magenta
-			printf '%b %s@%s %b\n' "${color_blue}" "$USER" "$HOSTNAME" "${no_color}"
-			return 0
 		}
 
-		[[ $EUID -eq 1000 ]] || [[ $USER != root && $USER != shell ]] && {
-			printf '%b %s@%s %b\n' "${color_blue}" "$USER" "$HOSTNAME" "${no_color}"
-			return 0
-		}
+		printf "%b %s@%s %b\n" "${color_blue}" "$USER" "$HOSTNAME" "${no_color}"
+		return 0
 	}
 
 	get_device_name() {
@@ -6767,18 +6763,18 @@ exit 0
 			device_name="${device_name} $(< /sys/devices/virtual/dmi/id/product_name)"
 		}
 
-		printf '%s\n\n' "$device_name"
+		printf "%s\n\n" "$device_name"
 	}
 
 	get_os_name() {
 		# Handles Android
 		[[ -d /system/app/ ]] && {
-			printf 'Android %s %s\n' "$ANDROID_VERSION" "$HOSTTYPE"
+			printf "Android %s %s\n" "$ANDROID_VERSION" "$HOSTTYPE"
 		}
 
 		# Handles non-Android OS
 		[[ ! -d /system/app/ ]] && {
-			printf '%s %s\n' "$PRETTY_NAME" "$HOSTTYPE"
+			printf "%s %s\n" "$PRETTY_NAME" "$HOSTTYPE"
 		}
 	}
 
@@ -6787,7 +6783,7 @@ exit 0
 		kernel_version="${kernel_version/\(*}"
 		kernel_version="${kernel_version/version\ }"
 
-		printf '%s\n' "$kernel_version"
+		printf "%s\n" "$kernel_version"
 	}
 
 	get_init() {
@@ -6797,12 +6793,12 @@ exit 0
 			init_program="${init_program/*Name:}"
 			init_program="${init_program/Umask:*}"
 			init_program="${init_program//[[:space:]]}"
-			printf '%s\n' "$init_program"
+			printf "%s\n" "$init_program"
 		}
 
 		# Handles android chroot
 		[[ -z $init_program && $PRETTY_NAME == *Linux* && -d /sys/class/power_supply/battery ]] && {
-			printf '%s\n' "init"
+			printf "%s\n" "init"
 		}
 	}
 
@@ -6813,7 +6809,7 @@ exit 0
 			for package_list in /var/db/xbps/.*; do
 				package_count="$((package_count + 1))"
 			done
-			printf '%s xbps\n' "${package_count//[[:space:]]}"
+			printf "%s xbps\n" "${package_count//[[:space:]]}"
 		}
 
 		# Handles Linux with apt
@@ -6822,7 +6818,7 @@ exit 0
 			for package_list in /var/lib/dpkg/info/*.md5sums; do
 				package_count="$((package_count + 1))"
 			done
-			printf '%s apt\n' "${package_count//[[:space:]]}"
+			printf "%s apt\n" "${package_count//[[:space:]]}"
 		}
 
 		# Handles Linux with apk
@@ -6831,7 +6827,7 @@ exit 0
 			for package_list in $(< /etc/apk/world); do
 				package_count="$((package_count + 1))"
 			done
-			printf '%s apk\n' "${package_count//[[:space:]]}"
+			printf "%s apk\n" "${package_count//[[:space:]]}"
 		}
 
 		# Handles Android
@@ -6842,24 +6838,24 @@ exit 0
 					package_count="$((package_count + 1))"
 				}
 			done
-			printf '%s apks\n' "${package_count//[[:space:]]}"
+			printf "%s apks\n" "${package_count//[[:space:]]}"
 		}
 	}
 
 	get_shell() {
-		[[ -n $BASH ]] && printf '%s %s\n' "${BASH##*/}" "${BASH_VERSION/-*}"
-		[[ -z $BASH ]] && printf '%s\n' "${SHELL##*/}"
+		[[ -n $BASH ]] && printf "%s %s\n" "${BASH##*/}" "${BASH_VERSION/-*}"
+		[[ -z $BASH ]] && printf "%s\n" "${SHELL##*/}"
 	}
 
 	get_desktop() {
 		desktop_environment="${XDG_CURRENT_DESKTOP:=$DESKTOP_SESSION}"
 
 		[[ -n ${desktop_environment//[[:space:]]} && -z $XDG_SESSION_TYPE ]] && {
-			printf '%s\n' "${desktop_environment}"
+			printf "%s\n" "${desktop_environment}"
 		}
 
 		[[ -n ${desktop_environment//[[:space:]]} && -n $XDG_SESSION_TYPE ]] && {
-			printf '%s (%s)\n' "${desktop_environment}" "${XDG_SESSION_TYPE}"
+			printf "%s (%s)\n" "${desktop_environment}" "${XDG_SESSION_TYPE}"
 		}
 	}
 
@@ -6895,7 +6891,7 @@ exit 0
 		[[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
 			cpu_clk="$(( $(< /sys/devices/system/cpu/cpu$((CPU_CORE_COUNT - 1))/cpufreq/scaling_cur_freq) / 1000 ))"
 		}
-		printf '%s (%d) @ %dMhz\n' "${cpu_name}" "$CPU_CORE_COUNT" "${cpu_clk}"
+		printf "%s (%d) @ %dMhz\n" "${cpu_name}" "$CPU_CORE_COUNT" "${cpu_clk}"
 	}
 
 	get_cpu_clusters() {
@@ -6928,7 +6924,7 @@ exit 0
 
 		# Clean up output
 		cpu_total="${cpu_clk[*]}"
-		printf '%s\n' "${cpu_total%,}"
+		printf "%s\n" "${cpu_total%,}"
 	}
 
 	get_gpu() {
@@ -6936,14 +6932,14 @@ exit 0
 		[[ -d /proc/gpufreq ]] && {
 			gpu_name="${cpu_file/gpu_name/*Hardware*:\ }"
 			gpu_clk="$(( $(< /proc/gpufreq/cur_freq) / 1000 ))"
-			printf '%s @ %dMhz\n' "${gpu_name}" "${gpu_clk}"
+			printf "%s @ %dMhz\n" "${gpu_name}" "${gpu_clk}"
 		}
 
 		# Handles Snapdragron GPUs
 		[[ -d /sys/class/kgsl/kgsl-3d0 ]] && {
 			gpu_name="$(< /sys/class/kgsl/kgsl-3d0/gpu_model)"
 			gpu_clk="$(( $(< /sys/class/kgsl/kgsl-3d0/gpuclk) / 1000000 ))"
-			printf '%s @ %dMhz\n' "${gpu_name}" "${gpu_clk}"
+			printf "%s @ %dMhz\n" "${gpu_name}" "${gpu_clk}"
 		}
 	}
 
@@ -6957,7 +6953,7 @@ exit 0
 				battery_full_design="$(< /sys/class/power_supply/BAT0/charge_full_design)"
 				battery_health="$((( battery_full * 100 ) / battery_full_design ))"
 				battery_health_decimal="$((( battery_full * 10000 ) / battery_full_design % 100 ))"
-				printf '%s, %d%% - (%d.%d%% Health)\n' "${battery_status}" "${battery_capacity}" "${battery_health}" "${battery_health_decimal}"
+				printf "%s, %d%% - (%d.%d%% Health)\n" "${battery_status}" "${battery_capacity}" "${battery_health}" "${battery_health_decimal}"
 				return
 			}
 		}
@@ -6971,12 +6967,12 @@ exit 0
 				battery_full_design="$(< /sys/class/power_supply/battery/charge_full_design)"
 				battery_health="$((( battery_full * 100 ) / battery_full_design ))"
 				battery_health_decimal="$((( battery_full * 10000 ) / battery_full_design % 100 ))"
-				printf '%s, %d%% - (%d.%d%% Health)\n' "${battery_status}" "${battery_capacity}" "${battery_health}" "${battery_health_decimal}"
+				printf "%s, %d%% - (%d.%d%% Health)\n" "${battery_status}" "${battery_capacity}" "${battery_health}" "${battery_health_decimal}"
 				return
 			}
 		}
 
-		printf '%s, %d%%\n' "${battery_status}" "${battery_capacity}"
+		printf "%s, %d%%\n" "${battery_status}" "${battery_capacity}"
 	}
 
 	get_cpu_temp() {
@@ -6995,7 +6991,7 @@ exit 0
 		}
 
 		usage_visualizer="$cpu_temp"
-		printf '%s %d.%d°C\n' "$(print_usage_bar)" "${cpu_temp}" "${cpu_temp_decimal}"
+		printf "%s %d.%d°C\n" "$(print_usage_bar)" "${cpu_temp}" "${cpu_temp_decimal}"
 	}
 
 	get_gpu_temp() {
@@ -7006,7 +7002,7 @@ exit 0
 			gpu_temp_decimal="$((gpu_temp_decimal / 100))"
 			gpu_temp="$((gpu_temp / 1000))"
 			usage_visualizer="$gpu_temp"
-			printf '%s %d.%d°C\n' "$(print_usage_bar)" "${gpu_temp}" "${gpu_temp_decimal}"
+			printf "%s %d.%d°C\n" "$(print_usage_bar)" "${gpu_temp}" "${gpu_temp_decimal}"
 		}
 	}
 
@@ -7016,7 +7012,7 @@ exit 0
 		battery_temp="$((battery_temp / 10))"
 
 		usage_visualizer="$battery_temp"
-		printf '%s %d.%d°C\n' "$(print_usage_bar)" "${battery_temp}" "${battery_temp_decimal}"
+		printf "%s %d.%d°C\n" "$(print_usage_bar)" "${battery_temp}" "${battery_temp_decimal}"
 	}
 
 	get_mem() {
@@ -7036,7 +7032,7 @@ exit 0
 		# Convert to percentage for print_usage_bar
 		usage_visualizer="$((( used_mem * 100 ) / total_mem ))"
 
-		printf '%s %d / %d MiB (%d%%)\n' "$(print_usage_bar)" "$used_mem" "$total_mem" "${usage_visualizer}"
+		printf "%s %d / %d MiB (%d%%)\n" "$(print_usage_bar)" "$used_mem" "$total_mem" "${usage_visualizer}"
 	}
 
 	get_swap() {
@@ -7056,11 +7052,11 @@ exit 0
 
 		[[ $total_swap -gt 0 ]] && {
 			usage_visualizer="$(((used_swap * 100) / total_swap ))"
-			printf '%s %d / %d MiB (%d%%)\n' "$(print_usage_bar)" "$used_swap" "$total_swap" "${usage_visualizer}"
+			printf "%s %d / %d MiB (%d%%)\n" "$(print_usage_bar)" "$used_swap" "$total_swap" "${usage_visualizer}"
 		}
 
 		[[ $total_swap -le 0 ]] && {
-			printf '%s %d / %d MiB\n' "$(print_usage_bar)" "$used_swap" "$total_swap"
+			printf "%s %d / %d MiB\n" "$(print_usage_bar)" "$used_swap" "$total_swap"
 		}
 	}
 
@@ -7082,97 +7078,97 @@ exit 0
 		[[ ${in_minutes/ *} -eq 1 ]] && in_minutes="${in_minutes/s}"
 		[[ ${in_seconds/ *} -eq 1 ]] && in_seconds="${in_seconds%s}"
 
-		printf '%s, %s, %s, %s\n' "${in_days}" "${in_hours}" "${in_minutes}" "${in_seconds}"
+		printf "%s, %s, %s, %s\n" "${in_days}" "${in_hours}" "${in_minutes}" "${in_seconds}"
 	}
 
 	tfetch_config() {
-		printf '\n'
+		printf "\n"
 		get_hostname "$@"
-		printf '%s\n' " -----------------"
+		printf "%s\n" " -----------------"
 		# Show only if device name is available
 		[[ -d /sys/devices/virtual/dmi/id || -f /sys/firmware/devicetree/base/model || -f /proc/device-tree/model ]] && {
-			printf '%b Device:   %b%s %b\n' "${color_blue}" "${color_white}" "$(get_device_name)" "${no_color}"
+			printf "%b Device:   %b%s %b\n" "${color_blue}" "${color_white}" "$(get_device_name)" "${no_color}"
 		}
 
-		printf '%b OS:       %b%s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
-		printf '%b Kernel:   %b%s %b\n' "${color_blue}" "${color_white}" "$(get_kernel)" "${no_color}"
-		printf '%b Init:     %b%s %b\n' "${color_blue}" "${color_white}" "$(get_init)" "${no_color}"
-		printf '%b Packages: %b%s %b\n' "${color_blue}" "${color_white}" "$(get_pkgs)" "${no_color}"
-		printf '%b Shell:    %b%s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
+		printf "%b OS:       %b%s %b\n" "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
+		printf "%b Kernel:   %b%s %b\n" "${color_blue}" "${color_white}" "$(get_kernel)" "${no_color}"
+		printf "%b Init:     %b%s %b\n" "${color_blue}" "${color_white}" "$(get_init)" "${no_color}"
+		printf "%b Packages: %b%s %b\n" "${color_blue}" "${color_white}" "$(get_pkgs)" "${no_color}"
+		printf "%b Shell:    %b%s %b\n" "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
 
 		# Show on non-root Linux desktop
 		[[ -n ${XDG_CURRENT_DESKTOP:=$DESKTOP_SESSION} ]] && {
-			printf '%b Desktop:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_desktop)" "${no_color}"
+			printf "%b Desktop:  %b%s %b\n" "${color_blue}" "${color_white}" "$(get_desktop)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU:      %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
+			printf "%b CPU:      %b%s %b\n" "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
 		}
 
 		# Show only on Android or desktops with $CPU_CORE_COUNT <= 8
 		[[ -d /sys/class/power_supply/battery || $CPU_CORE_COUNT -le 8 ]] && {
-			printf '%b CPU_CLK:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
+			printf "%b CPU_CLK:  %b%s %b\n" "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
 		}
 
 		# Show only on Android with Mediatek or Snapdragon SOC
 		[[ -f /proc/gpufreq/cur_freq || -f /sys/class/kgsl/kgsl-3d0/gpuclk ]] && {
-			printf '%b GPU:      %b%s %b\n' "${color_blue}" "${color_white}" "$(get_gpu)" "${no_color}"
+			printf "%b GPU:      %b%s %b\n" "${color_blue}" "${color_white}" "$(get_gpu)" "${no_color}"
 		}
 
 		# Show only if battery is available
 		[[ -d /sys/class/power_supply/BAT0 || -d /sys/class/power_supply/battery ]] && {
-			printf '%b Battery:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_battery_stats)" "${no_color}"
+			printf "%b Battery:  %b%s %b\n" "${color_blue}" "${color_white}" "$(get_battery_stats)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
+			printf "%b CPU Temp: %b%b %b\n" "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
 		}
 
 		# Show only on Android with Snapdragon SOC
 		[[ -f /sys/class/kgsl/kgsl-3d0/temp ]] && {
-			printf '%b GPU Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_gpu_temp)" "${no_color}"
+			printf "%b GPU Temp: %b%b %b\n" "${color_blue}" "${color_white}" "$(get_gpu_temp)" "${no_color}"
 		}
 
 		# Show only on Android
 		[[ -f /sys/class/power_supply/battery/temp ]] && {
-			printf '%b BAT Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_battery_temp)" "${no_color}"
+			printf "%b BAT Temp: %b%b %b\n" "${color_blue}" "${color_white}" "$(get_battery_temp)" "${no_color}"
 		}
 
-		printf '%b RAM:      %b%b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
-		printf '%b Swap:     %b%b %b\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
-		printf '%b Uptime:   %b%s %b\n\n' "${color_blue}" "${color_white}" "$(get_uptime)" "${no_color}"
+		printf "%b RAM:      %b%b %b\n" "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
+		printf "%b Swap:     %b%b %b\n" "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
+		printf "%b Uptime:   %b%s %b\n\n" "${color_blue}" "${color_white}" "$(get_uptime)" "${no_color}"
 		exit 0
 	}
 	tfetch_config_noroot() {
-		printf '\n'
+		printf "\n"
 		get_hostname "$@"
-		printf '%s\n' " -----------------"
+		printf "%s\n" " -----------------"
 
 		[[ -f /product/etc/build.prop ]] && {
-			printf '%b OS:       %b%s %b\n' "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
+			printf "%b OS:       %b%s %b\n" "${color_blue}" "${color_white}" "$(get_os_name)" "${no_color}"
 		}
 
-		printf '%b Shell:    %b%s %b\n' "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
+		printf "%b Shell:    %b%s %b\n" "${color_blue}" "${color_white}" "$(get_shell)" "${no_color}"
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU:      %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
+			printf "%b CPU:      %b%s %b\n" "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
 		}
 
 		# Show only on Android or desktops with $CPU_CORE_COUNT <= 8
 		[[ -d /sys/class/power_supply/battery || $CPU_CORE_COUNT -le 8 ]] && {
-			printf '%b CPU_CLK:  %b%s %b\n' "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
+			printf "%b CPU_CLK:  %b%s %b\n" "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
 		}
 
 		# Show only if CPU files are present, i.e will be absent in a VM
 		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] && {
-			printf '%b CPU Temp: %b%b %b\n' "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
+			printf "%b CPU Temp: %b%b %b\n" "${color_blue}" "${color_white}" "$(get_cpu_temp)" "${no_color}"
 		}
 
-		printf '%b RAM:      %b%b %b\n' "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
-		printf '%b Swap:     %b%b %b\n\n' "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
+		printf "%b RAM:      %b%b %b\n" "${color_blue}" "${color_white}" "$(get_mem)" "${no_color}"
+		printf "%b Swap:     %b%b %b\n\n" "${color_blue}" "${color_white}" "$(get_swap)" "${no_color}"
 		exit 0
 	}
 
@@ -7195,14 +7191,14 @@ exit 0
 #--------------------------------------------------------------
 touchzip() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - create 7z archives.
+printf "\033[1;97mNAME\033[00m
+	%s - create 7z archives.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION] [FILENAME] [FILE(s)...]
+	%s [OPTION] [FILENAME] [FILE(s)...]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m creates an (un)encrypted [FILENAME].7z archive file of the
+	\033[1;97m%s\033[00m creates an (un)encrypted [FILENAME].7z archive file of the
 	specified [FILE(s)...].
 
 	\033[1;97m-en, --encrypt\033[00m [FILENAME] [FILE(s)...]
@@ -7233,7 +7229,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -7280,7 +7276,7 @@ exit 0
 
 	encrypted_archive() {
 		print_warning "Creating an encrypted 7z archive"
-		printf '\n'
+		printf "\n"
 
 		# Handles password creation
 		create_password "$@"
@@ -7299,7 +7295,7 @@ exit 0
 
 	unencrypted_archive() {
 		print_warning "Creating an unencrypted 7z archive"
-		printf '\n'
+		printf "\n"
 
 		unset exit_status
 		7z a -snl -snh -t7z -mx1 -mmt"$CPU_CORE_COUNT" -y "${archive_name}.7z" "${@:3}" &>/dev/null && exit_status=0
@@ -7368,14 +7364,14 @@ exit 0
 #--------------------------------------------------------------
 whatsapp-backup() {
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - create and restore whatsapp backups.
+printf "\033[1;97mNAME\033[00m
+	%s - create and restore whatsapp backups.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [OPTION]
+	%s [OPTION]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m creates or restores (un)encrypted backups of
+	\033[1;97m%s\033[00m creates or restores (un)encrypted backups of
 	Whatsapp. It saves and restores the backups from external storage
 	and will only fallback to using Android's internal storage if no
 	external storage device exists.
@@ -7414,7 +7410,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -7474,18 +7470,18 @@ exit 0
 		}
 
 		# Set whatsapp backup directory
-		whatsapp_backup_dir="$PHONE_STORAGE/Misc/whatsapp-backup"
+		whatsapp_backup_dir="$PHONE_STORAGE/Backup/whatsapp-backup"
 
 		# Use external storage if available
 		[[ -d "$EXTERNAL_STORAGE" ]] && {
-			whatsapp_backup_dir="$EXTERNAL_STORAGE/Misc/whatsapp-backup"
+			whatsapp_backup_dir="$EXTERNAL_STORAGE/Backup/whatsapp-backup"
 		}
 
 		# Set current current directory
 		current_dir="$PWD"
 
 		# Get date and time in YYYY.MM.DD.HH.MM format
-		current_date="$(printf '%(%Y.%m.%d.%H%M)T\n')"
+		current_date="$(printf "%(%Y.%m.%d.%H%M)T\n")"
 	}
 
 	failed_to_create() {
@@ -7499,14 +7495,14 @@ exit 0
 	}
 
 	failed_to_extract() {
-		printf '\n'
+		printf "\n"
 		print_error "Failed to extract '${backup_list[$backup_option]}'"
 		exit 1
 	}
 
 	encrypted_backup_whatsapp() {
 		print_warning "Creating encrypted backup 'whatsapp-backup.${current_date}.7z'"
-		printf '\n'
+		printf "\n"
 
 		# Handles password creation
 		create_password "$@"
@@ -7528,7 +7524,7 @@ exit 0
 
 	unencrypted_backup_whatsapp() {
 		print_warning "Creating unencrypted backup 'whatsapp-backup.${current_date}.7z'"
-		printf '\n'
+		printf "\n"
 
 		cd "$whatsapp_dir" 2>/dev/null || print_dir_change_error "${whatsapp_dir}"
 		mkdir -p "$whatsapp_backup_dir" || print_write_error "$whatsapp_backup_dir"
@@ -7564,15 +7560,15 @@ exit 0
 		# List available backups
 		print_banner
 		print_warning "Restoring whatsapp"
-		printf '\n'
+		printf "\n"
 		for ((array_checker=1; array_checker < array_counter; array_checker++)); do
-			printf '%s.%s\n' "${array_checker}" "${backup_list[$array_checker]}"
+			printf "%s.%s\n" "${array_checker}" "${backup_list[$array_checker]}"
 		done
-		printf '\n'
+		printf "\n"
 		read -rep "Select preferred backup: " backup_option
 		case "$backup_option" in
 			-*)
-				printf '\n'
+				printf "\n"
 				[[ -z ${backup_option#*\-} ]] && {
 					print_error "Unrecognized option '${backup_option}'" &&
 					exit 1
@@ -7582,14 +7578,14 @@ exit 0
 				exit 1
 			;;
 			*)
-				printf '\n'
+				printf "\n"
 				[[ $(( backup_option / 1 )) -gt 0 && $backup_option -lt $array_counter ]] && {
 					print_warning "Restoring whatsapp using '${backup_list[$backup_option]}'"
 					mkdir -p "$whatsapp_dir" || print_write_error "$whatsapp_dir"
 
 					# Extract selected backup file
 					7z x "${whatsapp_backup_dir}/${backup_list[$backup_option]}" -mmt"$CPU_CORE_COUNT" -y -o"$whatsapp_dir" 2>/dev/null || failed_to_extract "$@"
-					printf '\n'
+					printf "\n"
 					print_success "Finished restoring '${backup_list[$backup_option]}'"
 					exit 0
 				}
@@ -7607,7 +7603,7 @@ exit 0
 					check_dependencies "$@"
 
 					# Handles if $whatsapp_dir exists and is empty
-					[[ $(printf '%s\n' "$whatsapp_dir/"*) == "$whatsapp_dir/*" ]] && {
+					[[ $(printf "%s\n" "$whatsapp_dir/"*) == "$whatsapp_dir/*" ]] && {
 						print_error "Nothing to backup"
 						print_aligned "Try using your whatsapp more"
 						exit 1
@@ -7622,21 +7618,21 @@ exit 0
 					check_dependencies "$@"
 
 					# Handles no available whatsapp backup
-					[[ $(printf '%s\n' "$whatsapp_backup_dir/"*) == "$whatsapp_backup_dir/*" ]] && {
+					[[ $(printf "%s\n" "$whatsapp_backup_dir/"*) == "$whatsapp_backup_dir/*" ]] && {
 						print_error "No available backups"
 						exit 1
 					}
 
-					printf '\033[1;97mAvailable backups:\033[00m\n'
+					printf "\033[1;97mAvailable backups:\033[00m\n"
 
-					backup_content="$(printf '%s\n' "$whatsapp_backup_dir/"*)"
-					printf '%s\n' "${backup_content//"${whatsapp_backup_dir}/"}"
+					backup_content="$(printf "%s\n" "$whatsapp_backup_dir/"*)"
+					printf "%s\n" "${backup_content//"${whatsapp_backup_dir}/"}"
 					exit 0
 				;;
 				-un | --unencrypt)
 					check_dependencies "$@"
 
-					[[ $(printf '%s\n' "$whatsapp_dir/"*) == "$whatsapp_dir/*" ]] && {
+					[[ $(printf "%s\n" "$whatsapp_dir/"*) == "$whatsapp_dir/*" ]] && {
 						print_error "Nothing to backup"
 						print_aligned "Try using your whatsapp more"
 						exit 1
@@ -7713,18 +7709,18 @@ tether() {
 	done
 
 	print_help() {
-echo -e "\033[1;97mNAME\033[00m
-	$SCRIPT_NAME - multicall shell script.
+printf "\033[1;97mNAME\033[00m
+	%s - multicall shell script.
 
 \033[1;97mSYNOPSIS\033[00m
-	$SCRIPT_NAME [FUNCTION] [ARGUMENT(s)...]
-	$SCRIPT_NAME [OPTION] [FOLDER]
+	%s [FUNCTION] [ARGUMENT(s)...]
+	%s [OPTION] [FOLDER]
 
 \033[1;97mDESCRIPTION\033[00m
-	\033[1;97m$SCRIPT_NAME\033[00m is a multi-call shell script that combines many applets
+	\033[1;97m%s\033[00m is a multi-call shell script that combines many applets
 	into a single executable. Think busybox, toybox or GNU coreutils,
-	except as a shell script. Create symbolic links to \033[1;97m$SCRIPT_NAME\033[00m for each
-	function and \033[1;97m$SCRIPT_NAME\033[00m will act like whatever it was invoked as.
+	except as a shell script. Create symbolic links to \033[1;97m%s\033[00m for each
+	function and \033[1;97m%s\033[00m will act like whatever it was invoked as.
 
 	\033[1;97m-b, --banner\033[00m
 		display program banner and exit.
@@ -7762,7 +7758,7 @@ echo -e "\033[1;97mNAME\033[00m
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-tether $SCRIPT_VERSION"
+tether %s\n" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_NAME" "$SCRIPT_VERSION"
 exit 0
 	}
 
@@ -7805,8 +7801,8 @@ exit 0
 					exit 0
 				;;
 				-l | --list)
-					printf '\033[1;97mCurrently defined functions (%d):\033[00m\n' "$func_count"
-					printf '%s\n' "${function_space%,*}"
+					printf "\033[1;97mCurrently defined functions (%d):\033[00m\n" "$func_count"
+					printf "%s\n" "${function_space%,*}"
 					exit 0
 				;;
 				-s | --silent)
@@ -7851,7 +7847,7 @@ exit 0
 				*)
 					# Handles main script
 					# Example: tether mkcp newfolder file
-					[[ $(printf '%s\n' "${applet[@]}" | grep -x "$1" 2>/dev/null) ]] && {
+					[[ $(printf "%s\n" "${applet[@]}" | grep -x "$1" 2>/dev/null) ]] && {
 						# Makes $SCRIPT_NAME the name of the executed function
 						SCRIPT_NAME="${1}"
 						"${@:1}"
@@ -7880,12 +7876,12 @@ exit 0
 	
 	# Handles symlinked applets
 	# Example: mkcp newfolder file
-	[[ $(printf '%s\n' "${applet[@]}" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
+	[[ $(printf "%s\n" "${applet[@]}" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && {
 		"$SCRIPT_NAME" "${@:1}" && exit 0
 	}
 
 	# Handles symlinked applets that don't exist
-	[[ ! $(printf '%s\n' "${applet[@]}" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && [[ $SCRIPT_NAME != "tether" ]] && {
+	[[ ! $(printf "%s\n" "${applet[@]}" | grep -x "$SCRIPT_NAME" 2>/dev/null) ]] && [[ $SCRIPT_NAME != "tether" ]] && {
 		SCRIPT_NAME="tether"
 		print_error "$SCRIPT_NAME: '${0##*/}' applet not found"
 		exit 1

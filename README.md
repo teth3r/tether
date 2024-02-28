@@ -13,7 +13,6 @@ Think busybox or toybox, except as a shell script, you can create symbolic links
 . mkcp
 . mkmv
 . mktouch
-. omaps-backup
 . package
 . replace-su
 . setup
@@ -38,7 +37,6 @@ Think busybox or toybox, except as a shell script, you can create symbolic links
 **mkcp** | cp, find, mkdir | Device Agnostic | Usage: ` mkcp [FOLDER] [FILE...] ` <p> This tool copies files/folders to the specified folder. It will create the folder if it doesn't already exist. Run `mkcp --help` for more details. |
 **mkmv** | cp, find, mkdir, rm | Device Agnostic | Usage: ` mkmv [FOLDER] [FILE...] ` <p> This tool moves files/folders to the specified folder. It will create the folder if it doesn't already exist. Run `mkmv --help` for more details. |
 **mktouch** | mkdir, touch | Device Agnostic | Usage: ` mktouch [FOLDER] [FILE...] ` <p> This tool creates specified empty file(s) in the specified folder. It will create the folder if it doesn't already exist. Run `mktouch --help` for more details. |
-**omaps-backup** | mkdir, pm | Android (root) | Usage: ` omaps-backup [OPTION] ` <p> This tool Create and restore backups of organic maps .mwm files in external storage (SD card, USB OTG, etc), It will fallback to using internal storage if no external storage device is available. Run `omaps-backup --help` for more details. |
 **package** | ping, magisk, sed | Android (root) | Usage: ` package [OPTION] ` <p> Magisk module packaging tool. Run `package --help` for more details. |
 **replace-su** | mount, unmount | Android (root) | Usage: ` replace-su [OPTION] ` <p> Removes phh-su from AOSP GSI releases >= 12, allowing the use of custom root solutions like `magisk`. Run `replace-su --help` for more details. |
 **setup** | ping, xbps-install | Voidlinux | Usage: ` setup [OPTION] ` <p> Post-installation setup tool for Voidlinux. Run `setup --help` for more details. |

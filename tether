@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.28.1040"
+SCRIPT_VERSION="2024.02.29.2227"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -100,10 +100,12 @@ SCRIPT_VERSION="2024.02.28.1040"
 #--------------------------------------------------------------
 # Get the available number of cpu threads
 #--------------------------------------------------------------
-CPU_CORE_COUNT="$(< /sys/devices/system/cpu/online)"
-CPU_CORE_COUNT="${CPU_CORE_COUNT//*\-}"
-CPU_CORE_COUNT="${CPU_CORE_COUNT//[[:space:]]}"
-CPU_CORE_COUNT="$((CPU_CORE_COUNT + 1))"
+[[ -f /sys/devices/system/cpu/online ]] && {
+	CPU_CORE_COUNT="$(< /sys/devices/system/cpu/online)"
+	CPU_CORE_COUNT="${CPU_CORE_COUNT//*\-}"
+	CPU_CORE_COUNT="${CPU_CORE_COUNT//[[:space:]]}"
+	CPU_CORE_COUNT="$((CPU_CORE_COUNT + 1))"
+}
 
 #--------------------------------------------------------------
 # Print out error message to stderr
@@ -6824,7 +6826,9 @@ exit 0
 			printf "%b CPU:      %b%s %b\n" "${color_blue}" "${color_white}" "$(get_cpu)" "${no_color}"
 		}
 
-		# Show only on Android or desktops with $CPU_CORE_COUNT <= 8
+		# Show only if CPU files are present and if device is Android or a
+		# desktops with $CPU_CORE_COUNT <= 8
+		[[ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]] &&
 		[[ -d /sys/class/power_supply/battery || $CPU_CORE_COUNT -le 8 ]] && {
 			printf "%b CPU_CLK:  %b%s %b\n" "${color_blue}" "${color_white}" "$(get_cpu_clusters)" "${no_color}"
 		}

@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.02.29.2227"
+SCRIPT_VERSION="2024.03.03.0855"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -105,6 +105,10 @@ SCRIPT_VERSION="2024.02.29.2227"
 	CPU_CORE_COUNT="${CPU_CORE_COUNT//*\-}"
 	CPU_CORE_COUNT="${CPU_CORE_COUNT//[[:space:]]}"
 	CPU_CORE_COUNT="$((CPU_CORE_COUNT + 1))"
+}
+
+[[ ! -f /sys/devices/system/cpu/online ]] && {
+	CPU_CORE_COUNT="$(nproc --all)"
 }
 
 #--------------------------------------------------------------

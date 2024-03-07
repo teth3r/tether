@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.03.03.0855"
+SCRIPT_VERSION="2024.03.07.1131"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -5885,7 +5885,6 @@ printf "\033[1;97mNAME\033[00m
 	\033[1;97m-v, --void\033[00m
 		mount void linux chroot image.
 
-
 \033[1;97mAUTHOR\033[00m
 	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU
 	GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
@@ -6124,7 +6123,6 @@ printf "\033[1;97mNAME\033[00m
 
 	\033[1;97m-v, --void\033[00m
 		umount void linux chroot image.
-
 
 \033[1;97mAUTHOR\033[00m
 	Copyright (C) 2023, Kolade Ayomide Olanrewaju. License GPLv3+: GNU

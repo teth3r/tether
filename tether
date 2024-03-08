@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.03.08.0215"
+SCRIPT_VERSION="2024.03.08.1211"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -3139,7 +3139,7 @@ done
 #--------------------------------------------------------------
 # Create swapfile
 #--------------------------------------------------------------
-fallocate -l 4G "$MODDIR/swapfile0" &&
+fallocate -l 8G "$MODDIR/swapfile0" &&
 chown root:root "$MODDIR/swapfile0" &&
 chmod 0600 "$MODDIR/swapfile0" &&
 mkswap "$MODDIR/swapfile0" &>/dev/null &&

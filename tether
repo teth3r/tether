@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.03.07.1131"
+SCRIPT_VERSION="2024.03.08.0215"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -2883,40 +2883,25 @@ exit 0
 		rm "$package_tmp_dir/tether" 2>/dev/null
 	}
 
-	download_custom_iosevka() {
-		[[ $font_variant == "sans" ]] && {
-			print_warning "Downloading 'Iosevka'"
-			printf "\n"
+	download_ersta() {
+		print_warning "Downloading 'Ersta'"
+		printf "\n"
 
-			# Download latest version of Iosevka custom build
-			busybox wget --no-check-certificate "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka.7z" -O "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null ||
-			download_fail "Iosevka"
+		# Download latest version of Ersta
+		busybox wget --no-check-certificate "https://github.com/teth3r/ersta/releases/latest/download/Ersta.7z" -O "$package_tmp_dir/system/bin/Ersta.7z" &>/dev/null ||
+		download_fail "Ersta"
 
-			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-			cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
-			7z x "$package_tmp_dir/system/bin/Iosevka.7z" &>/dev/null
-		}
-
-		[[ $font_variant == "slab" ]] && {
-			print_warning "Downloading 'Iosevka-Slab'"
-			printf "\n"
-
-			# Download latest version of Iosevka custom build
-			busybox wget --no-check-certificate "https://github.com/teth3r/Iosevka-build/releases/latest/download/Iosevka-slab.7z" -O "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null ||
-			download_fail "Iosevka-Slab"
-
-			mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
-			cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
-			7z x "$package_tmp_dir/system/bin/Iosevka-slab.7z" &>/dev/null
-		}
+		mkdir -p "$package_tmp_dir/system/fonts" 2>/dev/null || print_write_error "$package_tmp_dir/system/fonts"
+		cd "$package_tmp_dir/system/bin" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/bin"
+		7z x "$package_tmp_dir/system/bin/Ersta.7z" &>/dev/null
 
 		# Populate font directory
-		cp Iosevka-Regular.ttf "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf"
-		cp Iosevka-Bold.ttf "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf"
-		cp Iosevka-BoldItalic.ttf "$package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf"
-		cp Iosevka-Italic.ttf "$package_tmp_dir/system/fonts/NotoSerif-Italic.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Italic.ttf"
+		cp Ersta-Regular.ttf "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Regular.ttf"
+		cp Ersta-Bold.ttf "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Bold.ttf"
+		cp Ersta-BoldItalic.ttf "$package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-BoldItalic.ttf"
+		cp Ersta-Italic.ttf "$package_tmp_dir/system/fonts/NotoSerif-Italic.ttf" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/fonts/NotoSerif-Italic.ttf"
 
-		rm "$package_tmp_dir"/system/bin/*.md "$package_tmp_dir"/system/bin/Iosevka* 2>/dev/null
+		rm "$package_tmp_dir"/system/bin/*.md "$package_tmp_dir"/system/bin/Ersta* 2>/dev/null
 
 		# Create font symbolic-links
 		cd "$package_tmp_dir/system/fonts" 2>/dev/null || print_dir_change_error "${package_tmp_dir}/system/fonts"
@@ -3235,29 +3220,15 @@ EOF
 		print_warning "Adding custom fonts"
 		printf "\n"
 
-		read -rep "Replace system fonts with Iosevka (y/n) " font_option
+		read -rep "Replace system fonts with Ersta (y/n) " font_option
 		printf "\n"
 		case "$font_option" in
 			 Y | y)
-				# Select font variant
-				printf "1. %s\n2. %s\n\n" "Sans-serif" "Slab-serif"
-				read -rep "Select Iosevka typeface: " font_type
-				printf "\n"
-				case "$font_type" in
-					1)
-						font_variant="sans"
-						download_custom_iosevka "$@"
-						create_post_fs "$@"
-					;;
-					*)
-						font_variant="slab"
-						download_custom_iosevka "$@"
-						create_post_fs "$@"
-					;;
-				esac
+				download_ersta "$@"
+				create_post_fs "$@"
 			;;
 			*)
-				print_warning "Skipping Iosevka font installation"
+				print_warning "Skipping Ersta font installation"
 				printf "\n"
 			;;
 		esac
@@ -3276,7 +3247,7 @@ EOF
 
 		# update module description
 		[[ $font_option == "y" || $font_option == "Y" ]] && {
-			sed -i "s/description\=.*/description\=Installs tether, changes system fonts to Iosevka, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
+			sed -i "s/description\=.*/description\=Installs tether, changes system fonts to Ersta, sets CPU and GPU governor to 'performance', disables ZRAM, enables swap and removes software controlled thermal limits\./" "$package_tmp_dir/module.prop" 2>/dev/null
 		}
 
 		[[ $font_option != "y" && $font_option != "Y" ]] && {

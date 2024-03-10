@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.03.10.1218"
+SCRIPT_VERSION="2024.03.10.1405"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -2774,20 +2774,20 @@ exit 0
 		cp -rf "$package_tmp_dir/android-arm64/dnscrypt-proxy" "$package_tmp_dir/system/bin/" 2>/dev/null || print_file_write_error "$package_tmp_dir/system/bin/dnscrypt-proxy"
 		rm -r "$package_tmp_dir/dnscrypt-proxy-android_arm64-${dnscrypt_version}.zip" "$package_tmp_dir/android-arm64" 2>/dev/null
 
-		busybox wget --no-check-certificate https://github.com/teth3r/blocklist/archive/refs/heads/main.zip -O "$package_tmp_dir/main.zip" &>/dev/null ||
-		download_fail "main.zip"
+		busybox wget --no-check-certificate https://github.com/teth3r/blocklist/archive/refs/heads/master.zip -O "$package_tmp_dir/master.zip" &>/dev/null ||
+		download_fail "master.zip"
 
 		# Extract downloaded zip file
-		busybox unzip "main.zip" &>/dev/null
-		cp -rf "$package_tmp_dir/blocklist-main"/*.txt "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
-		cp -rf "$package_tmp_dir/blocklist-main"/*.toml "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
+		busybox unzip "master.zip" &>/dev/null
+		cp -rf "$package_tmp_dir/blocklist-master"/*.txt "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
+		cp -rf "$package_tmp_dir/blocklist-master"/*.toml "$package_tmp_dir/system/etc/dnscrypt-proxy" 2>/dev/null
 
 		# Change default DNS port -- Port 53 is used by dnsmasq for mobile hotspot
 		sed -i 's|127.0.0.1:53|127.0.0.1:5354|g' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
 
 		# Force TCP usage for connecting to upstream resolvers 
 		sed -i 's/force_tcp\ =\ false/force_tcp\ =\ true/' "$package_tmp_dir/system/etc/dnscrypt-proxy/dnscrypt-proxy.toml" 2>/dev/null
-		rm -r "$package_tmp_dir/main.zip" "$package_tmp_dir/blocklist-main" 2>/dev/null
+		rm -r "$package_tmp_dir/master.zip" "$package_tmp_dir/blocklist-master" 2>/dev/null
 	}
 
 	download_bash() {

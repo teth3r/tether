@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.03.08.1731"
+SCRIPT_VERSION="2024.03.10.1150"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -252,7 +252,7 @@ print_not_normal_user() {
 # Print version info
 #--------------------------------------------------------------
 print_version() {
-	printf "%s (tether) %s\n
+	printf "%s (tether) %s
 Copyright (C) 2023, Kolade Ayomide Olanrewaju.
 License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.

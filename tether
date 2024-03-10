@@ -41,7 +41,7 @@ SCRIPT_NAME="${0##*/}"
 #--------------------------------------------------------------
 # Set the version of this script
 #--------------------------------------------------------------
-SCRIPT_VERSION="2024.03.10.1150"
+SCRIPT_VERSION="2024.03.10.1218"
 
 #--------------------------------------------------------------
 # Set global variables if running on Android
@@ -3744,12 +3744,6 @@ EOF
 	}
 
 	install_extras() {
-		# Disble ssh server
-		[[ -d /var/service/sshd ]] && {
-			sv down sshd
-			rm -r /var/service/sshd
-		}
-
 		# Update xbps, enable multi-lib repo and non-free repo
 		xbps-install -Syu xbps void-repo-multilib void-repo-nonfree &&
 
